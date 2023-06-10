@@ -19,9 +19,7 @@ jobs:
   build:
     # The type of runner that the job will run on
    runs-on: ubuntu-latest
-    steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v3
+   steps:
     
     - name: Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
