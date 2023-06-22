@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -49,7 +49,7 @@
         </div>
     </header>
     <section>
-        <div class="flex lg:flex-row flex-col max-h-screen lg:overflow-hidden pt-[60px]">
+        <div class="flex lg:flex-row flex-col max-h-screen lg:overflow-hidden pt-[60px] ">
             <!-- Chapter and chanel responsive  -->
             <div class="flex lg:mx-0 mx-[10px] lg:my-0 my-1 gap-x-1 lg:gap-x-0">
                 <div
@@ -291,27 +291,10 @@
                                     <img src="./Resources/images/arrowup.svg" class="toggle-arrow">
                                 </button>
                             </div>
-                            <div class="lg:block hidden expanable-content">
-                                <div class="lg:flex block justify-between border-b min-h-[39px] max-h-[39px]">
-
-                                    <div class="flex font-normal text-xs font-inter items-center my-1 lg:mx-2 mx-3">
-                                        <button class="hover:bg-primary hover:font-bold xl:px-4 px-4 lg:px-2 py-2">
-                                            <a href="">KJV</a>
-                                        </button>
-                                        <button class="hover:bg-primary hover:font-bold xl:px-4 px-4 lg:px-2 py-2">
-                                            <a href="">KJV+</a>
-                                        </button>
-                                        <button class="hover:bg-primary hover:font-bold xl:px-4 px-4 lg:px-2 py-2">
-                                            <a href=""> Compare</a>
-                                        </button>
-                                        <button class="hover:bg-primary hover:font-bold xl:px-4 px-4 lg:px-2 py-2">
-                                            <a href="">Parallel</a>
-                                        </button>
-
-                                    </div>
-
+                            <div class="lg:block hidden  expanable-content">
+                                <div class="lg:flex block justify-between lg:border-b min-h-[39px] max-h-[39px]">
                                     <div
-                                        class="flex xl:gap-x-9 lg:gap-x-3 xl:justify-normal justify-between lg:pr-7 py-3 items-center lg:border-0 border-b lg:px-1 px-5 xl:px-6">
+                                        class="flex xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 border-b lg:px-1 px-5 xl:px-6 justify-between items-center py-2">
                                         <button>
                                             <a href="">
                                                 <img src="./Resources/images/ph_play-light.svg">
@@ -322,6 +305,9 @@
                                         </p>
                                         <button type="button" class="highlighter" onclick="toggleHighlight()">
                                             <img src="./Resources/images/ph_text-aa-fill.svg" alt="">
+                                        </button>
+                                        <button>
+                                            <img src="./Resources/images/bookmark-ribbon-7790.svg" class="w-4 h-4">
                                         </button>
                                         <p>
                                             <img src="./Resources/images/line.svg" alt="">
@@ -343,7 +329,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="flex max-h-[400px] lg:mt-0 mt-[50px] max-w-full overflow-hidden">
+                                <div class="flex  lg:mt-0 mt-[50px] max-w-full overflow-hidden max-h-screen">
                                     <div class="overflow-auto w-full p-0 max-w-full">
                                         <div class="zoom-text bg-white">
                                             <div class="flex items-center justify-center py-[10px]">
@@ -352,24 +338,20 @@
                                                 </h1>
                                             </div>
                                             <div class="flex">
-                                                <div class="flex flex-col gap-y-[10px] px-5">
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                <div class="flex flex-col gap-y-[10px] px-5 data-change-font-on-click">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:1
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class=" text-base text-primary-dark">
                                                             In the beginning God created the heaven and the earth.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:2
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And the earth was without form, and void; and darkness was
                                                             upon
                                                             the
@@ -379,36 +361,30 @@
                                                             waters.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class="font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:3
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And God said, Let there be light: and there was light.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:4
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And God saw the light, that it was good: and God divided the
                                                             light
                                                             from
                                                             the darkness.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:5
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And God called the light Day, and the darkness he called
                                                             Night.
                                                             And
@@ -416,26 +392,22 @@
                                                             evening and the morning were the first day.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:6
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And God said, Let there be a firmament in the midst of the
                                                             waters,
                                                             and
                                                             let it divide the waters from the waters.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:7
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And God made the firmament, and divided the waters which
                                                             were
                                                             under
@@ -446,25 +418,21 @@
                                                             so.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:8
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And God called the firmament Heaven. And the evening and the
                                                             morning
                                                             were the second day.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:9
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And God said, Let the earth bring forth grass, the herb
                                                             yielding
                                                             seed,
@@ -474,13 +442,11 @@
                                                             itself, upon the earth: and it was so.
                                                         </p>
                                                     </div>
-                                                    <div class="flex">
-                                                        <p
-                                                            class=" font-normal text-base text-primary-light min-w-[65px] hover:font-bold">
+                                                    <div class="flex font-normal">
+                                                        <p class="text-base text-primary-light min-w-[65px]">
                                                             Gen 1:10
                                                         </p>
-                                                        <p
-                                                            class="font-normal text-base text-primary-dark hover:font-bold">
+                                                        <p class="text-base text-primary-dark">
                                                             And the earth brought forth grass, and herb yielding seed
                                                             after
                                                             his
@@ -499,99 +465,11 @@
                                         </div>
 
                                     </div>
-                                    <div class="flex flex-col gap-y-[26px] pt-2 px-1 bg-silver-light h-full">
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill.svg">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill2.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill3.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill4.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph-book-fill5.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill 6.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill 7.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill 8.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill 9.svg" alt="">
-                                        </button>
-                                        <button class="xl:w-[30px] w-[20px]">
-                                            <img src="./Resources/images/ph_book-fill 10.svg" alt="">
-                                        </button>
-
-                                    </div>
+                                  
                                 </div>
 
                             </div>
                         </div>
-                        <!-- Dictonaries  -->
-                        <div class="mainDiv">
-                            <div
-                                class="bg-silver-light z-10 py-3 font-inter lg:pl-3 px-[10px] lg:border-0 border-b flex justify-between toggle-btn">
-                                <h3 class="text-xs font-bold uppercase">
-                                    Dictonaries
-                                </h3>
-                                <button class="lg:hidden block rotate-180" id="expandDictionary">
-                                    <img src="./Resources/images/arrowup.svg" class="toggle-arrow">
-                                </button>
-                            </div>
-                            <div class="lg:flex hidden justify-between border-b expanable-content">
-                                <div
-                                    class="my-1 flex font-inter font-normal text-xs px-2 items-center lg:border-0 border-b">
-                                    <button class="hover:bg-primary hover:font-bold px-4 py-2">
-                                        Strong
-                                    </button>
-                                    <button class="hover:bg-primary hover:font-bold px-4 py-2">
-                                        Smith
-                                    </button>
-                                </div>
-                                <div
-                                    class="flex justify-between lg:justify-normal xl:gap-x-9 gap-x-7 lg:gap-x-[14px] lg:pr-[30px] px-[10px] items-center lg:border-0 border-b">
-                                    <button>
-                                        <img src="./Resources/images/ph_play-light.svg" class="">
-                                    </button>
-                                    <p>
-                                        <img src="./Resources/images/line.svg" class="">
-                                    </p>
-                                    <button type="button" class="highlighter" onclick="toggleHighlight()">
-                                        <img src="./Resources/images/ph_text-aa-fill.svg" class="">
-                                    </button>
-                                    <p>
-                                        <img src="./Resources/images/line.svg" class="">
-                                    </p>
-                                    <button type="button" class="zoom-in">
-                                        <img src="./Resources/images/zoomIn.svg" class="">
-                                    </button>
-                                    <button type="button" class="zoom-out">
-                                        <img src="./Resources/images/zoomout.svg" class="">
-                                    </button>
-                                    <p>
-                                        <img src="./Resources/images/line.svg" class="">
-                                    </p>
-                                    <button type="button" class="left-move">
-                                        <img src="./Resources/images/leftarrow.svg" class="">
-                                    </button>
-                                    <button class="right-move" type="button">
-                                        <img src="./Resources/images/rightarrow.svg" class="">
-                                    </button>
-                                </div>
-
-                            </div>
-                        </div>
-
-
                     </div>
                     <!-- Commentaries -->
                     <div class="xl:max-w-[30%] xl:min-w-[30%] lg:max-w-[40%] lg:min-w-[40%] max-h-full min-h-full">
@@ -631,6 +509,9 @@
                                         <button type="button" class="highlighter" onclick="toggleHighlight()"
                                             id="highlightButton">
                                             <img src="./Resources/images/ph_text-aa-fill.svg" alt="">
+                                        </button>
+                                        <button>
+                                            <i class="fa-regular fa-bookmark"></i>
                                         </button>
                                         <p>
                                             <img src="./Resources/images/line.svg" alt="">
@@ -898,18 +779,6 @@
                     currentScale = 0.5;
                 }
             })
-
-            // let highlighterbtn = allMaindiv[i].querySelector(".highlighter");
-            // highlighterbtn.addEventListener("click", () => {
-            //     let highlightcontent = allMaindiv[i].querySelector(".zoom-text");
-            //     let usehighlight = highlightcontent.classList.contains("bg-white");
-            //     if (usehighlight) {
-            //         highlightcontent.classList.remove("bg-white");
-            //         highlightcontent.classList.add("bg-red-900");
-            //     }
-            // })
-
-
         }
 
     </script>
@@ -931,6 +800,17 @@
         var highlightButton = document.getElementById("highlightButton");
         highlightButton.addEventListener("click", toggleHighlight);
     </script>
+    <!-- Code for changing font size from normal to bold and vice versa -->
+    <script>
+        let elements = document.getElementsByClassName('font-normal');
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].addEventListener('click', function () {
+                this.classList.toggle('font-bold');
+            });
+        }
+    </script>
+
+
 
 </body>
 
