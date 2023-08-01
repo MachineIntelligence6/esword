@@ -14,7 +14,10 @@ export default function ForgotPasswordPage() {
         resolver: zodResolver(forgotPaswordFormSchema),
         mode: "all"
     })
-    const handleFormSubmit = async (data: ForgotPaswordFormSchema) => { }
+    const handleFormSubmit = async (data: ForgotPaswordFormSchema) => { 
+        console.log(data)
+
+    }
 
 
     return (

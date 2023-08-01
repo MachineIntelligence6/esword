@@ -14,7 +14,10 @@ export default function SignUpPage() {
         resolver: zodResolver(signUpFormSchema),
         mode: "all"
     })
-    const handleFormSubmit = async (data: SignUpFormSchema) => { }
+    const handleFormSubmit = async (data: SignUpFormSchema) => {
+        console.log(data)
+
+     }
 
 
     return (

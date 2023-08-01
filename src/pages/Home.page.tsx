@@ -1,6 +1,5 @@
 
 import BooksChapterComponent from "@/components/BooksChapterComponent";
-import Editor from "@/components/EditiorComponent";
 import HeaderComponent from "@/components/HeaderComponent";
 import VersesComponent from "@/components/VersesComponent";
 import { Button } from "@/components/ui/button";

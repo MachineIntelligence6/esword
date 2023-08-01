@@ -12,7 +12,10 @@ export default function CreateNewPasword() {
     const form = useForm<CreatePaswordFormSchema>({
         resolver: zodResolver(createPaswordFormSchema),
     })
-    const handleFormSubmit = async (data: CreatePaswordFormSchema) => { }
+    const handleFormSubmit = async (data: CreatePaswordFormSchema) => { 
+        console.log(data)
+
+    }
 
 
     return (

@@ -15,7 +15,10 @@ export default function LoginPage() {
         resolver: zodResolver(loginFormSchema),
         mode: "all"
     })
-    const handleFormSubmit = async (data: LoginFormSchema) => { }
+    const handleFormSubmit = async (data: LoginFormSchema) => {
+        console.log(data)
+
+     }
 
 
     return (
