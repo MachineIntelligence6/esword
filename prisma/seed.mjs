@@ -2,18 +2,18 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-    // await prisma.user.upsert({
-    //     create: {
-    //         email: "admin@gmail.com",
-    //         name: "Admin",
-    //         password: "12345",
-    //         username: "admin"
-    //     },
-    //     where: {
-    //         email: "admin@.gmail.com"
-    //     },
-    //     update: {}
-    // })
+    await prisma.user.upsert({
+        create: {
+            email: "admin@gmail.com",
+            name: "Admin",
+            password: "12345",
+            username: "admin"
+        },
+        where: {
+            email: "admin@.gmail.com"
+        },
+        update: {}
+    })
     for (let index = 0; index < 50; index++) {
         await prisma.book.upsert({
             create: {
