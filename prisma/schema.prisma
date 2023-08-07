@@ -16,47 +16,60 @@ model User {
   image     String?  @db.LongText
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+  archived  Boolean  @default(false)
+
+  @@map("users")
 }
 
 model Book {
-  id        Int       @id @default(autoincrement())
-  name      String    @db.MediumText
-  slug      String    @unique
-  chapters  Chapter[]
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt() @map("updated_at")
+  id           Int       @id @default(autoincrement())
+  name         String    @db.MediumText
+  slug         String    @unique
+  abbreviation String
+  chapters     Chapter[]
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt() @map("updated_at")
+  archived     Boolean   @default(false)
 
   @@map("books")
 }
 
 model Chapter {
-  id           Int      @id @default(autoincrement())
-  name         String   @db.MediumText
-  slug         String   @unique
-  abbreviation String
-  bookId       Int      @map("book_id")
-  book         Book     @relation(fields: [bookId], references: [id])
-  verses       Verse[]
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @default(now()) @updatedAt() @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  name      String   @db.MediumText
+  number    Int
+  slug      String   @unique
+  bookId    Int      @map("book_id")
+  book      Book     @relation(fields: [bookId], references: [id])
+  verses    Verse[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+  archived  Boolean  @default(false)
 
   @@map("chapters")
 }
 
 model Verse {
-  id        Int      @id @default(autoincrement())
-  slug      String   @unique
-  name      String   @db.MediumText
-  number    Int
-  text      String
-  audio     String?
-  chapterId Int      @map("chapter_id")
-  chapter   Chapter  @relation(fields: [chapterId], references: [id])
-  notes     Note[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+  id           Int         @id @default(autoincrement())
+  name         String      @db.MediumText
+  number       Int
+  text         String
+  audio        String?
+  type         VerseType   @default(CONTENT)
+  chapterId    Int         @map("chapter_id")
+  chapter      Chapter     @relation(fields: [chapterId], references: [id])
+  commentaries Commentary[]
+  notes        Note[]
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @default(now()) @updatedAt() @map("updated_at")
+  archived     Boolean     @default(false)
 
   @@map("verses")
+}
+
+enum VerseType {
+  HEADING
+  CONTENT
 }
 
 model Note {
@@ -66,14 +79,33 @@ model Note {
   verse     Verse    @relation(fields: [verseId], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+  archived  Boolean  @default(false)
 
   @@map("notes")
 }
 
-model Author {
-  id        String   @id @default(uuid())
+model Commentary {
+  id        Int      @id @default(autoincrement())
   name      String
-  image     String   @db.LongText
+  text      String
+  verseId   Int      @map("verse_id")
+  verse     Verse    @relation(fields: [verseId], references: [id])
+  authorId  Int      @map("author_id")
+  author    Author   @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+  archived  Boolean  @default(false)
+
+  @@map("commentaries")
+}
+
+model Author {
+  id           Int         @id @default(autoincrement())
+  name         String
+  description  String
+  image        String?     @db.LongText
+  commentaries Commentary[]
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @default(now()) @updatedAt() @map("updated_at")
+  archived     Boolean     @default(false)
 }

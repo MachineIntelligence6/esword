@@ -1,0 +1,308 @@
+"use client"
+
+import * as React from "react"
+import {
+  Table as TTable,
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  Column,
+} from "@tanstack/react-table"
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+import { DataTablePagination } from "@/components/tables/shared/pagination"
+import { ArrowDownIcon, ArrowUpIcon, CaretSortIcon, Cross2Icon, EyeNoneIcon, MixerHorizontalIcon } from "@radix-ui/react-icons"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+
+
+
+
+interface DataTableProps<TData, TValue> extends ToolbarProps<TData> {
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[];
+  pagination?: boolean;
+  toolbar?: boolean;
+}
+
+export function BaseTable<TData, TValue>({
+  columns,
+  data,
+  getFilterValue,
+  setFilterValue,
+  pagination = true,
+  toolbar = true,
+}: DataTableProps<TData, TValue>) {
+  const [rowSelection, setRowSelection] = React.useState({})
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  )
+  const [sorting, setSorting] = React.useState<SortingState>([])
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+  })
+
+  return (
+    <div className="space-y-4 w-full">
+      {
+        toolbar &&
+        <DataTableToolbar table={table} getFilterValue={getFilterValue} setFilterValue={setFilterValue} />
+      }
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      {
+        pagination &&
+        <DataTablePagination table={table} />
+      }
+    </div>
+  )
+}
+
+
+
+
+interface DataTableColumnHeaderProps<TData, TValue>
+  extends React.HTMLAttributes<HTMLDivElement> {
+  column: Column<TData, TValue>
+  title: string
+}
+
+export function DataTableColumnHeader<TData, TValue>({
+  column,
+  title,
+  className,
+}: DataTableColumnHeaderProps<TData, TValue>) {
+  if (!column.getCanSort()) {
+    return <div className={cn(className)}>{title}</div>
+  }
+
+  return (
+    <div className={cn("flex items-center space-x-2", className)}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+
+            variant="ghost"
+            size="sm"
+            className="-ml-3 h-8 data-[state=open]:bg-accent"
+          >
+            <span>{title}</span>
+            {column.getIsSorted() === "desc" ? (
+              <ArrowDownIcon className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "asc" ? (
+              <ArrowUpIcon className="ml-2 h-4 w-4" />
+            ) : (
+              <CaretSortIcon className="ml-2 h-4 w-4" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+            <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            Asc
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+            <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            Desc
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
+            <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            Hide
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}
+
+
+
+
+export interface ToolbarProps<TData> {
+  getFilterValue: (table: TTable<TData>) => string;
+  setFilterValue: (table: TTable<TData>, value: string) => void;
+}
+interface DataTableToolbarProps<TData> extends ToolbarProps<TData> {
+  table: TTable<TData>;
+}
+
+export function DataTableToolbar<TData>({
+  table,
+  getFilterValue,
+  setFilterValue
+}: DataTableToolbarProps<TData>) {
+  const isFiltered = table.getState().columnFilters.length > 0
+
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex flex-1 items-center space-x-2">
+        <Input
+          placeholder="Search..."
+          value={getFilterValue(table)}
+          onChange={(event) =>
+            setFilterValue(table, event.target.value)
+          }
+          className="h-8 w-[150px] lg:w-[250px]"
+        />
+        {isFiltered && (
+          <Button
+            variant="ghost"
+            onClick={() => table.resetColumnFilters()}
+            className="h-8 px-2 lg:px-3"
+          >
+            Reset
+            <Cross2Icon className="ml-2 h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      <DataTableViewOptions table={table} />
+    </div>
+  )
+}
+
+
+
+
+interface DataTableViewOptionsProps<TData> {
+  table: TTable<TData>
+}
+
+export function DataTableViewOptions<TData>({
+  table,
+}: DataTableViewOptionsProps<TData>) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="ml-auto hidden h-8 lg:flex"
+        >
+          <MixerHorizontalIcon className="mr-2 h-4 w-4" />
+          View
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[150px]">
+        <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {table
+          .getAllColumns()
+          .filter(
+            (column) =>
+              typeof column.accessorFn !== "undefined" && column.getCanHide()
+          )
+          .map((column) => {
+            return (
+              <DropdownMenuCheckboxItem
+                key={column.id}
+                className="capitalize"
+                checked={column.getIsVisible()}
+                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+              >
+                {column.id}
+              </DropdownMenuCheckboxItem>
+            )
+          })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}

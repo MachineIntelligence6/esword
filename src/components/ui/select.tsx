@@ -1,15 +1,15 @@
 "use client"
-
 import * as React from "react"
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
 import * as SelectPrimitive from "@radix-ui/react-select"
 
 import { cn } from "@/lib/utils"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import { Button } from "./button"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./command"
 
 const Select = SelectPrimitive.Root
-
 const SelectGroup = SelectPrimitive.Group
-
 const SelectValue = SelectPrimitive.Value
 
 const SelectTrigger = React.forwardRef<
@@ -19,7 +19,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-9 w-full items-center justify-between rounded-md border border-slate-200 border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:border-slate-800 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus:ring-slate-800",
+      "flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50",
       className
     )}
     {...props}
@@ -40,9 +40,9 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-slate-200 bg-white text-slate-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
+        "relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-slate-200 bg-white text-slate-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className
       )}
       position={position}
@@ -52,7 +52,7 @@ const SelectContent = React.forwardRef<
         className={cn(
           "p-1",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+          "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
         )}
       >
         {children}
@@ -108,6 +108,112 @@ const SelectSeparator = React.forwardRef<
 ))
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 
+
+
+export type SelectOption = {
+  label: string;
+  value: string;
+  rawValue: any;
+}
+
+type SelectElProps = {
+  options?: Array<SelectOption>;
+  value: string;
+  onChange?: (opt?: SelectOption | null) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+const SelectEl = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, placeholder, onChange, value }, ref) => {
+  const handleChange = (value: string) => {
+    const option = options?.find((opt) => opt.value === value)
+    if (!option || !onChange) return;
+    onChange(option)
+  }
+  return (
+    <Select onValueChange={handleChange} value={value}>
+      <SelectTrigger className="w-full h-10">
+        <SelectValue placeholder={placeholder ? placeholder : "Select"} />
+      </SelectTrigger>
+      <SelectContent className="max-h-96 overflow-y-auto">
+        {
+          options?.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))
+        }
+      </SelectContent>
+    </Select>
+  )
+})
+SelectEl.displayName = "SelectEl"
+
+const ComboBox = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, placeholder, onChange, value, disabled }, ref) => {
+  const [open, setOpen] = React.useState(false)
+  const [selectedOpt, setSelectedOpt] = React.useState<SelectOption | undefined>(options?.find((opt) => opt.value === value))
+  const handleChange = (value: string) => {
+    setOpen(false)
+    const option = options?.find((opt) => opt.value === value)
+    if (!option) return;
+    setSelectedOpt(option)
+  }
+
+
+
+
+  React.useEffect(() => {
+    setSelectedOpt(options?.find((opt) => opt.value === value))
+  }, [value])
+
+  React.useEffect(() => {
+    onChange?.(selectedOpt)
+  }, [selectedOpt])
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          disabled={disabled}
+          aria-expanded={open}
+          className="w-full justify-between h-10"
+        >
+          {selectedOpt ? selectedOpt.label : (placeholder ?? "")}
+          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0">
+        <Command>
+          <CommandInput placeholder="Search..." />
+          <CommandEmpty>No Data.</CommandEmpty>
+          <CommandGroup className="max-h-96 w-full overflow-y-auto">
+            {
+              options?.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.value}
+                  onSelect={handleChange}
+                >
+                  <CheckIcon
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {option.label}
+                </CommandItem>
+              ))}
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+})
+ComboBox.displayName = "ComboBox"
+
+
 export {
   Select,
   SelectGroup,
@@ -117,4 +223,6 @@ export {
   SelectLabel,
   SelectItem,
   SelectSeparator,
+  SelectEl,
+  ComboBox
 }

@@ -1,4 +1,4 @@
-import defaults from "@/const/defaults"
+import defaults from "@/shared/constants/defaults"
 import apiHandlers from "@/server/handlers"
 import { NextResponse } from "next/server"
 

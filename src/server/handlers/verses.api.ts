@@ -1,28 +1,37 @@
-import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Chapter, Verse } from "@prisma/client";
-import defaults from "@/const/defaults";
+import { Prisma, Verse, VerseType } from "@prisma/client";
+import defaults from "@/shared/constants/defaults";
 
 
 
+type PaginationProps = BasePaginationProps<Prisma.VerseInclude> & {
+    chapter?: number;
+}
 
-export async function getAll(page = 1, perPage = defaults.PER_PAGE_ITEMS, chapter = -1): Promise<PaginatedApiResponse<Verse[]>> {
+
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, chapter = -1, include }: PaginationProps): Promise<PaginatedApiResponse<Verse[]>> {
     try {
         const verses = await db.verse.findMany({
             where: {
                 ...(chapter !== -1 && {
                     chapterId: chapter
-                })
+                }),
+                archived: false,
             },
             orderBy: {
                 id: "asc"
             },
-            skip: page <= 1 ? 0 : ((page - 1) * perPage),
-            take: perPage,
-            include: {
-                chapter: false,
-                notes: false
-            }
+            ...(perPage !== -1 && {
+                take: perPage,
+                skip: page <= 1 ? 0 : ((page - 1) * perPage),
+            }),
+            include: (
+                include ? include : {
+                    chapter: false,
+                    notes: false
+                }
+            )
         })
         return {
             succeed: true,
@@ -45,9 +54,19 @@ export async function getAll(page = 1, perPage = defaults.PER_PAGE_ITEMS, chapte
 
 
 
-export async function getBySlug(slug: string): Promise<ApiResponse<Verse>> {
+export async function getById(id: number, include?: Prisma.VerseInclude): Promise<ApiResponse<Verse>> {
     try {
-        const verse = await db.verse.findFirst({ where: { slug: slug } })
+        const verse = await db.verse.findFirst({
+            where: {
+                OR: [
+                    {
+                        id: id
+                    }
+                ],
+                archived: false
+            },
+            include: (include ? include : { chapter: false, notes: false })
+        })
         if (!verse) {
             return {
                 succeed: false,
@@ -71,20 +90,49 @@ export async function getBySlug(slug: string): Promise<ApiResponse<Verse>> {
 
 
 
+export async function archive(id: number): Promise<ApiResponse<null>> {
+    try {
+        await db.verse.update({
+            where: { id: id },
+            data: {
+                archived: true,
+            }
+        })
+        return {
+            succeed: true,
+            data: null
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
+
+
+
+
 
 type CreateVerseReq = {
     name: string;
-    slug: string;
-    number: number;
     text: string;
+    number: number;
+    type: VerseType;
     chapterId: number;
 }
 
-export async function create(req: Request): Promise<ApiResponse> {
+export async function create(req: Request): Promise<ApiResponse<Verse>> {
     try {
         const verseReq = await req.json() as CreateVerseReq
         const verseExist = await db.verse.findFirst({
-            where: { slug: verseReq.slug }
+            where: {
+                AND: [
+                    { chapterId: verseReq.chapterId },
+                    { number: verseReq.number },
+                ]
+            }
         })
         if (verseExist) {
             return {
@@ -93,7 +141,13 @@ export async function create(req: Request): Promise<ApiResponse> {
             }
         }
         const verse = await db.verse.create({
-            data: verseReq,
+            data: {
+                name: verseReq.name,
+                number: verseReq.number,
+                type: verseReq.type,
+                text: verseReq.text,
+                chapterId: verseReq.chapterId
+            },
             include: {
                 notes: false,
                 chapter: false
@@ -121,37 +175,42 @@ export async function create(req: Request): Promise<ApiResponse> {
 
 type UpdateVerseReq = {
     name?: string | null;
-    slug?: string | null;
+    type?: VerseType | null;
     number?: number | null;
     text?: string | null;
     chapterId?: number | null;
 }
 
 
-export async function update(req: Request, slug: string): Promise<ApiResponse> {
+export async function update(req: Request, id: number): Promise<ApiResponse<Verse>> {
     try {
         const verseReq = await req.json() as UpdateVerseReq
-        if (verseReq.slug) {
+        if (verseReq.number && verseReq.chapterId) {
             const verseExist = await db.verse.findFirst({
-                where: { slug: verseReq.slug }
+                where: {
+                    AND: [
+                        { chapterId: verseReq.chapterId },
+                        { number: verseReq.number },
+                    ]
+                }
             })
-            if (verseExist) {
+            if (verseExist && verseExist.id !== id) {
                 return {
                     succeed: false,
-                    code: "SLUG_MUST_BE_UNIQUE",
+                    code: "VERSE_NUMBER_MUST_BE_UNIQUE",
                 }
             }
         }
         const verse = await db.verse.update({
             data: {
                 ...(verseReq.name && { name: verseReq.name }),
-                ...(verseReq.slug && { slug: verseReq.slug }),
+                ...(verseReq.type && { type: verseReq.type }),
                 ...(verseReq.text && { text: verseReq.text }),
                 ...(verseReq.chapterId && { chapterId: verseReq.chapterId }),
                 ...(verseReq.number && { number: verseReq.number }),
             },
             where: {
-                slug: slug
+                id: id
             }
         })
         if (!verse) throw new Error("");

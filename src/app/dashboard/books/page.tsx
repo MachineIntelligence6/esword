@@ -1,22 +1,18 @@
-import Image from "next/image"
-
-import { columns } from "@/components/tables/columns/books-table-columns"
-import { DataTable } from "@/components/tables/data-table"
 import apiHandlers from "@/server/handlers"
+import PageContent from "./content"
 
 
 
-export default async function TaskPage() {
-  const { data: books } = await apiHandlers.books.getAll(1, -1)
-
+export default async function Page() {
+  const { data: books } = await apiHandlers.books.getAll({ page: 1, perPage: 200 })
   return (
-    <>
+    <div className="space-y-8">
       <div>
-        {
-          books &&
-          <DataTable data={books} columns={columns} />
-        }
+        <h1 className="font-bold text-2xl">
+          Books
+        </h1>
       </div>
-    </>
+      {books && <PageContent books={books} />}
+    </div>
   )
 }

@@ -1,15 +1,20 @@
-import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
 import { Book, Prisma } from "@prisma/client";
-import defaults from "@/const/defaults";
+import defaults from "@/shared/constants/defaults";
 
 
 
+type PaginationProps = BasePaginationProps<Prisma.BookInclude>
 
 
-export async function getAll(page: number = 1, perPage: number = defaults.PER_PAGE_ITEMS): Promise<PaginatedApiResponse<Book[]>> {
+
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<Book[]>> {
     try {
         const books = await db.book.findMany({
+            where: {
+                archived: false
+            },
             orderBy: {
                 id: "asc"
             },
@@ -17,9 +22,7 @@ export async function getAll(page: number = 1, perPage: number = defaults.PER_PA
                 take: perPage,
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
-            include: {
-                chapters: false,
-            }
+            include: (include ? include : { chapters: false })
         })
         return {
             succeed: true,
@@ -31,7 +34,7 @@ export async function getAll(page: number = 1, perPage: number = defaults.PER_PA
             data: books
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         return {
             succeed: false,
             code: "UNKOWN_ERROR",
@@ -41,9 +44,22 @@ export async function getAll(page: number = 1, perPage: number = defaults.PER_PA
 }
 
 
-export async function getBySlug(slug: string): Promise<ApiResponse<Book>> {
+export async function getByRef(ref: string, include?: Prisma.BookInclude): Promise<ApiResponse<Book>> {
     try {
-        const book = await db.book.findFirst({ where: { slug: slug } })
+        const book = await db.book.findFirst({
+            where: {
+                OR: [
+                    {
+                        slug: ref,
+                    },
+                    {
+                        id: parseInt(ref)
+                    }
+                ],
+                archived: false
+            },
+            include: (include ? include : { chapters: false })
+        })
         if (!book) {
             return {
                 succeed: false,
@@ -56,7 +72,7 @@ export async function getBySlug(slug: string): Promise<ApiResponse<Book>> {
             data: book
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         return {
             succeed: false,
             code: "UNKOWN_ERROR",
@@ -67,10 +83,25 @@ export async function getBySlug(slug: string): Promise<ApiResponse<Book>> {
 
 
 
-type CreateBookReq = {
-    name: string;
-    slug: string;
+export async function archive(id: number): Promise<ApiResponse<Book>> {
+    try {
+        await db.book.update({ where: { id: id }, data: { archived: true } })
+        return {
+            succeed: true,
+            data: null
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
 }
+
+
+
+type CreateBookReq = Prisma.BookCreateInput
 
 export async function create(req: Request): Promise<ApiResponse> {
     try {
@@ -86,7 +117,11 @@ export async function create(req: Request): Promise<ApiResponse> {
             }
         }
         const book = await db.book.create({
-            data: bookReq,
+            data: {
+                name: bookReq.name,
+                slug: bookReq.slug,
+                abbreviation: bookReq.abbreviation
+            },
             include: {
                 chapters: false
             }
@@ -98,7 +133,7 @@ export async function create(req: Request): Promise<ApiResponse> {
             data: book
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         return {
             succeed: false,
             code: "UNKOWN_ERROR"
@@ -112,10 +147,11 @@ export async function create(req: Request): Promise<ApiResponse> {
 type UpdateBookReq = {
     name?: string | null
     slug?: string | null
+    abbreviation?: string | null
 }
 
 
-export async function update(req: Request, slug: string): Promise<ApiResponse> {
+export async function update(req: Request, id: number): Promise<ApiResponse> {
     try {
         const bookReq = await req.json() as UpdateBookReq
 
@@ -123,7 +159,7 @@ export async function update(req: Request, slug: string): Promise<ApiResponse> {
             const bookExist = await db.book.findFirst({
                 where: { slug: bookReq.slug }
             })
-            if (bookExist) {
+            if (bookExist && bookExist.id !== id) {
                 return {
                     succeed: false,
                     code: "SLUG_MUST_BE_UNIQUE",
@@ -134,9 +170,10 @@ export async function update(req: Request, slug: string): Promise<ApiResponse> {
             data: {
                 ...(bookReq.name && { name: bookReq.name }),
                 ...(bookReq.slug && { slug: bookReq.slug }),
+                ...(bookReq.abbreviation && { abbreviation: bookReq.abbreviation }),
             },
             where: {
-                slug: slug
+                id: id
             }
         })
         if (!book) throw new Error("");
@@ -146,7 +183,7 @@ export async function update(req: Request, slug: string): Promise<ApiResponse> {
             data: book
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         return {
             succeed: false,
             code: "UNKOWN_ERROR"

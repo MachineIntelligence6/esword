@@ -21,12 +21,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
     return (
         <div className="flex w-full">
             <DashboardSidebar className="w-full max-w-[300px]" />
-            <div className="w-full p-10 space-y-8">
-                <div>
-                    <h1 className="font-bold text-2xl">
-                        {currentMenuItem?.label}
-                    </h1>
-                </div>
+            <div className="w-full p-10">
                 {children}
             </div>
         </div>
