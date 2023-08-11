@@ -1,8 +1,8 @@
-'use client'
 import { ReactNode } from "react";
-import DashboardSidebar, { menuItems } from "./sidebar";
-import { usePathname } from "next/navigation";
+import DashboardSidebar from "./sidebar";
+import DashboardHeader from "./header";
 import { Metadata } from "next";
+import AuthProvider from "@/components/auth-provider";
 
 
 
@@ -14,17 +14,19 @@ export const metadata: Metadata = {
 
 
 export default function DashboardLayout({ children }: { children?: ReactNode }) {
-    const pathname = usePathname()
-
-    const currentMenuItem = menuItems.find((menuItem) => pathname === (menuItem.path))
 
     return (
-        <div className="flex w-full">
-            <DashboardSidebar className="w-full max-w-[300px]" />
-            <div className="w-full p-10">
-                {children}
+        <AuthProvider>
+            <div className="flex flex-col min-h-screen">
+                <DashboardHeader />
+                <div className="flex w-full min-h-screen">
+                    <DashboardSidebar className="w-full max-w-[300px]" />
+                    <div className="w-full p-10">
+                        {children}
+                    </div>
+                </div>
             </div>
-        </div>
+        </AuthProvider>
     )
 
 }

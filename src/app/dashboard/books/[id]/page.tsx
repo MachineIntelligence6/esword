@@ -1,6 +1,6 @@
-import { BackButton } from "@/components/buttons";
-import ChaptersTable from "@/components/tables/chapters.table";
-import apiHandlers from "@/server/handlers";
+import { BackButton } from "@/components/dashboard/buttons";
+import ChaptersTable from "@/components/dashboard/tables/chapters.table";
+import serverApiHandlers from "@/server/handlers";
 import { ChapterWBook } from "@/shared/types/models.types";
 import { Book, Chapter } from "@prisma/client";
 import { notFound } from "next/navigation";
@@ -9,26 +9,49 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
+} from "@/components/dashboard/ui/card"
+import { Button, buttonVariants } from "@/components/dashboard/ui/button";
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 
 export default async function Page({ params }: { params: { id: string } }) {
-    const { data: book } = await apiHandlers.books.getByRef(params.id, { chapters: true })
+    const { data: book } = await serverApiHandlers.books.getByRef(params.id)
     if (!book) return notFound()
-    const chapters: ChapterWBook[] = (book as (Book & { chapters: Chapter[] })).chapters.map((chapter) => ({ ...chapter, book: book }))
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center gap-5">
-                <BackButton />
-                <h1 className="font-semibold text-2xl">
-                    {book?.name}
-                </h1>
+            <div className="flex items-center gap-5 justify-between">
+                <div className="flex items-center gap-5">
+                    <BackButton />
+                    <h1 className="font-semibold text-2xl">
+                        {book?.name}
+                    </h1>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href={parseInt(params.id) > 1 ? `/dashboard/books/${parseInt(params.id) - 1}` : '#'}
+                        className={cn(
+                            buttonVariants({ variant: "ghost" }),
+                            "aspect-square p-1 w-auto h-auto rounded-full"
+                        )}>
+                        <ChevronLeftIcon className="w-6 h-6" />
+                    </Link>
+                    <Link
+                        href={`/dashboard/books/${parseInt(params.id) + 1}`}
+                        className={cn(
+                            buttonVariants({ variant: "ghost" }),
+                            "aspect-square p-1 w-auto h-auto rounded-full"
+                        )}>
+                        <ChevronRightIcon className="w-6 h-6" />
+                    </Link>
+                </div>
             </div>
             <BookDetailsCard book={book} />
             <div className="pt-5">
                 <h3 className="font-semibold text-2xl mb-5">Chapters</h3>
-                {chapters && <ChaptersTable chapters={chapters} />}
+                <ChaptersTable book={book} />
             </div>
         </div>
     )

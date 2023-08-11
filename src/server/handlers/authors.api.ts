@@ -27,12 +27,14 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                 }
             )
         })
+        const authorsCount = await db.author.count({ where: { archived: false } })
         return {
             succeed: true,
             pagination: {
                 page: page,
                 perPage: perPage,
-                results: authors.length
+                results: authors.length,
+                totalPages: Math.ceil(authorsCount / perPage)
             },
             data: authors
         }
@@ -129,7 +131,7 @@ export async function create(req: Request): Promise<ApiResponse<Author>> {
         if (!verse) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: verse
         }
     } catch (error) {
@@ -154,21 +156,21 @@ type UpdateAuthorReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse> {
     try {
-        const verseReq = await req.json() as UpdateAuthorReq
-        const verse = await db.verse.update({
+        const authorReq = await req.json() as UpdateAuthorReq
+        const author = await db.author.update({
             data: {
-                ...(verseReq.name && { name: verseReq.name }),
-                ...(verseReq.description && { description: verseReq.description })
+                ...(authorReq.name && { name: authorReq.name }),
+                ...(authorReq.description && { description: authorReq.description })
             },
             where: {
                 id: id
             }
         })
-        if (!verse) throw new Error("");
+        if (!author) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
-            data: verse
+            code: "SUCCESS",
+            data: author
         }
     } catch (error) {
         console.log(error)

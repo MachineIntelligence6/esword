@@ -3,15 +3,18 @@ import * as chaptersApiHandlers from '@/server/handlers/chapters.api'
 import * as versesApiHandlers from '@/server/handlers/verses.api'
 import * as authorsApiHandlers from '@/server/handlers/authors.api'
 import * as commentariesApiHandlers from '@/server/handlers/commentaries.api'
+import * as usersApiHandlers from '@/server/handlers/users.api'
+import * as notesApiHandlers from '@/server/handlers/notes.api'
 
 
-
-const apiHandlers = {
+const serverApiHandlers = {
     books: booksApiHandlers,
     chapters: chaptersApiHandlers,
     verses: versesApiHandlers,
     authors: authorsApiHandlers,
-    commentaries: commentariesApiHandlers
+    commentaries: commentariesApiHandlers,
+    users: usersApiHandlers,
+    notes: notesApiHandlers
 }
 
-export default apiHandlers;
+export default serverApiHandlers;

@@ -1,8 +1,9 @@
 import { randomBytes, randomUUID } from "crypto"
-import { AuthOptions } from "next-auth"
+import { AuthOptions, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import db from "@/server/db"
 import bcrypt from 'bcryptjs'
+import { User } from "@prisma/client"
 
 
 
@@ -27,10 +28,9 @@ export const authOptions: AuthOptions = {
                         email: email,
                     },
                 })
-                console.log(password)
-                if (!user) throw new Error("User not found.")
-                if (user.password !== password) throw new Error("Wrong password.")
-                return user
+                if (!user) throw new Error("NOT_FOUND")
+                if (!(await comparePassword(password, user.password))) throw new Error("WRONG_PASSWORD")
+                return { ...user, id: user.id.toString(), password: "" }
             },
         }),
     ],
@@ -42,28 +42,29 @@ export const authOptions: AuthOptions = {
         },
     },
     pages: {
-        // signIn: "/auth/signin",
-        // signOut: "/auth/signin",
-        // error: "/auth/signin",
+        signIn: "/login",
+        signOut: "/login",
+        error: "/login",
     },
     secret: process.env.NEXTAUTH_SECRET as string,
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.name = user.name
-                token.email = user.email
+                token.user = user
             }
             return token
         },
         async session({ session, token }) {
-            if (session.user) {
-                session.user.name = token.name
-                session.user.email = token.email
+            if (token.user) {
+                session.user = token.user as User
             }
             return session
         },
     },
 }
+
+
+export const getServerAuth = () => getServerSession(authOptions)
 
 
 

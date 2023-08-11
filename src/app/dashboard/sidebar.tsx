@@ -1,7 +1,6 @@
+'use client'
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/dashboard/ui/scroll-area"
 import { usePathname } from 'next/navigation'
 import Link from "next/link";
 
@@ -57,7 +56,7 @@ export default function DashboardSidebar({ className }: SidebarProps) {
     const pathname = usePathname()
 
     return (
-        <div className={cn("py-12 border-r min-h-screen border-slate-200", className)}>
+        <div className={cn("py-5 border-r-2 min-h-full border-slate-200", className)}>
             <ScrollArea className="h-full px-1">
                 <div className="space-y-1 p-2">
                     {

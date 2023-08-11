@@ -8,17 +8,24 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String   @db.MediumText
-  username  String   @db.MediumText
   password  String   @db.MediumText
   image     String?  @db.LongText
+  role      UserRole @default(VIEWER)
+  notes     Note[]
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
   archived  Boolean  @default(false)
 
   @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
 }
 
 model Book {
@@ -50,19 +57,19 @@ model Chapter {
 }
 
 model Verse {
-  id           Int         @id @default(autoincrement())
-  name         String      @db.MediumText
+  id           Int          @id @default(autoincrement())
+  name         String       @db.MediumText
   number       Int
   text         String
   audio        String?
-  type         VerseType   @default(CONTENT)
-  chapterId    Int         @map("chapter_id")
-  chapter      Chapter     @relation(fields: [chapterId], references: [id])
+  type         VerseType    @default(CONTENT)
+  chapterId    Int          @map("chapter_id")
+  chapter      Chapter      @relation(fields: [chapterId], references: [id])
   commentaries Commentary[]
   notes        Note[]
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @default(now()) @updatedAt() @map("updated_at")
-  archived     Boolean     @default(false)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @default(now()) @updatedAt() @map("updated_at")
+  archived     Boolean      @default(false)
 
   @@map("verses")
 }
@@ -77,6 +84,8 @@ model Note {
   text      String
   verseId   Int      @map("verse_id")
   verse     Verse    @relation(fields: [verseId], references: [id])
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
   archived  Boolean  @default(false)
@@ -100,12 +109,12 @@ model Commentary {
 }
 
 model Author {
-  id           Int         @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   name         String
   description  String
-  image        String?     @db.LongText
+  image        String?      @db.LongText
   commentaries Commentary[]
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @default(now()) @updatedAt() @map("updated_at")
-  archived     Boolean     @default(false)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @default(now()) @updatedAt() @map("updated_at")
+  archived     Boolean      @default(false)
 }

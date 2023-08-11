@@ -3,7 +3,7 @@ import { Book } from "@prisma/client";
 
 
 
-type ApiResCode = "SUCCEESS" | "UNKOWN_ERROR" | "SLUG_MUST_BE_UNIQUE" | "NOT_FOUND" | "VERSE_NUMBER_MUST_BE_UNIQUE"
+export type ApiResCode = "SUCCESS" | "UNKOWN_ERROR" | "SLUG_MUST_BE_UNIQUE" | "NOT_FOUND" | "VERSE_NUMBER_MUST_BE_UNIQUE" | "EMAIL_ALREADY_EXISTS" | "WRONG_PASSWORD"
 
 
 export type ApiResponse<TData = any> = {
@@ -25,5 +25,6 @@ export type PaginatedApiResponse<TData = any> = ApiResponse<TData> & {
         page: number;
         perPage: number;
         results: number;
+        totalPages: number
     }
 }

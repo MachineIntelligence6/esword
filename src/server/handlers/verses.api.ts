@@ -33,12 +33,21 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, chap
                 }
             )
         })
+        const versesCount = await db.verse.count({
+            where: {
+                ...(chapter !== -1 && {
+                    chapterId: chapter
+                }),
+                archived: false,
+            },
+        })
         return {
             succeed: true,
             pagination: {
                 page: page,
                 perPage: perPage,
-                results: verses.length
+                results: verses.length,
+                totalPages: Math.ceil(versesCount / perPage)
             },
             data: verses
         }
@@ -156,7 +165,7 @@ export async function create(req: Request): Promise<ApiResponse<Verse>> {
         if (!verse) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: verse
         }
     } catch (error) {
@@ -178,18 +187,18 @@ type UpdateVerseReq = {
     type?: VerseType | null;
     number?: number | null;
     text?: string | null;
-    chapterId?: number | null;
+    chapter?: number | null;
 }
 
 
 export async function update(req: Request, id: number): Promise<ApiResponse<Verse>> {
     try {
         const verseReq = await req.json() as UpdateVerseReq
-        if (verseReq.number && verseReq.chapterId) {
+        if (verseReq.number && verseReq.chapter) {
             const verseExist = await db.verse.findFirst({
                 where: {
                     AND: [
-                        { chapterId: verseReq.chapterId },
+                        { chapterId: verseReq.chapter },
                         { number: verseReq.number },
                     ]
                 }
@@ -206,7 +215,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<Vers
                 ...(verseReq.name && { name: verseReq.name }),
                 ...(verseReq.type && { type: verseReq.type }),
                 ...(verseReq.text && { text: verseReq.text }),
-                ...(verseReq.chapterId && { chapterId: verseReq.chapterId }),
+                ...(verseReq.chapter && { chapterId: verseReq.chapter }),
                 ...(verseReq.number && { number: verseReq.number }),
             },
             where: {
@@ -216,7 +225,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<Vers
         if (!verse) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: verse
         }
     } catch (error) {

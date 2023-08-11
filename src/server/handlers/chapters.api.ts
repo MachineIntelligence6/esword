@@ -33,12 +33,21 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, book
                 }
             )
         })
+        const chaptersCount = await db.chapter.count({
+            where: {
+                ...(book !== -1 && {
+                    bookId: book
+                }),
+                archived: false,
+            },
+        })
         return {
             succeed: true,
             pagination: {
                 page: page,
                 perPage: perPage,
-                results: chapters.length
+                results: chapters.length,
+                totalPages: Math.ceil(chaptersCount / perPage)
             },
             data: chapters
         }
@@ -155,7 +164,7 @@ export async function create(req: Request): Promise<ApiResponse> {
         if (!chapter) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: chapter
         }
     } catch (error) {
@@ -175,7 +184,7 @@ export async function create(req: Request): Promise<ApiResponse> {
 type UpdateChapterReq = {
     name?: string | null
     slug?: string | null
-    bookId?: number | null
+    book?: number | null
 }
 
 
@@ -197,7 +206,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
             data: {
                 ...(chapterReq.name && { name: chapterReq.name }),
                 ...(chapterReq.slug && { slug: chapterReq.slug }),
-                ...(chapterReq.bookId && { bookId: chapterReq.bookId }),
+                ...(chapterReq.book && { bookId: chapterReq.book }),
             },
             where: {
                 id: id
@@ -206,7 +215,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
         if (!chapter) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: chapter
         }
     } catch (error) {

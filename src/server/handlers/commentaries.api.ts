@@ -37,12 +37,24 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
                 }
             )
         })
+        const commentariesCount = await db.commentary.count({
+            where: {
+                ...(author !== -1 && {
+                    authorId: author
+                }),
+                ...(verse !== -1 && {
+                    verseId: verse
+                }),
+                archived: false,
+            },
+        })
         return {
             succeed: true,
             pagination: {
                 page: page,
                 perPage: perPage,
-                results: commentaries.length
+                results: commentaries.length,
+                totalPages: Math.ceil(commentariesCount / perPage)
             },
             data: commentaries
         }
@@ -62,11 +74,7 @@ export async function getById(id: number, include?: Prisma.CommentaryInclude): P
     try {
         const commentary = await db.commentary.findFirst({
             where: {
-                OR: [
-                    {
-                        id: id
-                    }
-                ],
+                id: id,
                 archived: false
             },
             include: (include ? include : { author: false, verse: false })
@@ -122,8 +130,8 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 type CreateCommentaryReq = {
     name: string;
     text: string;
-    verseId: number;
-    authorId: number;
+    verse: number;
+    author: number;
 }
 
 export async function create(req: Request): Promise<ApiResponse<Commentary>> {
@@ -133,8 +141,8 @@ export async function create(req: Request): Promise<ApiResponse<Commentary>> {
             data: {
                 name: commentaryReq.name,
                 text: commentaryReq.text,
-                authorId: commentaryReq.authorId,
-                verseId: commentaryReq.verseId
+                authorId: commentaryReq.author,
+                verseId: commentaryReq.verse
             },
             include: {
                 verse: false,
@@ -144,7 +152,7 @@ export async function create(req: Request): Promise<ApiResponse<Commentary>> {
         if (!commentary) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: commentary
         }
     } catch (error) {
@@ -164,8 +172,8 @@ export async function create(req: Request): Promise<ApiResponse<Commentary>> {
 type UpdateCommentaryReq = {
     name?: string | null;
     text?: string | null;
-    verseId?: number | null;
-    authorId?: number | null;
+    verse?: number | null;
+    author?: number | null;
 }
 
 
@@ -176,8 +184,8 @@ export async function update(req: Request, id: number): Promise<ApiResponse<Comm
             data: {
                 ...(commentaryReq.name && { name: commentaryReq.name }),
                 ...(commentaryReq.text && { text: commentaryReq.text }),
-                ...(commentaryReq.verseId && { verseId: commentaryReq.verseId }),
-                ...(commentaryReq.authorId && { authorId: commentaryReq.authorId }),
+                ...(commentaryReq.verse && { verseId: commentaryReq.verse }),
+                ...(commentaryReq.author && { authorId: commentaryReq.author }),
             },
             where: {
                 id: id
@@ -186,7 +194,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<Comm
         if (!commentary) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: commentary
         }
     } catch (error) {

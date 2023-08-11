@@ -1,17 +1,11 @@
-import apiHandlers from "@/server/handlers"
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/dashboard/ui/button"
 import Link from "next/link"
-import ChaptersTable from "@/components/tables/chapters.table"
-import { ChapterWBook } from "@/shared/types/models.types"
+import ChaptersTable from "@/components/dashboard/tables/chapters.table"
 
 
 
-export default async function Page() {
-  const { data: chapters } = await apiHandlers.chapters.getAll({
-    page: 1,
-    perPage: -1,
-    include: { book: true }
-  })
+export default function Page() {
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -22,9 +16,7 @@ export default async function Page() {
           Add New
         </Link>
       </div>
-      {
-        chapters && <ChaptersTable chapters={chapters as ChapterWBook[]} />
-      }
+      <ChaptersTable />
     </div>
   )
 }

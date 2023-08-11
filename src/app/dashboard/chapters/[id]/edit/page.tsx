@@ -1,14 +1,14 @@
-import { BackButton } from "@/components/buttons";
-import ChaptersForm from "@/components/forms/chapters.form";
-import apiHandlers from "@/server/handlers";
+import { BackButton } from "@/components/dashboard/buttons";
+import ChaptersForm from "@/components/dashboard/forms/chapters.form";
+import serverApiHandlers from "@/server/handlers";
 import { notFound } from "next/navigation";
 
 
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const { data: chapter } = await apiHandlers.chapters.getByRef(params.id)
+  const { data: chapter } = await serverApiHandlers.chapters.getByRef(params.id)
   if (!chapter) return notFound();
-  const { data: books } = await apiHandlers.books.getAll({ perPage: -1 })
+  const { data: books } = await serverApiHandlers.books.getAll({ perPage: -1 })
 
   return (
     <div>

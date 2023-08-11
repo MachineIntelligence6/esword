@@ -22,14 +22,16 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                 take: perPage,
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
-            include: (include ? include : { chapters: false })
+            include: (include ? include : { chapters: false, _count: true })
         })
+        const booksCount = await db.book.count({ where: { archived: false } })
         return {
             succeed: true,
             pagination: {
                 page: page,
                 perPage: perPage,
-                results: books.length
+                results: books.length,
+                totalPages: Math.ceil(booksCount / perPage)
             },
             data: books
         }
@@ -129,7 +131,7 @@ export async function create(req: Request): Promise<ApiResponse> {
         if (!book) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: book
         }
     } catch (error) {
@@ -179,7 +181,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
         if (!book) throw new Error("");
         return {
             succeed: true,
-            code: "SUCCEESS",
+            code: "SUCCESS",
             data: book
         }
     } catch (error) {

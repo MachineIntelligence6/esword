@@ -1,11 +1,11 @@
-import { BackButton } from "@/components/buttons";
-import VersesForm from "@/components/forms/verses.form";
-import apiHandlers from "@/server/handlers";
+import { BackButton } from "@/components/dashboard/buttons";
+import VersesForm from "@/components/dashboard/forms/verses.form";
+import serverApiHandlers from "@/server/handlers";
 
 
 
 export default async function Page() {
-  const { data: books } = await apiHandlers.books.getAll({ perPage: -1, include: { chapters: true } })
+  const { data: books } = await serverApiHandlers.books.getAll({ perPage: -1, include: { chapters: true } })
 
   return (
     <div>

@@ -1,16 +1,11 @@
-import apiHandlers from "@/server/handlers"
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/dashboard/ui/button"
 import Link from "next/link"
-import CommentariesTable from "@/components/tables/commentaries.table"
+import CommentariesTable from "@/components/dashboard/tables/commentaries.table"
 
 
 
-export default async function Page() {
-  const { data: commentaries } = await apiHandlers.commentaries.getAll({
-    page: 1,
-    perPage: -1,
-    include: { author: true, verse: true }
-  })
+export default function Page() {
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -21,9 +16,7 @@ export default async function Page() {
           Add New
         </Link>
       </div>
-      {
-        commentaries && <CommentariesTable commentaries={commentaries} />
-      }
+      <CommentariesTable />
     </div>
   )
 }

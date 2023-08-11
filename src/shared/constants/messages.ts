@@ -5,6 +5,9 @@
 const definedMessages = {
     SLUG_MUST_BE_UNIQUE: "Slug must be unique.",
     VERSE_NUMBER_MUST_BE_UNIQUE: "A verse at this number in this chapter already exists.",
+    EMAIL_ALREADY_EXISTS: "A user already exists with this email.",
+    USER_NOT_FOUND: "Email not registered.",
+    WRONG_PASSWORD: "Wrong password.",
     UNKNOWN_ERROR: "Some error occured while processing your request, please try again.",
     BOOK_DELETED: "Book deleted successfully. Refresh page to see changes.",
     BOOK_ADDED: "Book added successfully. Refresh page to see changes.",

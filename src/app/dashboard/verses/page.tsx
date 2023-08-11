@@ -1,12 +1,12 @@
-import apiHandlers from "@/server/handlers"
-import { buttonVariants } from "@/components/ui/button"
+import serverApiHandlers from "@/server/handlers"
+import { buttonVariants } from "@/components/dashboard/ui/button"
 import Link from "next/link"
-import VersesTable from "@/components/tables/verses.table"
+import VersesTable from "@/components/dashboard/tables/verses.table"
 
 
 
 export default async function Page() {
-  const { data: verses } = await apiHandlers.verses.getAll({
+  const { data: verses } = await serverApiHandlers.verses.getAll({
     page: 1,
     perPage: -1,
     include: { chapter: true }
