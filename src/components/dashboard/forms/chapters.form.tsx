@@ -3,23 +3,23 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from "@/components/dashboard/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/dashboard/ui/card";
-import { Button, buttonVariants } from "@/components/dashboard/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/dashboard/ui/card";
+import { Button } from "@/components/dashboard/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
-import { Book, Chapter } from "@prisma/client";
 import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter } from "next/navigation";
 import { ComboBox, SelectEl } from "../ui/select";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { IBook, IChapter } from "@/shared/types/models.types";
 
 
 export const chapterFormSchema = z.object({
     info: z.string().nullable().default(""),
-    name: z.string({ required_error: "This field is required." }),
-    slug: z.string({ required_error: "This field is required." }),
-    book: z.number({ required_error: "This field is required." })
+    name: z.number({ required_error: "This field is required." }).min(0, { message: "This field is required." }),
+    slug: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    book: z.number({ required_error: "This field is required." }).min(0, { message: "This field is required." })
 })
 
 
@@ -27,11 +27,12 @@ export type ChapterFormSchema = z.infer<typeof chapterFormSchema>
 
 
 
-export default function ChaptersForm({ chapter, books }: { chapter?: Chapter, books: Book[] }) {
+export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
     const router = useRouter()
+    const [books, setBooks] = useState<IBook[] | null>(null)
     const form = useForm<ChapterFormSchema>({
         resolver: zodResolver(chapterFormSchema),
-        mode: "onBlur",
+        mode: "all",
         defaultValues: {
             name: chapter?.name,
             slug: chapter?.slug,
@@ -40,10 +41,20 @@ export default function ChaptersForm({ chapter, books }: { chapter?: Chapter, bo
     })
     const { formState } = form
 
+
+
+    useEffect(() => {
+        clientApiHandlers.books.get({ page: 1, perPage: -1 })
+            .then((res) => {
+                setBooks(res.data ?? [])
+            })
+    }, [])
+
+
     const onNameChange = () => {
         const nameVal = form.getValues("name")
         if (!nameVal) return;
-        const slug = nameVal.toLowerCase().replaceAll(" ", "_")
+        const slug = "chapter_" + nameVal.toString()
         form.setValue("slug", slug, { shouldValidate: true })
     }
 
@@ -51,7 +62,7 @@ export default function ChaptersForm({ chapter, books }: { chapter?: Chapter, bo
 
     const resetFormValues = () => {
         form.reset({
-            name: "",
+            name: undefined,
             slug: "",
             book: undefined
         })
@@ -103,12 +114,13 @@ export default function ChaptersForm({ chapter, books }: { chapter?: Chapter, bo
                             name="name"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-1">
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Name <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="text"
+                                        <Input type="number"
+                                            required
                                             {...field}
                                             onChange={(e) => {
-                                                field.onChange(e)
+                                                field.onChange(e.target.valueAsNumber)
                                                 onNameChange()
                                             }} />
                                     </FormControl>
@@ -124,9 +136,9 @@ export default function ChaptersForm({ chapter, books }: { chapter?: Chapter, bo
                             name="slug"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-1">
-                                    <FormLabel>Slug</FormLabel>
+                                    <FormLabel>Slug <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="text"  {...field} />
+                                        <Input type="text" required  {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -140,18 +152,17 @@ export default function ChaptersForm({ chapter, books }: { chapter?: Chapter, bo
                             name="book"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Book</FormLabel>
+                                    <FormLabel>Book <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <ComboBox
+                                        <SelectEl
                                             value={field.value?.toString()}
                                             placeholder="Select Book"
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    field.onChange(parseInt(opt.value))
-                                                }
+                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
                                             }}
                                             ref={field.ref}
-                                            options={books.map((book) => ({ label: book.name, value: book.id.toString(), rawValue: book }))}
+                                            loading={!books}
+                                            options={books?.map((book) => ({ label: book.name, value: book.id.toString(), rawValue: book }))}
                                         />
                                     </FormControl>
                                     {

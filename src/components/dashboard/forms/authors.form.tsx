@@ -7,18 +7,17 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/dashboard/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
-import { Author, Book } from "@prisma/client";
 import Spinner from "@/components/spinner";
 import { useEffect } from "react";
-import { useToast } from "@/components/dashboard/ui/use-toast";
 import { z } from 'zod'
 import { Textarea } from "../ui/textarea";
+import { IAuthor } from "@/shared/types/models.types";
 
 
 export const authorFormSchema = z.object({
     info: z.string().nullable().default(""),
-    name: z.string({ required_error: "This field is required." }),
-    description: z.string({ required_error: "This field is required." }),
+    name: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    description: z.string({ required_error: "This field is required." }).optional(),
 })
 
 
@@ -27,7 +26,7 @@ export type AuthorFormSchema = z.infer<typeof authorFormSchema>
 
 
 type Props = {
-    author?: Author | null;
+    author?: IAuthor | null;
     onReset?: () => void;
 }
 
@@ -35,7 +34,7 @@ type Props = {
 export default function AuthorsForm({ author, onReset }: Props) {
     const form = useForm<AuthorFormSchema>({
         resolver: zodResolver(authorFormSchema),
-        mode: "all"
+        mode: "all",
     })
     const { formState } = form
 
@@ -45,7 +44,7 @@ export default function AuthorsForm({ author, onReset }: Props) {
         if (!author) return;
         form.reset({
             name: author.name,
-            description: author.description
+            description: author.description ?? ""
         })
     }, [author, form])
 
@@ -106,9 +105,9 @@ export default function AuthorsForm({ author, onReset }: Props) {
                             name="name"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Name <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="text"{...field} />
+                                        <Input type="text" required {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -149,7 +148,7 @@ export default function AuthorsForm({ author, onReset }: Props) {
                     <CardFooter className="flex justify-between">
                         {
                             formState.isDirty || author ?
-                                <Button variant="outline" onClick={resetForm}>Cancel</Button>
+                                <Button variant="outline" type="button" onClick={resetForm}>Cancel</Button>
                                 :
                                 <span></span>
                         }

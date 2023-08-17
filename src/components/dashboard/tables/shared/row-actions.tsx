@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { TableActionProps } from "../shared/types"
 import { DotsHorizontalIcon } from "@radix-ui/react-icons"
 import { Row } from "@tanstack/react-table"
+import { useSession } from "next-auth/react";
 
 
 
@@ -20,7 +21,9 @@ export function DataTableRowActions<TData>({
     viewAction,
     deleteAction
 }: DataTableRowActionsProps<TData>) {
+    const { data: session } = useSession()
     const [delAlertOpen, setDelAlertOpen] = useState(false);
+    const deleteEnabled = session?.user && session.user.role === "ADMIN" && deleteAction
     return (
         <div>
             <DropdownMenu>
@@ -46,28 +49,31 @@ export function DataTableRowActions<TData>({
                         </DropdownMenuItem>
                     }
                     {
-                        (editAction || viewAction) && deleteAction &&
+                        ((editAction || viewAction) && deleteEnabled) &&
                         <DropdownMenuSeparator />
                     }
                     {
-                        deleteAction &&
+                        (deleteEnabled) &&
                         <DropdownMenuItem onClick={() => setDelAlertOpen(true)}>
                             Delete
                         </DropdownMenuItem>
                     }
                 </DropdownMenuContent>
             </DropdownMenu>
-            <DeleteRowAction
-                open={delAlertOpen}
-                setOpen={setDelAlertOpen}
-                onDelete={async () => await deleteAction?.(row.original)} />
+            {
+                deleteEnabled &&
+                <DeleteRowAction
+                    open={delAlertOpen}
+                    setOpen={setDelAlertOpen}
+                    onDelete={async () => await deleteAction?.(row.original)} />
+            }
         </div>
     )
 }
 
 
 
-export default function DeleteRowAction(
+export function DeleteRowAction(
     { open, setOpen, onDelete }: {
         open: boolean;
         setOpen: (value: boolean) => void;
@@ -89,6 +95,50 @@ export default function DeleteRowAction(
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
                         This action will delete the current row.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <Button variant={"destructive"} onClick={handleDelete}>
+                        {
+                            processing ?
+                                <Spinner className="border-white" />
+                                :
+                                <span>Delete</span>
+                        }
+                    </Button>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}
+
+
+
+
+
+export function DeleteBatchRowsAction({ onDelete }: { onDelete?: () => Promise<void> }) {
+    const [processing, setProcessing] = useState(false);
+    const [open, setOpen] = useState(false)
+
+    const handleDelete = async () => {
+        setProcessing(true);
+        await onDelete?.()
+        setProcessing(false);
+        setOpen(false)
+    }
+    return (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger>
+                <Button variant="destructive">
+                    Delete
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action will delete all selected rows.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

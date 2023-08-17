@@ -1,14 +1,15 @@
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Author, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
+import { IAuthor } from "@/shared/types/models.types";
 
 
 
 type PaginationProps = BasePaginationProps<Prisma.AuthorInclude>
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<Author[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<IAuthor[]>> {
     try {
         const authors = await db.author.findMany({
             where: {
@@ -22,9 +23,10 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
             include: (
-                include ? include : {
-                    commentaries: false
-                }
+                include ?
+                    include
+                    // { ...(include.commentaries && { commentaries: { where: { archived: false } } }) }
+                    : { commentaries: false }
             )
         })
         const authorsCount = await db.author.count({ where: { archived: false } })
@@ -50,7 +52,7 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
 
 
 
-export async function getById(id: number, include?: Prisma.AuthorInclude): Promise<ApiResponse<Author>> {
+export async function getById(id: number, include?: Prisma.AuthorInclude): Promise<ApiResponse<IAuthor>> {
     try {
         const author = await db.author.findFirst({
             where: {
@@ -61,7 +63,12 @@ export async function getById(id: number, include?: Prisma.AuthorInclude): Promi
                 ],
                 archived: false
             },
-            include: (include ? include : { commentaries: false })
+            include: (
+                include ?
+                    include
+                    // { ...(include.commentaries && { commentaries: { where: { archived: false } } }) }
+                    : { commentaries: false }
+            )
         })
         if (!author) {
             return {
@@ -116,7 +123,7 @@ type CreateAuthorReq = {
     description: string;
 }
 
-export async function create(req: Request): Promise<ApiResponse<Author>> {
+export async function create(req: Request): Promise<ApiResponse<IAuthor>> {
     try {
         const authorReq = await req.json() as CreateAuthorReq
         const verse = await db.author.create({
@@ -149,18 +156,19 @@ export async function create(req: Request): Promise<ApiResponse<Author>> {
 
 
 type UpdateAuthorReq = {
-    name?: string | null;
-    description?: string | null;
+    name?: string;
+    description?: string;
 }
 
 
 export async function update(req: Request, id: number): Promise<ApiResponse> {
     try {
         const authorReq = await req.json() as UpdateAuthorReq
+        console.log(authorReq)
         const author = await db.author.update({
             data: {
                 ...(authorReq.name && { name: authorReq.name }),
-                ...(authorReq.description && { description: authorReq.description })
+                description: authorReq.description
             },
             where: {
                 id: id

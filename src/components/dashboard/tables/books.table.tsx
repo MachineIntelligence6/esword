@@ -5,12 +5,12 @@ import { DataTableColumnHeader } from "./shared/table"
 import { DataTableRowActions } from "./shared/row-actions"
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
-import { Book } from "@prisma/client";
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
-import defaults from "@/shared/constants/defaults"
 import clientApiHandlers from "@/client/handlers"
+import { IBook } from "@/shared/types/models.types"
+import Link from "next/link"
 
 
 type Props = TableActionProps & {
@@ -19,7 +19,7 @@ type Props = TableActionProps & {
 }
 
 export default function BooksTable({ showPagination, showToolbar, ...props }: Props) {
-    const [tableData, setTableData] = useState<PaginatedApiResponse<Book[]> | null>(null);
+    const [tableData, setTableData] = useState<PaginatedApiResponse<IBook[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
@@ -60,8 +60,8 @@ export default function BooksTable({ showPagination, showToolbar, ...props }: Pr
 
 
 
-function columns(rowActions: TableActionProps): ColumnDef<Book, any>[] {
-    const tableCols: ColumnDef<Book, any>[] = [
+function columns(rowActions: TableActionProps): ColumnDef<IBook, any>[] {
+    const tableCols: ColumnDef<IBook, any>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -83,15 +83,15 @@ function columns(rowActions: TableActionProps): ColumnDef<Book, any>[] {
             enableSorting: false,
             enableHiding: false,
         },
-        {
-            id: "index",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="#" />
-            ),
-            cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-            enableSorting: false,
-            enableHiding: false,
-        },
+        // {
+        //     id: "index",
+        //     header: ({ column }) => (
+        //         <DataTableColumnHeader column={column} title="#" />
+        //     ),
+        //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
+        //     enableSorting: false,
+        //     enableHiding: false,
+        // },
         {
             accessorKey: "name",
             header: ({ column }) => (
@@ -115,11 +115,10 @@ function columns(rowActions: TableActionProps): ColumnDef<Book, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/books/${row.original.id}`}
+                        <Link href={`/dashboard/books/${row.original.id}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
                             {row.getValue("slug")}
-                        </a>
+                        </Link>
                     </div>
                 )
             }

@@ -2,28 +2,27 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/dashboard/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, InputEl } from "@/components/dashboard/ui/input";
+import { InputEl } from "@/components/dashboard/ui/input";
 import { Card, CardContent, CardFooter } from "@/components/dashboard/ui/card";
-import { Button, buttonVariants } from "@/components/dashboard/ui/button";
+import { Button } from "@/components/dashboard/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
-import { Book, Chapter, Verse, VerseType } from "@prisma/client";
 import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter } from "next/navigation";
 import { ComboBox, SelectEl } from "../ui/select";
-import Link from "next/link";
 import { Textarea } from "../ui/textarea";
+import { useEffect, useState } from "react";
+import { IBook, IVerse } from "@/shared/types/models.types";
 
 
 export const verseFormSchema = z.object({
     info: z.string().nullable().default(""),
-    name: z.string({ required_error: "This field is required." }),
-    book: z.any({ required_error: "This field is required." }),
-    chapter: z.any({ required_error: "This field is required." }),
-    number: z.number({ required_error: "This field is required." }),
-    text: z.string({ required_error: "This field is required." }),
-    type: z.string({ required_error: "This field is required" })
+    book: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    chapter: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    topic: z.number({ required_error: "This field is required" }).min(1, { message: "This field is required." }),
+    number: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    text: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
 })
 
 
@@ -31,28 +30,44 @@ export type VerseFormSchema = z.infer<typeof verseFormSchema>
 
 
 
-export default function VersesForm({ books, verse }: { verse?: Verse, books: Book[] }) {
+export default function VersesForm({ verse }: { verse?: IVerse }) {
+    const [books, setBooks] = useState<IBook[] | null>(null)
     const router = useRouter()
     const form = useForm<VerseFormSchema>({
         resolver: zodResolver(verseFormSchema),
-        mode: "onBlur",
+        mode: "all",
         defaultValues: {
-            name: verse?.name,
-            book: books.find((b) => b.id === (verse as any)?.chapter?.bookId),
-            chapter: (verse as any)?.chapter,
+            book: verse?.topic?.chapter?.bookId,
+            chapter: verse?.topic?.chapterId,
             text: verse?.text,
-            type: verse?.type,
             number: verse?.number,
+            topic: verse?.topicId
         }
     })
     const { formState } = form
 
 
+
+    useEffect(() => {
+        clientApiHandlers.books.get({
+            page: 1, perPage: -1, include: {
+                chapters: {
+                    where: { archived: false },
+                    include: { topics: { where: { archived: false } } }
+                }
+            }
+        })
+            .then((res) => {
+                setBooks(res.data ?? [])
+            })
+    }, [])
+
+
+
     const resetFormValues = () => {
         form.reset({
-            name: "",
             text: "",
-            type: undefined,
+            topic: undefined,
             chapter: undefined,
             book: undefined,
             number: undefined
@@ -94,6 +109,30 @@ export default function VersesForm({ books, verse }: { verse?: Verse, books: Boo
     }
 
 
+    const getChaptersList = () => {
+        const bookId = form.getValues("book")
+        if (!bookId) return []
+        const book = books?.find((b) => b.id === bookId);
+        return book?.chapters ?? []
+    }
+    const getBook = () => {
+        const bookId = form.getValues("book")
+        if (!bookId) return null
+        return books?.find((b) => b.id === bookId);
+    }
+    const getChapter = () => {
+        const chapterId = form.getValues("chapter")
+        if (!chapterId) return null
+        const chapters = getChaptersList();
+        return chapters?.find((ch) => ch.id === chapterId)
+    }
+
+    const getTopicsList = () => {
+        const chapter = getChapter();
+        return chapter?.topics
+    }
+
+
     return (
         <Card className="w-full rounded-md">
             <Form {...form}>
@@ -105,23 +144,22 @@ export default function VersesForm({ books, verse }: { verse?: Verse, books: Boo
                             name="book"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Book</FormLabel>
+                                    <FormLabel>Book <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <ComboBox
+                                        <SelectEl
                                             placeholder="Select Book"
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    field.onChange(opt.rawValue)
-                                                    form.resetField("chapter", { defaultValue: undefined })
-                                                }
+                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
+                                                form.resetField("chapter", { defaultValue: undefined })
                                             }}
                                             ref={field.ref}
-                                            options={books.map((book) => ({
+                                            loading={!books}
+                                            options={books?.map((book) => ({
                                                 label: book.name,
                                                 value: book.id.toString(),
                                                 rawValue: book
                                             }))}
-                                            value={field.value?.id?.toString()}
+                                            value={field.value?.toString()}
                                         />
                                     </FormControl>
                                     {
@@ -136,23 +174,21 @@ export default function VersesForm({ books, verse }: { verse?: Verse, books: Boo
                             name="chapter"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Chapter</FormLabel>
+                                    <FormLabel>Chapter <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <ComboBox
+                                        <SelectEl
                                             placeholder="Select Chapter"
                                             disabled={!form.getValues("book")}
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    field.onChange(opt.rawValue)
-                                                }
+                                                field.onChange(opt && Number(opt.value))
                                             }}
                                             ref={field.ref}
-                                            options={form.getValues("book")?.chapters?.map((chapter: Chapter) => ({
-                                                label: chapter.name,
+                                            options={getChaptersList()?.map((chapter) => ({
+                                                label: String(chapter.name),
                                                 value: chapter.id.toString(),
                                                 rawValue: chapter
                                             }))}
-                                            value={field.value?.id?.toString()}
+                                            value={field.value?.toString()}
                                         />
                                     </FormControl>
                                     {
@@ -164,12 +200,23 @@ export default function VersesForm({ books, verse }: { verse?: Verse, books: Boo
                         />
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="topic"
                             render={({ field, fieldState }) => (
-                                <FormItem className="col-span-1">
-                                    <FormLabel>Name</FormLabel>
+                                <FormItem>
+                                    <FormLabel>Topic <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="text" {...field} />
+                                        <SelectEl
+                                            placeholder="Select Topic"
+                                            onChange={(opt) => {
+                                                field.onChange(Number(opt?.value))
+                                            }}
+                                            options={getTopicsList()?.map((topic) => ({
+                                                label: topic.name,
+                                                value: topic.id.toString(),
+                                                rawValue: topic
+                                            }))}
+                                            value={String(field.value)}
+                                        />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -183,47 +230,18 @@ export default function VersesForm({ books, verse }: { verse?: Verse, books: Boo
                             name="number"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-1">
-                                    <FormLabel>Number</FormLabel>
+                                    <FormLabel>Number <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <InputEl
                                             leading={
                                                 <span>
-                                                    {(form.getValues("book") as Book)?.abbreviation} {(form.getValues("chapter") as Chapter)?.number}
+                                                    {getBook()?.abbreviation} {getChapter()?.name} :
                                                 </span>
                                             }
                                             type="number"
+                                            required
                                             value={field.value}
                                             onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                    </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="type"
-                            render={({ field, fieldState }) => (
-                                <FormItem>
-                                    <FormLabel>Type</FormLabel>
-                                    <FormControl>
-                                        <SelectEl
-                                            placeholder="Select Type"
-                                            onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    console.log(opt.value)
-                                                    field.onChange(opt.value)
-                                                }
-                                            }}
-                                            options={[VerseType.CONTENT, VerseType.HEADING].map((type) => ({
-                                                label: type,
-                                                value: type,
-                                                rawValue: type
-                                            }))}
-                                            value={field.value}
-                                        />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -237,9 +255,9 @@ export default function VersesForm({ books, verse }: { verse?: Verse, books: Boo
                             name="text"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-full">
-                                    <FormLabel>Text</FormLabel>
+                                    <FormLabel>Text <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Textarea rows={8} {...field} />
+                                        <Textarea rows={8} required {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&

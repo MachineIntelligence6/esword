@@ -44,6 +44,7 @@ import {
 } from "@/components/dashboard/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import Spinner from "@/components/spinner"
+import { DeleteBatchRowsAction } from "./row-actions"
 
 
 
@@ -95,7 +96,7 @@ export function BaseTable<TData, TValue>({
     manualPagination: true,
   })
 
-  
+
   return (
     <div className="space-y-4 w-full">
       {
@@ -252,6 +253,7 @@ export function DataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -274,10 +276,17 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className="flex items-center gap-3">
+        {/* {
+          table.getSelectedRowModel().rows.length > 0 &&
+          <DeleteBatchRowsAction onDelete={} />
+        } */}
+        <DataTableViewOptions table={table} />
+      </div>
     </div>
   )
 }
+
 
 
 

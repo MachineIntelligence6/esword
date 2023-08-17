@@ -1,5 +1,4 @@
 'use client'
-import { User } from "@prisma/client";
 import { useState } from "react";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/dashboard/ui/use-toast";
@@ -7,15 +6,16 @@ import definedMessages from "@/shared/constants/messages";
 import Link from "next/link";
 import UsersTable from "@/components/dashboard/tables/users.table";
 import UsersForm from "@/components/dashboard/forms/users.form";
+import { IUser } from "@/shared/types/models.types";
 
 
 
 
 export default function Page() {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const { toast } = useToast();
 
-  const handleDelete = async (user: User) => {
+  const handleDelete = async (user: IUser) => {
     const res = await clientApiHandlers.users.archive(user.id)
     if (res.succeed) {
       window.location.reload();
@@ -39,10 +39,10 @@ export default function Page() {
         <div className="col-span-8 w-full">
           {
             <UsersTable
-              viewAction={(user: User) => (
+              viewAction={(user: IUser) => (
                 <Link href={`/dashboard/users/${user.id}`}>View</Link>
               )}
-              editAction={(user: User) => (
+              editAction={(user: IUser) => (
                 <span onClick={() => setSelectedUser(user)}>Edit</span>
               )}
               deleteAction={handleDelete} />

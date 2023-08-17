@@ -6,12 +6,37 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/dashboard/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
+import db from "@/server/db";
 
 
 export default async function Page({ params }: { params: { id: string } }) {
-    const { data: author } = await serverApiHandlers.authors.getById(parseInt(params.id), { commentaries: { take: 10, include: { author: true, verse: true } } })
+    const { data: author } = await serverApiHandlers.authors.getById(parseInt(params.id))
     if (!author) return notFound()
-    const commentaries = (author as any).commentaries
+
+    const next = await db.author.findFirst({
+        take: 1,
+        where: {
+            id: {
+                gt: parseInt(params.id),
+            },
+            archived: false
+        },
+        orderBy: {
+            id: "asc",
+        },
+    });
+    const previous = await db.author.findFirst({
+        take: 1,
+        where: {
+            id: {
+                lt: parseInt(params.id),
+            },
+            archived: false
+        },
+        orderBy: {
+            id: "asc",
+        },
+    });
 
     return (
         <div className="space-y-8">
@@ -27,18 +52,20 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </div>
                 <div className="flex items-center gap-3">
                     <Link
-                        href={parseInt(params.id) > 1 ? `/dashboard/authors/${parseInt(params.id) - 1}` : '#'}
+                        href={previous ? `/dashboard/authors/${previous.id}` : '#'}
                         className={cn(
                             buttonVariants({ variant: "ghost" }),
-                            "aspect-square p-1 w-auto h-auto rounded-full"
+                            "aspect-square p-1 w-auto h-auto rounded-full",
+                            !previous && "opacity-60 pointer-events-none"
                         )}>
                         <ChevronLeftIcon className="w-6 h-6" />
                     </Link>
                     <Link
-                        href={`/dashboard/authors/${parseInt(params.id) + 1}`}
+                        href={next ? `/dashboard/authors/${next.id}` : '#'}
                         className={cn(
                             buttonVariants({ variant: "ghost" }),
-                            "aspect-square p-1 w-auto h-auto rounded-full"
+                            "aspect-square p-1 w-auto h-auto rounded-full",
+                            !next && "opacity-60 pointer-events-none"
                         )}>
                         <ChevronRightIcon className="w-6 h-6" />
                     </Link>
@@ -46,7 +73,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             </div>
             <div className="pt-5">
                 <h3 className="font-semibold text-2xl mb-5">Commentaries</h3>
-                {commentaries && <CommentariesTable commentaries={commentaries} />}
+                <CommentariesTable author={author} />
             </div>
         </div>
     )

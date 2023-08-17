@@ -68,9 +68,12 @@ export function DataTablePagination<TData>({ table, totalPages, onPageChange, cu
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          Page {currentPage} of{" "} {totalPages}
-        </div>
+        {
+          totalPages > 0 &&
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            Page {currentPage} of{" "} {totalPages}
+          </div>
+        }
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"

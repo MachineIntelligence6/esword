@@ -8,21 +8,21 @@ import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/dashboard/ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
-import { Book, Chapter } from "@prisma/client"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
+import { IBook, IChapter } from "@/shared/types/models.types"
 
 
 
 type Props = {
-    book?: Book
+    book?: IBook
 }
 
 export default function ChaptersTable({ book }: Props) {
     const { toast } = useToast()
-    const [tableData, setTableData] = useState<PaginatedApiResponse<Chapter[]> | null>(null);
+    const [tableData, setTableData] = useState<PaginatedApiResponse<IChapter[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
@@ -48,12 +48,15 @@ export default function ChaptersTable({ book }: Props) {
     }
 
 
-    const handleDelete = async (chapter: Chapter) => {
+    const handleDelete = async (chapter: IChapter) => {
         const res = await clientApiHandlers.chapters.archive(chapter.id)
         if (res.succeed) {
+            window.location.reload()
+        } else if (res.code === "DATA_LINKED") {
             toast({
-                title: "Chapter Deleted",
-                description: definedMessages.CHAPTER_DELETED
+                title: "Chapter can not be deleted.",
+                variant: "destructive",
+                description: "All topics linked with this chapter must be unlinked in order to delete this chapter."
             })
         } else {
             toast({
@@ -96,7 +99,7 @@ export default function ChaptersTable({ book }: Props) {
 
 
 
-function columns(rowActions: TableActionProps): ColumnDef<Chapter, any>[] {
+function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
     return [
         {
             id: "select",
@@ -119,15 +122,15 @@ function columns(rowActions: TableActionProps): ColumnDef<Chapter, any>[] {
             enableSorting: false,
             enableHiding: false,
         },
-        {
-            id: "index",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="#" />
-            ),
-            cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-            enableSorting: false,
-            enableHiding: false,
-        },
+        // {
+        //     id: "index",
+        //     header: ({ column }) => (
+        //         <DataTableColumnHeader column={column} title="#" />
+        //     ),
+        //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
+        //     enableSorting: false,
+        //     enableHiding: false,
+        // },
         {
             accessorKey: "name",
             header: ({ column }) => (
@@ -151,11 +154,10 @@ function columns(rowActions: TableActionProps): ColumnDef<Chapter, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/chapters/${row.original.id}`}
+                        <Link href={`/dashboard/chapters/${row.original.id}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
                             {row.getValue("slug")}
-                        </a>
+                        </Link>
                     </div>
                 )
             }
@@ -168,11 +170,10 @@ function columns(rowActions: TableActionProps): ColumnDef<Chapter, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/books/${row.original.bookId}`}
+                        <Link href={`/dashboard/books/${row.original.bookId}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {(row.original as any).book?.name}
-                        </a>
+                            {row.original.book?.name}
+                        </Link>
                     </div>
                 )
             }

@@ -7,18 +7,17 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/dashboard/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
-import { Book } from "@prisma/client";
 import Spinner from "@/components/spinner";
 import { useEffect } from "react";
-import { useToast } from "@/components/dashboard/ui/use-toast";
 import { z } from 'zod'
+import { IBook } from "@/shared/types/models.types";
 
 
 export const bookFormSchema = z.object({
     info: z.string().nullable().default(""),
-    name: z.string({ required_error: "This field is required." }),
-    slug: z.string({ required_error: "This field is required." }),
-    abbreviation: z.string({ required_error: "This field is required." }),
+    name: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    slug: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    abbreviation: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
 })
 
 
@@ -28,7 +27,7 @@ export type BookFormSchema = z.infer<typeof bookFormSchema>
 
 
 type BookFormProps = {
-    book?: Book | null;
+    book?: IBook | null;
     onReset?: () => void;
 }
 
@@ -38,7 +37,6 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
         resolver: zodResolver(bookFormSchema),
         mode: "all"
     })
-    const { toast } = useToast()
     const { formState } = form
 
 
@@ -78,14 +76,15 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
         const res = await clientApiHandlers.books.create(data)
         if (res.succeed && res.data) {
             return window.location.reload()
-            // return toast({
-            //     title: "New Book Added",
-            //     description: definedMessages.BOOK_ADDED
-            // })
         }
         if (res.code === "SLUG_MUST_BE_UNIQUE") {
             form.setError("slug", {
                 message: definedMessages.SLUG_MUST_BE_UNIQUE
+            })
+        }
+        if (res.code === "BOOK_NAME_MUST_BE_UNIQUE") {
+            form.setError("name", {
+                message: definedMessages.BOOK_NAME_MUST_BE_UNIQUE
             })
         }
         if (res.code === "UNKOWN_ERROR") {
@@ -101,14 +100,15 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
         const res = await clientApiHandlers.books.update(book.id, data)
         if (res.succeed && res.data) {
             return window.location.reload()
-            // return toast({
-            //     title: "Book Updated",
-            //     description: definedMessages.BOOK_UPDATED
-            // })
         }
         if (res.code === "SLUG_MUST_BE_UNIQUE") {
             form.setError("slug", {
                 message: definedMessages.SLUG_MUST_BE_UNIQUE
+            })
+        }
+        if (res.code === "BOOK_NAME_MUST_BE_UNIQUE") {
+            form.setError("name", {
+                message: definedMessages.BOOK_NAME_MUST_BE_UNIQUE
             })
         }
         if (res.code === "UNKOWN_ERROR") {
@@ -134,10 +134,10 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                             name="name"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Book Name</FormLabel>
+                                    <FormLabel>Book Name <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <Input type="text"
-                                            autoComplete="book name"
+                                            required
                                             {...field}
                                             onChange={(e) => {
                                                 field.onChange(e)
@@ -156,9 +156,9 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                             name="slug"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Slug</FormLabel>
+                                    <FormLabel>Slug <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="text" autoComplete="book slug" {...field} />
+                                        <Input type="text" required {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -172,9 +172,9 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                             name="abbreviation"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Abbreviation</FormLabel>
+                                    <FormLabel>Abbreviation <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="text" autoComplete="abbreviation" {...field} />
+                                        <Input type="text" required {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -199,7 +199,7 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                     <CardFooter className="flex justify-between">
                         {
                             formState.isDirty || book ?
-                                <Button variant="outline" onClick={resetForm}>Cancel</Button>
+                                <Button variant="outline" type="button" onClick={resetForm}>Cancel</Button>
                                 :
                                 <span></span>
                         }

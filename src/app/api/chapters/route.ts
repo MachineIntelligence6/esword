@@ -16,8 +16,6 @@ export const GET = async (req: Request) => {
     } catch (error) {
     }
 
-    console.log(includeStr)
-
     const res = await serverApiHandlers.chapters.getAll({ page, perPage, book, include: include })
     return NextResponse.json(res)
 }

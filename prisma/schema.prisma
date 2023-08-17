@@ -30,9 +30,9 @@ enum UserRole {
 
 model Book {
   id           Int       @id @default(autoincrement())
-  name         String    @db.MediumText
+  name         String    @unique
   slug         String    @unique
-  abbreviation String
+  abbreviation String    @db.MediumText
   chapters     Chapter[]
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @default(now()) @updatedAt() @map("updated_at")
@@ -43,12 +43,11 @@ model Book {
 
 model Chapter {
   id        Int      @id @default(autoincrement())
-  name      String   @db.MediumText
-  number    Int
+  name      Int
   slug      String   @unique
   bookId    Int      @map("book_id")
   book      Book     @relation(fields: [bookId], references: [id])
-  verses    Verse[]
+  topics    Topic[]
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
   archived  Boolean  @default(false)
@@ -56,15 +55,25 @@ model Chapter {
   @@map("chapters")
 }
 
+model Topic {
+  id        Int     @id @default(autoincrement())
+  name      String
+  number    Int
+  chapterId Int     @map("chapter_id")
+  chapter   Chapter @relation(fields: [chapterId], references: [id])
+  verses    Verse[]
+  archived  Boolean @default(false)
+
+  @@map("topics")
+}
+
 model Verse {
   id           Int          @id @default(autoincrement())
-  name         String       @db.MediumText
   number       Int
-  text         String
+  text         String       @db.LongText
   audio        String?
-  type         VerseType    @default(CONTENT)
-  chapterId    Int          @map("chapter_id")
-  chapter      Chapter      @relation(fields: [chapterId], references: [id])
+  topicId      Int          @map("topic_id")
+  topic        Topic        @relation(fields: [topicId], references: [id])
   commentaries Commentary[]
   notes        Note[]
   createdAt    DateTime     @default(now()) @map("created_at")
@@ -74,14 +83,9 @@ model Verse {
   @@map("verses")
 }
 
-enum VerseType {
-  HEADING
-  CONTENT
-}
-
 model Note {
   id        Int      @id @default(autoincrement())
-  text      String
+  text      String   @db.LongText
   verseId   Int      @map("verse_id")
   verse     Verse    @relation(fields: [verseId], references: [id])
   userId    Int      @map("user_id")
@@ -95,8 +99,8 @@ model Note {
 
 model Commentary {
   id        Int      @id @default(autoincrement())
-  name      String
-  text      String
+  name      String   @db.MediumText
+  text      String   @db.LongText
   verseId   Int      @map("verse_id")
   verse     Verse    @relation(fields: [verseId], references: [id])
   authorId  Int      @map("author_id")
@@ -110,11 +114,13 @@ model Commentary {
 
 model Author {
   id           Int          @id @default(autoincrement())
-  name         String
-  description  String
+  name         String       @db.MediumText
+  description  String?      @db.LongText
   image        String?      @db.LongText
   commentaries Commentary[]
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @default(now()) @updatedAt() @map("updated_at")
   archived     Boolean      @default(false)
+
+  @@map("authors")
 }

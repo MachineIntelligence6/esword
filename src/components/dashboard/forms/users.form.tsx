@@ -7,17 +7,21 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/dashboard/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
-import { User, UserRole } from "@prisma/client";
 import Spinner from "@/components/spinner";
 import { useEffect } from "react";
 import { z } from 'zod'
 import { SelectEl } from "../ui/select";
+import { IUser } from "@/shared/types/models.types";
+import { UserRole } from "@prisma/client";
 
 
 export const userFormSchema = z.object({
     info: z.string().nullable().default(""),
-    name: z.string({ required_error: "This field is required." }),
-    email: z.string({ required_error: "This field is required." }).email({ message: "Please enter a valid email." }),
+    name: z.string({ required_error: "This field is required." })
+        .min(1, { message: "This field is required." }),
+    email: z.string({ required_error: "This field is required." })
+        .min(1, { message: "This field is required." })
+        .email({ message: "Please enter a valid email." }),
     password: z.string({ required_error: "This field is required." }).optional(),
     role: z.string({ required_error: "This field is required." }),
 })
@@ -28,7 +32,7 @@ export type UserFormSchema = z.infer<typeof userFormSchema>
 
 
 type Props = {
-    user?: User | null;
+    user?: IUser | null;
     onReset?: () => void;
 }
 
@@ -37,9 +41,6 @@ export default function UsersForm({ user, onReset }: Props) {
     const form = useForm<UserFormSchema>({
         resolver: zodResolver(userFormSchema),
         mode: "all",
-        defaultValues: {
-
-        }
     })
     const { formState } = form
 
@@ -124,7 +125,7 @@ export default function UsersForm({ user, onReset }: Props) {
                             name="name"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Name <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <Input type="text" {...field} />
                                     </FormControl>
@@ -140,15 +141,12 @@ export default function UsersForm({ user, onReset }: Props) {
                             name="role"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Role</FormLabel>
+                                    <FormLabel>Role <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <SelectEl
                                             placeholder="Select Role"
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    console.log(opt.value)
-                                                    field.onChange(opt.value)
-                                                }
+                                                field.onChange(opt?.value)
                                             }}
                                             options={[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER].map((type) => ({
                                                 label: type,
@@ -170,9 +168,9 @@ export default function UsersForm({ user, onReset }: Props) {
                             name="email"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="email" {...field} />
+                                        <Input type="email" required {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -186,7 +184,7 @@ export default function UsersForm({ user, onReset }: Props) {
                             name="password"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>Password {!user && <span className="text-red-500">*</span>}</FormLabel>
                                     <FormControl>
                                         <Input type="password" required={!user} {...field} />
                                     </FormControl>

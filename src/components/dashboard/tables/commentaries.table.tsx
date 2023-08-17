@@ -8,22 +8,22 @@ import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/dashboard/ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
-import { Author, Commentary, Verse } from "@prisma/client"
 import Link from "next/link"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { useEffect, useState } from "react"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
+import { IAuthor, ICommentary, IVerse } from "@/shared/types/models.types"
 
 
 
 type Props = {
-    author?: Author;
-    verse?: Verse
+    author?: IAuthor;
+    verse?: IVerse
 }
 
 export default function CommentariesTable({ author, verse }: Props) {
     const { toast } = useToast()
-    const [tableData, setTableData] = useState<PaginatedApiResponse<Commentary[]> | null>(null);
+    const [tableData, setTableData] = useState<PaginatedApiResponse<ICommentary[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
@@ -31,7 +31,7 @@ export default function CommentariesTable({ author, verse }: Props) {
         setTableData(null)
         const res = await clientApiHandlers.commentaries.get({
             page: currentPage, perPage: perPage,
-            include: { author: true, verse: true },
+            include: { author: true, verse: { include: { topic: { include: { chapter: { include: { book: true } } } } } } },
             author: author?.id,
             verse: verse?.id
         })
@@ -54,13 +54,10 @@ export default function CommentariesTable({ author, verse }: Props) {
     }
 
 
-    const handleDelete = async (commentary: Commentary) => {
+    const handleDelete = async (commentary: ICommentary) => {
         const res = await clientApiHandlers.commentaries.archive(commentary.id)
         if (res.succeed) {
-            toast({
-                title: "Commentary Deleted",
-                description: definedMessages.VERSE_DELETED
-            })
+            window.location.reload();
         } else {
             toast({
                 title: "Error",
@@ -71,10 +68,10 @@ export default function CommentariesTable({ author, verse }: Props) {
     }
 
     const tableColumns = columns({
-        viewAction: (commentary: Commentary) => (
+        viewAction: (commentary: ICommentary) => (
             <Link href={`/dashboard/commentaries/${commentary.id}`}>View</Link>
         ),
-        editAction: (commentary: Commentary) => (
+        editAction: (commentary: ICommentary) => (
             <Link href={`/dashboard/commentaries/${commentary.id}/edit`}>Edit</Link>
         ),
         deleteAction: handleDelete
@@ -98,7 +95,7 @@ export default function CommentariesTable({ author, verse }: Props) {
 
 
 
-function columns(rowActions: TableActionProps): ColumnDef<Commentary, any>[] {
+function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
     return [
         {
             id: "select",
@@ -121,15 +118,15 @@ function columns(rowActions: TableActionProps): ColumnDef<Commentary, any>[] {
             enableSorting: false,
             enableHiding: false,
         },
-        {
-            id: "index",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="#" />
-            ),
-            cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-            enableSorting: false,
-            enableHiding: false,
-        },
+        // {
+        //     id: "index",
+        //     header: ({ column }) => (
+        //         <DataTableColumnHeader column={column} title="#" />
+        //     ),
+        //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
+        //     enableSorting: false,
+        //     enableHiding: false,
+        // },
         {
             accessorKey: "name",
             header: ({ column }) => (
@@ -153,7 +150,7 @@ function columns(rowActions: TableActionProps): ColumnDef<Commentary, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <span className="max-w-[250px] font-normal line-clamp-2">
+                        <span className="max-w-[500px] font-normal line-clamp-2">
                             {row.getValue("text")}
                         </span>
                     </div>
@@ -168,11 +165,10 @@ function columns(rowActions: TableActionProps): ColumnDef<Commentary, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/authors/${(row.original as any).author?.id}`}
+                        <Link href={`/dashboard/authors/${row.original.author?.id}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {(row.original as any).author?.name}
-                        </a>
+                            {row.original.author?.name}
+                        </Link>
                     </div>
                 )
             }
@@ -183,13 +179,13 @@ function columns(rowActions: TableActionProps): ColumnDef<Commentary, any>[] {
                 <DataTableColumnHeader column={column} title="Verse" />
             ),
             cell: ({ row }) => {
+                const chapter = row.original.verse?.topic?.chapter
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/verses/${(row.original as any).verse?.id}`}
+                        <Link href={`/dashboard/verses/${row.original.verseId}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {(row.original as any).verse?.name}
-                        </a>
+                            {`${chapter?.book?.name}/${chapter?.name}/${row.original.verse?.number}`}
+                        </Link>
                     </div>
                 )
             }

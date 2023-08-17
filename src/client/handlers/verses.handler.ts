@@ -1,19 +1,23 @@
 import axios from "axios";
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Prisma, Verse } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { VerseFormSchema } from "@/components/dashboard/forms/verses.form";
+import { IVerse } from "@/shared/types/models.types";
 
 type PaginationProps = BasePaginationProps<Prisma.VerseInclude> & {
-    chapter?: number;
+    topic?: number;
 }
 
 
+
+
+
 export async function get(
-    { page = 1, perPage, chapter = -1, include }: PaginationProps
-): Promise<PaginatedApiResponse<Verse[]>> {
+    { page = 1, perPage, topic = -1, include }: PaginationProps
+): Promise<PaginatedApiResponse<IVerse[]>> {
     try {
-        const res = await axios.get<PaginatedApiResponse<Verse[]>>(
-            `/api/verses?page=${page}&perPage=${perPage}&chapter=${chapter}&include=${JSON.stringify(include)}`
+        const res = await axios.get<PaginatedApiResponse<IVerse[]>>(
+            `/api/verses?page=${page}&perPage=${perPage}&topic=${topic}&include=${JSON.stringify(include)}`
         )
         return res.data
     } catch (error) {
@@ -27,9 +31,9 @@ export async function get(
 
 
 
-export async function create(data: VerseFormSchema): Promise<ApiResponse<Verse>> {
+export async function create(data: VerseFormSchema): Promise<ApiResponse<IVerse>> {
     try {
-        const res = await axios.post<ApiResponse<Verse>>("/api/verses", data)
+        const res = await axios.post<ApiResponse<IVerse>>("/api/verses", data)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {
@@ -40,9 +44,12 @@ export async function create(data: VerseFormSchema): Promise<ApiResponse<Verse>>
     }
 }
 
-export async function update(id: number, update: VerseFormSchema): Promise<ApiResponse<Verse>> {
+
+
+
+export async function update(id: number, update: VerseFormSchema): Promise<ApiResponse<IVerse>> {
     try {
-        const res = await axios.put<ApiResponse<Verse>>(`/api/verses/${id}`, update)
+        const res = await axios.put<ApiResponse<IVerse>>(`/api/verses/${id}`, update)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {
@@ -67,5 +74,26 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     }
 }
 
+
+
+
+
+
+
+
+export async function importFromCSV(file: File): Promise<ApiResponse<IVerse[]>> {
+    try {
+        const data = new FormData();
+        data.append("file", file)
+        const res = await axios.post<ApiResponse<IVerse[]>>("/api/verses/csv", data)
+        if (res.status !== 200) throw new Error()
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR"
+        }
+    }
+}
 
 

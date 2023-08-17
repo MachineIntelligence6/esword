@@ -8,7 +8,6 @@ import { notFound } from "next/navigation";
 export default async function Page({ params }: { params: { id: string } }) {
   const { data: chapter } = await serverApiHandlers.chapters.getByRef(params.id)
   if (!chapter) return notFound();
-  const { data: books } = await serverApiHandlers.books.getAll({ perPage: -1 })
 
   return (
     <div>
@@ -19,7 +18,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         </h1>
       </div>
       <div className="mt-8">
-        <ChaptersForm chapter={chapter} books={books ?? []} />
+        <ChaptersForm chapter={chapter} />
       </div>
     </div>
   )

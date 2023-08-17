@@ -2,11 +2,13 @@
 import * as React from "react"
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
 import * as SelectPrimitive from "@radix-ui/react-select"
-
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { Button } from "./button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./command"
+import Spinner from "@/components/spinner"
+import { Input } from "./input"
+import { Separator } from "./separator"
 
 const Select = SelectPrimitive.Root
 const SelectGroup = SelectPrimitive.Group
@@ -118,30 +120,63 @@ export type SelectOption = {
 
 type SelectElProps = {
   options?: Array<SelectOption>;
+  loading?: boolean;
   value: string;
   onChange?: (opt?: SelectOption | null) => void;
   placeholder?: string;
   disabled?: boolean;
 }
 
-const SelectEl = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, placeholder, onChange, value }, ref) => {
+const SelectEl = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, placeholder, disabled, loading, onChange, value }, ref) => {
+  const [filteredOpts, setFilteredOpts] = React.useState(options)
   const handleChange = (value: string) => {
     const option = options?.find((opt) => opt.value === value)
-    if (!option || !onChange) return;
-    onChange(option)
+    // if (!option || !onChange) return;
+    onChange?.(option)
   }
+
+
+  React.useEffect(() => {
+    setFilteredOpts(options)
+  }, [options])
+
+  const handleFilterChange = (val: string) => {
+    setFilteredOpts(options?.filter((opt) => opt.label.toLowerCase().includes(val.toLowerCase())))
+  }
+
   return (
-    <Select onValueChange={handleChange} value={value}>
-      <SelectTrigger className="w-full h-10">
-        <SelectValue placeholder={placeholder ? placeholder : "Select"} />
+    <Select onValueChange={handleChange} value={value} required>
+      <SelectTrigger className="w-full h-10" disabled={disabled}>
+        <SelectValue placeholder={placeholder ?? "Select"} />
       </SelectTrigger>
-      <SelectContent className="max-h-96 overflow-y-auto">
+      <SelectContent className="p-0">
         {
-          options?.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))
+          options && !loading &&
+          <>
+            <input className="flex w-full rounded-md bg-transparent py-2 px-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Search..." onChange={(e) => handleFilterChange(e.target.value)} />
+            <Separator />
+          </>
+        }
+        {
+          loading ?
+            <div className="w-full py-10 flex items-center justify-center">
+              <Spinner className="w-10 h-10 border-4" />
+            </div>
+            :
+            !filteredOpts || filteredOpts?.length <= 0 ?
+              <div className="w-full py-10 flex items-center justify-center">
+                <p>No data.</p>
+              </div>
+              :
+              <div className="mt-2 max-h-96 overflow-y-auto ">
+                {
+                  filteredOpts?.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))
+                }
+              </div>
         }
       </SelectContent>
     </Select>
@@ -149,7 +184,7 @@ const SelectEl = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, 
 })
 SelectEl.displayName = "SelectEl"
 
-const ComboBox = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, placeholder, onChange, value, disabled }, ref) => {
+const ComboBox = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, placeholder, onChange, loading, value, disabled }, ref) => {
   const [open, setOpen] = React.useState(false)
   const [selectedOpt, setSelectedOpt] = React.useState<SelectOption | undefined>(options?.find((opt) => opt.value === value))
   const handleChange = (value: string) => {
@@ -159,17 +194,14 @@ const ComboBox = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, 
     setSelectedOpt(option)
   }
 
-
-
-
   React.useEffect(() => {
     setSelectedOpt(options?.find((opt) => opt.value === value))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
   React.useEffect(() => {
     onChange?.(selectedOpt)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedOpt])
 
   return (
@@ -187,28 +219,35 @@ const ComboBox = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, 
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder="Search..." />
-          <CommandEmpty>No Data.</CommandEmpty>
-          <CommandGroup className="max-h-96 w-full overflow-y-auto">
-            {
-              options?.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={handleChange}
-                >
-                  <CheckIcon
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-          </CommandGroup>
-        </Command>
+        {
+          loading ?
+            <div className="w-full py-10 flex items-center justify-center">
+              <Spinner className="w-10 h-10 border-4" />
+            </div>
+            :
+            <Command>
+              <CommandInput placeholder="Search..." />
+              <CommandEmpty>No Data.</CommandEmpty>
+              <CommandGroup className="max-h-96 w-full overflow-y-auto">
+                {
+                  options?.map((option) => (
+                    <CommandItem
+                      key={option.value}
+                      value={option.value}
+                      onSelect={handleChange}
+                    >
+                      <CheckIcon
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === option.value ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {option.label}
+                    </CommandItem>
+                  ))}
+              </CommandGroup>
+            </Command>
+        }
       </PopoverContent>
     </Popover>
   )

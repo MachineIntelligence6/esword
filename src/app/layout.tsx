@@ -1,3 +1,4 @@
+import AuthProvider from '@/components/auth-provider'
 import { Toaster } from '@/components/dashboard/ui/toaster'
 import '@/styles/tailwind.css'
 import type { Metadata } from 'next'
@@ -10,6 +11,9 @@ export const metadata: Metadata = {
   description: '',
 }
 
+
+
+
 export default function RootLayout({
   children,
 }: {
@@ -18,8 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
-        <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   )

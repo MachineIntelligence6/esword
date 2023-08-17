@@ -1,14 +1,15 @@
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Prisma, User, UserRole } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { hashPassword } from "../auth";
+import { IUser } from "@/shared/types/models.types";
 
 
 type PaginationProps = BasePaginationProps<Prisma.UserInclude>
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<User[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<IUser[]>> {
     try {
         const users = await db.user.findMany({
             where: {
@@ -22,9 +23,10 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
             include: (
-                include ? include : {
-                    notes: false
-                }
+                include ?
+                    include
+                    // { ...(include.notes && { notes: { where: { archived: false } } }) }
+                    : { notes: false }
             )
         })
         const usersCount = await db.user.count({ where: { archived: false } })
@@ -53,14 +55,19 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
 
 
 
-export async function getById(id: number, include?: Prisma.UserInclude): Promise<ApiResponse<User>> {
+export async function getById(id: number, include?: Prisma.UserInclude): Promise<ApiResponse<IUser>> {
     try {
         const user = await db.user.findFirst({
             where: {
                 id: id,
                 archived: false
             },
-            include: (include ? include : { notes: false })
+            include: (
+                include ?
+                    include
+                    // { ...(include.notes && { notes: { where: { archived: false } } }) }
+                    : { notes: false }
+            )
         })
         if (!user) {
             return {
@@ -120,7 +127,7 @@ type CreateUserReq = {
     role: UserRole;
 }
 
-export async function create(req: Request): Promise<ApiResponse<User>> {
+export async function create(req: Request): Promise<ApiResponse<IUser>> {
     try {
         const userReq = await req.json() as CreateUserReq
         const userExist = await db.user.findFirst({ where: { email: userReq.email } })

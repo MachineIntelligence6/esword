@@ -1,7 +1,8 @@
 import axios from "axios";
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Chapter, Prisma } from "@prisma/client";
 import { ChapterFormSchema } from "@/components/dashboard/forms/chapters.form";
+import { IChapter } from "@/shared/types/models.types";
+import { Prisma } from "@prisma/client";
 
 type PaginationProps = BasePaginationProps<Prisma.ChapterInclude> & {
     book?: number;
@@ -10,9 +11,9 @@ type PaginationProps = BasePaginationProps<Prisma.ChapterInclude> & {
 
 export async function get(
     { page = 1, perPage, book = -1, include }: PaginationProps
-): Promise<PaginatedApiResponse<Chapter[]>> {
+): Promise<PaginatedApiResponse<IChapter[]>> {
     try {
-        const res = await axios.get<PaginatedApiResponse<Chapter[]>>(
+        const res = await axios.get<PaginatedApiResponse<IChapter[]>>(
             `/api/chapters?page=${page}&perPage=${perPage}&book=${book}&include=${JSON.stringify(include)}`
         )
         return res.data
@@ -27,9 +28,9 @@ export async function get(
 
 
 
-export async function create(data: ChapterFormSchema): Promise<ApiResponse<Chapter>> {
+export async function create(data: ChapterFormSchema): Promise<ApiResponse<IChapter>> {
     try {
-        const res = await axios.post<ApiResponse<Chapter>>("/api/chapters", data)
+        const res = await axios.post<ApiResponse<IChapter>>("/api/chapters", data)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {
@@ -40,9 +41,9 @@ export async function create(data: ChapterFormSchema): Promise<ApiResponse<Chapt
     }
 }
 
-export async function update(id: number, update: ChapterFormSchema): Promise<ApiResponse<Chapter>> {
+export async function update(id: number, update: ChapterFormSchema): Promise<ApiResponse<IChapter>> {
     try {
-        const res = await axios.put<ApiResponse<Chapter>>(`/api/chapters/${id}`, update)
+        const res = await axios.put<ApiResponse<IChapter>>(`/api/chapters/${id}`, update)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {

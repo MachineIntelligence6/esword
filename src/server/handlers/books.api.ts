@@ -1,7 +1,8 @@
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Book, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
+import { IBook } from "@/shared/types/models.types";
 
 
 
@@ -9,7 +10,7 @@ type PaginationProps = BasePaginationProps<Prisma.BookInclude>
 
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<Book[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<IBook[]>> {
     try {
         const books = await db.book.findMany({
             where: {
@@ -22,7 +23,12 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                 take: perPage,
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
-            include: (include ? include : { chapters: false, _count: true })
+            include: (
+                include ?
+                    include
+                    // { ...(include.chapters && { chapters: { where: { archived: false } } }) }
+                    : { chapters: false, _count: true }
+            )
         })
         const booksCount = await db.book.count({ where: { archived: false } })
         return {
@@ -46,7 +52,7 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
 }
 
 
-export async function getByRef(ref: string, include?: Prisma.BookInclude): Promise<ApiResponse<Book>> {
+export async function getByRef(ref: string, include?: Prisma.BookInclude): Promise<ApiResponse<IBook>> {
     try {
         const book = await db.book.findFirst({
             where: {
@@ -60,7 +66,12 @@ export async function getByRef(ref: string, include?: Prisma.BookInclude): Promi
                 ],
                 archived: false
             },
-            include: (include ? include : { chapters: false })
+            include: (
+                include ?
+                    include
+                    // { ...(include.chapters && { chapters: { where: { archived: false } } }) }
+                    : { chapters: false }
+            )
         })
         if (!book) {
             return {
@@ -85,8 +96,16 @@ export async function getByRef(ref: string, include?: Prisma.BookInclude): Promi
 
 
 
-export async function archive(id: number): Promise<ApiResponse<Book>> {
+export async function archive(id: number): Promise<ApiResponse<IBook>> {
     try {
+        const book = await db.book.findFirst({ where: { id: id }, include: { chapters: true } })
+        if (book?.chapters && book.chapters.length > 0) {
+            return {
+                succeed: false,
+                code: "DATA_LINKED",
+                data: null
+            }
+        }
         await db.book.update({ where: { id: id }, data: { archived: true } })
         return {
             succeed: true,
@@ -108,14 +127,18 @@ type CreateBookReq = Prisma.BookCreateInput
 export async function create(req: Request): Promise<ApiResponse> {
     try {
         const bookReq = await req.json() as CreateBookReq
-        // const slug = bookReq.slug ? bookReq.slug : bookReq.name.toLowerCase().replaceAll(" ", "_")
         const bookExist = await db.book.findFirst({
-            where: { slug: bookReq.slug }
+            where: {
+                OR: [
+                    { slug: bookReq.slug },
+                    { name: bookReq.name }
+                ]
+            }
         })
         if (bookExist) {
             return {
                 succeed: false,
-                code: "SLUG_MUST_BE_UNIQUE",
+                code: bookExist.name === bookReq.name ? "BOOK_NAME_MUST_BE_UNIQUE" : "SLUG_MUST_BE_UNIQUE",
             }
         }
         const book = await db.book.create({
@@ -147,9 +170,9 @@ export async function create(req: Request): Promise<ApiResponse> {
 
 
 type UpdateBookReq = {
-    name?: string | null
-    slug?: string | null
-    abbreviation?: string | null
+    name?: string
+    slug?: string
+    abbreviation?: string
 }
 
 
@@ -159,12 +182,17 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
 
         if (bookReq.slug) {
             const bookExist = await db.book.findFirst({
-                where: { slug: bookReq.slug }
+                where: {
+                    OR: [
+                        { slug: bookReq.slug },
+                        { name: bookReq.name }
+                    ]
+                }
             })
             if (bookExist && bookExist.id !== id) {
                 return {
                     succeed: false,
-                    code: "SLUG_MUST_BE_UNIQUE",
+                    code: bookExist.name === bookReq.name ? "BOOK_NAME_MUST_BE_UNIQUE" : "SLUG_MUST_BE_UNIQUE",
                 }
             }
         }

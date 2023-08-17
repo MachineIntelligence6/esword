@@ -1,10 +1,8 @@
-import { User as PUser } from "@prisma/client";
-
-
+import { SessionUser } from "./models.types";
 
 declare module 'next-auth' {
     interface Session {
-        user: Omit<PUser, "password">
+        user: SessionUser
     }
 }
 

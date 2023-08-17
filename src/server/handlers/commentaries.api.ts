@@ -1,7 +1,8 @@
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Commentary, Prisma, Verse } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
+import { ICommentary } from "@/shared/types/models.types";
 
 
 
@@ -11,7 +12,7 @@ type PaginationProps = BasePaginationProps<Prisma.CommentaryInclude> & {
 }
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, author = -1, include }: PaginationProps): Promise<PaginatedApiResponse<Commentary[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, author = -1, include }: PaginationProps): Promise<PaginatedApiResponse<ICommentary[]>> {
     try {
         const commentaries = await db.commentary.findMany({
             where: {
@@ -70,7 +71,7 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
 
 
 
-export async function getById(id: number, include?: Prisma.CommentaryInclude): Promise<ApiResponse<Commentary>> {
+export async function getById(id: number, include?: Prisma.CommentaryInclude): Promise<ApiResponse<ICommentary>> {
     try {
         const commentary = await db.commentary.findFirst({
             where: {
@@ -127,16 +128,16 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 
 
 
-type CreateCommentaryReq = {
+type CreateICommentaryReq = {
     name: string;
     text: string;
     verse: number;
     author: number;
 }
 
-export async function create(req: Request): Promise<ApiResponse<Commentary>> {
+export async function create(req: Request): Promise<ApiResponse<ICommentary>> {
     try {
-        const commentaryReq = await req.json() as CreateCommentaryReq
+        const commentaryReq = await req.json() as CreateICommentaryReq
         const commentary = await db.commentary.create({
             data: {
                 name: commentaryReq.name,
@@ -169,7 +170,7 @@ export async function create(req: Request): Promise<ApiResponse<Commentary>> {
 
 
 
-type UpdateCommentaryReq = {
+type UpdateICommentaryReq = {
     name?: string | null;
     text?: string | null;
     verse?: number | null;
@@ -177,9 +178,9 @@ type UpdateCommentaryReq = {
 }
 
 
-export async function update(req: Request, id: number): Promise<ApiResponse<Commentary>> {
+export async function update(req: Request, id: number): Promise<ApiResponse<ICommentary>> {
     try {
-        const commentaryReq = await req.json() as UpdateCommentaryReq
+        const commentaryReq = await req.json() as UpdateICommentaryReq
         const commentary = await db.commentary.update({
             data: {
                 ...(commentaryReq.name && { name: commentaryReq.name }),

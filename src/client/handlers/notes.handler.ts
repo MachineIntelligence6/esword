@@ -1,8 +1,9 @@
 import axios from "axios";
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Commentary, Note, Prisma, Verse } from "@prisma/client";
 import { CommentaryFormSchema } from "@/components/dashboard/forms/commentaries.form";
 import defaults from "@/shared/constants/defaults";
+import { ICommentary, INote } from "@/shared/types/models.types";
+import { Prisma } from "@prisma/client";
 
 type PaginationProps = BasePaginationProps<Prisma.NoteInclude> & {
     user?: number;
@@ -12,9 +13,9 @@ type PaginationProps = BasePaginationProps<Prisma.NoteInclude> & {
 
 export async function get(
     { page = 1, perPage = defaults.PER_PAGE_ITEMS, user = -1, verse = -1, include }: PaginationProps
-): Promise<PaginatedApiResponse<Note[]>> {
+): Promise<PaginatedApiResponse<INote[]>> {
     try {
-        const res = await axios.get<PaginatedApiResponse<Note[]>>(
+        const res = await axios.get<PaginatedApiResponse<INote[]>>(
             `/api/notes?page=${page}&perPage=${perPage}&user=${user}&verse=${verse}&include=${JSON.stringify(include)}`
         )
         return res.data
@@ -31,9 +32,9 @@ export async function get(
 
 
 
-export async function create(data: CommentaryFormSchema): Promise<ApiResponse<Commentary>> {
+export async function create(data: CommentaryFormSchema): Promise<ApiResponse<ICommentary>> {
     try {
-        const res = await axios.post<ApiResponse<Commentary>>("/api/commentaries", data)
+        const res = await axios.post<ApiResponse<ICommentary>>("/api/commentaries", data)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {
@@ -44,9 +45,9 @@ export async function create(data: CommentaryFormSchema): Promise<ApiResponse<Co
     }
 }
 
-export async function update(id: number, update: CommentaryFormSchema): Promise<ApiResponse<Commentary>> {
+export async function update(id: number, update: CommentaryFormSchema): Promise<ApiResponse<ICommentary>> {
     try {
-        const res = await axios.put<ApiResponse<Commentary>>(`/api/commentaries/${id}`, update)
+        const res = await axios.put<ApiResponse<ICommentary>>(`/api/commentaries/${id}`, update)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {

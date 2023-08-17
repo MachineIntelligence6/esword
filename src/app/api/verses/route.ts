@@ -8,7 +8,7 @@ export const GET = async (req: Request) => {
     const params = new URLSearchParams(req.url.split("?")[1])
     const page = parseInt(params.get("page") ?? "1")
     const perPage = parseInt(params.get("perPage") ?? `${defaults.PER_PAGE_ITEMS}`)
-    const chapter = parseInt(params.get("chapter") ?? "-1")
+    const topic = parseInt(params.get("topic") ?? "-1")
     const includeStr = params.get("include")
     let include: Prisma.VerseInclude | undefined;
     try {
@@ -16,7 +16,7 @@ export const GET = async (req: Request) => {
     } catch (error) {
     }
 
-    const res = await serverApiHandlers.verses.getAll({ page, perPage, chapter, include: include })
+    const res = await serverApiHandlers.verses.getAll({ page, perPage, topic, include: include })
     return NextResponse.json(res)
 }
 

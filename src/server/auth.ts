@@ -68,7 +68,6 @@ export const getServerAuth = () => getServerSession(authOptions)
 
 
 
-
 export async function hashPassword(password: string) {
     try {
         return bcrypt.hash(password, 10)

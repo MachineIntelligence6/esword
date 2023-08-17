@@ -1,16 +1,17 @@
 import axios from "axios";
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Author, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { AuthorFormSchema } from "@/components/dashboard/forms/authors.form";
+import { IAuthor } from "@/shared/types/models.types";
 
 
 type PaginationProps = BasePaginationProps<Prisma.AuthorInclude>
 
 export async function get(
     { page = 1, perPage, include }: PaginationProps
-): Promise<PaginatedApiResponse<Author[]>> {
+): Promise<PaginatedApiResponse<IAuthor[]>> {
     try {
-        const res = await axios.get<PaginatedApiResponse<Author[]>>(
+        const res = await axios.get<PaginatedApiResponse<IAuthor[]>>(
             `/api/authors?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}`
         )
         return res.data
@@ -26,9 +27,9 @@ export async function get(
 
 
 
-export async function create(data: AuthorFormSchema): Promise<ApiResponse<Author>> {
+export async function create(data: AuthorFormSchema): Promise<ApiResponse<IAuthor>> {
     try {
-        const res = await axios.post<ApiResponse<Author>>("/api/authors", data)
+        const res = await axios.post<ApiResponse<IAuthor>>("/api/authors", data)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {
@@ -39,9 +40,9 @@ export async function create(data: AuthorFormSchema): Promise<ApiResponse<Author
     }
 }
 
-export async function update(id: number, update: AuthorFormSchema): Promise<ApiResponse<Author>> {
+export async function update(id: number, update: AuthorFormSchema): Promise<ApiResponse<IAuthor>> {
     try {
-        const res = await axios.put<ApiResponse<Author>>(`/api/authors/${id}`, update)
+        const res = await axios.put<ApiResponse<IAuthor>>(`/api/authors/${id}`, update)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {

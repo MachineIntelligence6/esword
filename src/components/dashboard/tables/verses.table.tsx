@@ -8,16 +8,16 @@ import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/dashboard/ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
-import { Chapter, Verse } from "@prisma/client"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
+import { ITopic, IVerse } from "@/shared/types/models.types"
 
 
-export default function VersesTable({ chapter }: { chapter?: Chapter }) {
+export default function VersesTable({ topic }: { topic?: ITopic }) {
     const { toast } = useToast()
-    const [tableData, setTableData] = useState<PaginatedApiResponse<Verse[]> | null>(null);
+    const [tableData, setTableData] = useState<PaginatedApiResponse<IVerse[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
@@ -25,7 +25,8 @@ export default function VersesTable({ chapter }: { chapter?: Chapter }) {
         setTableData(null)
         const res = await clientApiHandlers.verses.get({
             page: currentPage, perPage: perPage,
-            chapter: chapter?.id, include: { chapter: true }
+            topic: topic?.id,
+            include: { topic: { include: { chapter: { include: { book: true } } } } }
         })
         setTableData(res)
     }
@@ -45,13 +46,10 @@ export default function VersesTable({ chapter }: { chapter?: Chapter }) {
         totalPages: tableData?.pagination?.totalPages ?? 1
     }
 
-    const handleDelete = async (verse: Verse) => {
+    const handleDelete = async (verse: IVerse) => {
         const res = await clientApiHandlers.verses.archive(verse.id)
         if (res.succeed) {
-            toast({
-                title: "Verse Deleted",
-                description: definedMessages.VERSE_DELETED
-            })
+            window.location.reload()
         } else {
             toast({
                 title: "Error",
@@ -62,10 +60,10 @@ export default function VersesTable({ chapter }: { chapter?: Chapter }) {
     }
 
     const tableColumns = columns({
-        viewAction: (verse: Verse) => (
+        viewAction: (verse: IVerse) => (
             <Link href={`/dashboard/verses/${verse.id}`}>View</Link>
         ),
-        editAction: (verse: Verse) => (
+        editAction: (verse: IVerse) => (
             <Link href={`/dashboard/verses/${verse.id}/edit`}>Edit</Link>
         ),
         deleteAction: handleDelete
@@ -78,8 +76,8 @@ export default function VersesTable({ chapter }: { chapter?: Chapter }) {
                 data={tableData?.data}
                 pagination={pagination}
                 columns={tableColumns}
-                getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
-                setFilterValue={(table, value) => table.getColumn("name")?.setFilterValue(value)}
+                getFilterValue={(table) => (table.getColumn("number")?.getFilterValue() as string ?? "")}
+                setFilterValue={(table, value) => table.getColumn("number")?.setFilterValue(value)}
             />
         </div>
     )
@@ -89,7 +87,7 @@ export default function VersesTable({ chapter }: { chapter?: Chapter }) {
 
 
 
-function columns(rowActions: TableActionProps): ColumnDef<Verse, any>[] {
+function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
     return [
         {
             id: "select",
@@ -112,25 +110,26 @@ function columns(rowActions: TableActionProps): ColumnDef<Verse, any>[] {
             enableSorting: false,
             enableHiding: false,
         },
+        // {
+        //     id: "index",
+        //     header: ({ column }) => (
+        //         <DataTableColumnHeader column={column} title="#" />
+        //     ),
+        //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
+        //     enableSorting: false,
+        //     enableHiding: false,
+        // },
         {
-            id: "index",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="#" />
-            ),
-            cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-            enableSorting: false,
-            enableHiding: false,
-        },
-        {
-            accessorKey: "name",
+            accessorKey: "number",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Name" />
             ),
             cell: ({ row }) => {
+                const chapter = row.original.topic?.chapter
                 return (
                     <div className="flex max-w-[100px] space-x-2">
                         <span className="max-w-[100px] truncate font-medium">
-                            {row.getValue("name")}
+                            {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original?.number}`}
                         </span>
                     </div>
                 )
@@ -144,7 +143,7 @@ function columns(rowActions: TableActionProps): ColumnDef<Verse, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <span className="max-w-[200px] truncate font-normal line-clamp-2">
+                        <span className="max-w-[600px] font-normal line-clamp-2">
                             {row.getValue("text")}
                         </span>
                     </div>
@@ -152,15 +151,15 @@ function columns(rowActions: TableActionProps): ColumnDef<Verse, any>[] {
             }
         },
         {
-            accessorKey: "type",
+            accessorKey: "topic",
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Type" />
+                <DataTableColumnHeader column={column} title="Topic" />
             ),
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <span className="max-w-[100px] truncate font-normal">
-                            {row.getValue("type")}
+                        <span className="max-w-[200px] truncate font-normal">
+                            {row.original.topic?.name}
                         </span>
                     </div>
                 )
@@ -174,11 +173,10 @@ function columns(rowActions: TableActionProps): ColumnDef<Verse, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/chapters/${(row.original as any).chapter?.id}`}
+                        <Link href={`/dashboard/chapters/${row.original.topic?.chapter?.id}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {(row.original as any).chapter?.name}
-                        </a>
+                            {`${row.original.topic?.chapter?.book?.name}/${row.original.topic?.chapter?.name}`}
+                        </Link>
                     </div>
                 )
             }

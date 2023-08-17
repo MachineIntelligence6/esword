@@ -1,4 +1,3 @@
-import serverApiHandlers from "@/server/handlers"
 import { buttonVariants } from "@/components/dashboard/ui/button"
 import Link from "next/link"
 import VersesTable from "@/components/dashboard/tables/verses.table"
@@ -6,11 +5,6 @@ import VersesTable from "@/components/dashboard/tables/verses.table"
 
 
 export default async function Page() {
-  const { data: verses } = await serverApiHandlers.verses.getAll({
-    page: 1,
-    perPage: -1,
-    include: { chapter: true }
-  })
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -21,9 +15,7 @@ export default async function Page() {
           Add New
         </Link>
       </div>
-      {
-        verses && <VersesTable verses={verses} />
-      }
+      <VersesTable />
     </div>
   )
 }

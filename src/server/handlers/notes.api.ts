@@ -1,7 +1,8 @@
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Commentary, Note, Prisma, Verse } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
+import { Prisma } from "@prisma/client";
+import { INote } from "@/shared/types/models.types";
 
 
 
@@ -11,7 +12,7 @@ type PaginationProps = BasePaginationProps<Prisma.NoteInclude> & {
 }
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, user = -1, include }: PaginationProps): Promise<PaginatedApiResponse<Note[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, user = -1, include }: PaginationProps): Promise<PaginatedApiResponse<INote[]>> {
     try {
         const notes = await db.note.findMany({
             where: {
@@ -70,7 +71,7 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
 
 
 
-export async function getById(id: number, include?: Prisma.NoteInclude): Promise<ApiResponse<Note>> {
+export async function getById(id: number, include?: Prisma.NoteInclude): Promise<ApiResponse<INote>> {
     try {
         const note = await db.note.findFirst({
             where: {
@@ -133,7 +134,7 @@ type CreateNoteReq = {
     user: number;
 }
 
-export async function create(req: Request): Promise<ApiResponse<Note>> {
+export async function create(req: Request): Promise<ApiResponse<INote>> {
     try {
         const noteReq = await req.json() as CreateNoteReq
         const note = await db.note.create({
@@ -174,7 +175,7 @@ type UpdateNoteReq = {
 }
 
 
-export async function update(req: Request, id: number): Promise<ApiResponse<Note>> {
+export async function update(req: Request, id: number): Promise<ApiResponse<INote>> {
     try {
         const noteReq = await req.json() as UpdateNoteReq
         const note = await db.note.update({

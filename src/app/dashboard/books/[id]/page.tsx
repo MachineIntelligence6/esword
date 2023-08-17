@@ -1,8 +1,6 @@
 import { BackButton } from "@/components/dashboard/buttons";
 import ChaptersTable from "@/components/dashboard/tables/chapters.table";
 import serverApiHandlers from "@/server/handlers";
-import { ChapterWBook } from "@/shared/types/models.types";
-import { Book, Chapter } from "@prisma/client";
 import { notFound } from "next/navigation";
 import {
     Card,
@@ -14,11 +12,38 @@ import { Button, buttonVariants } from "@/components/dashboard/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import db from "@/server/db";
+import { IBook } from "@/shared/types/models.types";
 
 
 export default async function Page({ params }: { params: { id: string } }) {
     const { data: book } = await serverApiHandlers.books.getByRef(params.id)
     if (!book) return notFound()
+    const next = await db.book.findFirst({
+        take: 1,
+        where: {
+            id: {
+                gt: parseInt(params.id),
+            },
+            archived: false
+        },
+        orderBy: {
+            id: "asc",
+        },
+    });
+    const previous = await db.book.findFirst({
+        take: 1,
+        where: {
+            id: {
+                lt: parseInt(params.id),
+            },
+            archived: false
+        },
+        orderBy: {
+            id: "asc",
+        },
+    });
+
 
     return (
         <div className="space-y-8">
@@ -31,18 +56,20 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </div>
                 <div className="flex items-center gap-3">
                     <Link
-                        href={parseInt(params.id) > 1 ? `/dashboard/books/${parseInt(params.id) - 1}` : '#'}
+                        href={previous ? `/dashboard/books/${previous.id}` : '#'}
                         className={cn(
                             buttonVariants({ variant: "ghost" }),
-                            "aspect-square p-1 w-auto h-auto rounded-full"
+                            "aspect-square p-1 w-auto h-auto rounded-full",
+                            !previous && "opacity-60 pointer-events-none"
                         )}>
                         <ChevronLeftIcon className="w-6 h-6" />
                     </Link>
                     <Link
-                        href={`/dashboard/books/${parseInt(params.id) + 1}`}
+                        href={next ? `/dashboard/books/${next.id}` : '#'}
                         className={cn(
                             buttonVariants({ variant: "ghost" }),
-                            "aspect-square p-1 w-auto h-auto rounded-full"
+                            "aspect-square p-1 w-auto h-auto rounded-full",
+                            !next && "opacity-60 pointer-events-none"
                         )}>
                         <ChevronRightIcon className="w-6 h-6" />
                     </Link>
@@ -58,7 +85,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 }
 
 
-function BookDetailsCard({ book }: { book: Book }) {
+function BookDetailsCard({ book }: { book: IBook }) {
     return (
         <Card className="w-fit">
             <CardHeader>

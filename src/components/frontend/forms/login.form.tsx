@@ -11,12 +11,16 @@ import { ApiResCode, ApiResponse } from "@/shared/types/api.types";
 import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 
 export const loginFormSchema = z.object(
     {
-        email: z.string({ required_error: "This field is required." }).email({ message: "please enter a valid email address" }),
-        password: z.string({ required_error: "This field is required." }).min(8, { message: "Password must contain at-least 8 characterisctics" })
+        email: z.string({ required_error: "This field is required." })
+            .min(1, { message: "This field is required." })
+            .email({ message: "please enter a valid email address" }),
+        password: z.string({ required_error: "This field is required." })
+            .min(8, { message: "Password must contain at-least 8 characterisctics" })
 
     }
 )
@@ -113,9 +117,9 @@ export default function LoginForm() {
                             </p>
                         </div>
                         <div>
-                            <a className="text-primary-dark font-semibold font-inter" href="/forgotpassowrd">
+                            <Link className="text-primary-dark font-semibold font-inter" href="/forgotpassowrd">
                                 Forgot Password?
-                            </a>
+                            </Link>
                         </div>
                     </div>
                     <div className="mt-5 mb-5">
@@ -131,11 +135,6 @@ export default function LoginForm() {
                 </form>
 
             </Form>
-            <div
-                className="flex gap-2 justify-center items-center font-normal text-sm  text-primary-dark md:pt-3 md:text-base  md:pb-8 pb-5 pt-0 px-1">
-                <p>Don’t have an account?</p>
-                <a className="font-bold" href="/signup">Sign up here</a>
-            </div>
         </div>
     )
 }

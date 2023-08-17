@@ -8,23 +8,24 @@ import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/dashboard/ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
-import { Note, User, Verse } from "@prisma/client"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
+import { INote, IUser, IVerse } from "@/shared/types/models.types"
+import Link from "next/link"
 
 
 
 type Props = {
-    user?: User;
-    verse?: Verse
+    user?: IUser;
+    verse?: IVerse;
 }
 
 
 export default function NotesTable({ user, verse }: Props) {
     const { toast } = useToast()
 
-    const [tableData, setTableData] = useState<PaginatedApiResponse<Note[]> | null>(null);
+    const [tableData, setTableData] = useState<PaginatedApiResponse<INote[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
@@ -54,13 +55,10 @@ export default function NotesTable({ user, verse }: Props) {
         totalPages: tableData?.pagination?.totalPages ?? 1
     }
 
-    const handleDelete = async (note: Note) => {
+    const handleDelete = async (note: INote) => {
         const res = await clientApiHandlers.notes.archive(note.id)
         if (res.succeed) {
-            toast({
-                title: "Note Deleted",
-                description: definedMessages.VERSE_DELETED
-            })
+            window.location.reload();
         } else {
             toast({
                 title: "Error",
@@ -98,7 +96,7 @@ export default function NotesTable({ user, verse }: Props) {
 
 
 
-function columns(rowActions: TableActionProps): ColumnDef<Note, any>[] {
+function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
     return [
         {
             id: "select",
@@ -121,15 +119,15 @@ function columns(rowActions: TableActionProps): ColumnDef<Note, any>[] {
             enableSorting: false,
             enableHiding: false,
         },
-        {
-            id: "index",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="#" />
-            ),
-            cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-            enableSorting: false,
-            enableHiding: false,
-        },
+        // {
+        //     id: "index",
+        //     header: ({ column }) => (
+        //         <DataTableColumnHeader column={column} title="#" />
+        //     ),
+        //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
+        //     enableSorting: false,
+        //     enableHiding: false,
+        // },
         {
             accessorKey: "text",
             header: ({ column }) => (
@@ -137,8 +135,8 @@ function columns(rowActions: TableActionProps): ColumnDef<Note, any>[] {
             ),
             cell: ({ row }) => {
                 return (
-                    <div className="flex max-w-[300px] space-x-2">
-                        <span className="max-w-[100px] line-clamp-2 font-medium">
+                    <div className="flex items-center">
+                        <span className="max-w-[500px] line-clamp-2 font-medium">
                             {row.getValue("text")}
                         </span>
                     </div>
@@ -153,11 +151,10 @@ function columns(rowActions: TableActionProps): ColumnDef<Note, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/users/${row.original.userId}`}
+                        <Link href={`/dashboard/users/${row.original.userId}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {(row.original as any).user?.name}
-                        </a>
+                            {row.original.user?.name}
+                        </Link>
                     </div>
                 )
             }
@@ -170,11 +167,10 @@ function columns(rowActions: TableActionProps): ColumnDef<Note, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <a
-                            href={`/dashboard/verses/${(row.original as any).verse?.id}`}
+                        <Link href={`/dashboard/verses/${row.original.verseId}`}
                             className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {(row.original as any).verse?.name}
-                        </a>
+                            {row.original.verse?.number}
+                        </Link>
                     </div>
                 )
             }

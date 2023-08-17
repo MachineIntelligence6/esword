@@ -1,6 +1,5 @@
 import { BackButton } from "@/components/dashboard/buttons";
 import serverApiHandlers from "@/server/handlers";
-import { Commentary } from "@prisma/client";
 import { notFound } from "next/navigation";
 import {
     Card,
@@ -12,15 +11,42 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/dashboard/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import db from "@/server/db";
+import { ICommentary } from "@/shared/types/models.types";
 
 
 
 export default async function Page({ params }: { params: { id: string } }) {
     const { data: note } = await serverApiHandlers.commentaries.getById(parseInt(params.id), {
-        verse: { include: { chapter: { include: { book: true } } } },
+        verse: { include: { topic: { include: { chapter: { include: { book: true } } } } } },
         author: true
     })
     if (!note) return notFound()
+
+    const next = await db.note.findFirst({
+        take: 1,
+        where: {
+            id: {
+                gt: parseInt(params.id),
+            },
+            archived: false
+        },
+        orderBy: {
+            id: "asc",
+        },
+    });
+    const previous = await db.note.findFirst({
+        take: 1,
+        where: {
+            id: {
+                lt: parseInt(params.id),
+            },
+            archived: false
+        },
+        orderBy: {
+            id: "asc",
+        },
+    });
 
     return (
         <div className="space-y-8">
@@ -36,47 +62,49 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </div>
                 <div className="flex items-center gap-3">
                     <Link
-                        href={parseInt(params.id) > 1 ? `/dashboard/commentaries/${parseInt(params.id) - 1}` : '#'}
+                        href={previous ? `/dashboard/notes/${previous.id}` : '#'}
                         className={cn(
                             buttonVariants({ variant: "ghost" }),
-                            "aspect-square p-1 w-auto h-auto rounded-full"
+                            "aspect-square p-1 w-auto h-auto rounded-full",
+                            !previous && "opacity-60 pointer-events-none"
                         )}>
                         <ChevronLeftIcon className="w-6 h-6" />
                     </Link>
                     <Link
-                        href={`/dashboard/commentaries/${parseInt(params.id) + 1}`}
+                        href={next ? `/dashboard/notes/${next.id}` : '#'}
                         className={cn(
                             buttonVariants({ variant: "ghost" }),
-                            "aspect-square p-1 w-auto h-auto rounded-full"
+                            "aspect-square p-1 w-auto h-auto rounded-full",
+                            !next && "opacity-60 pointer-events-none"
                         )}>
                         <ChevronRightIcon className="w-6 h-6" />
                     </Link>
                 </div>
             </div>
-            {/* <CommentaryDetailsCard note={note} /> */}
+            {/* <ICommentaryDetailsCard note={note} /> */}
         </div>
     )
 }
 
 
-function CommentaryDetailsCard({ commentary }: { commentary: Commentary }) {
+function ICommentaryDetailsCard({ commentary }: { commentary: ICommentary }) {
     return (
         <Card className="w-fit">
             <CardHeader>
-                <CardTitle className="text-xl">Commentary Details</CardTitle>
+                <CardTitle className="text-xl">ICommentary Details</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-between gap-20">
                 <div className="flex items-center gap-5 flex-wrap text-base font-normal">
                     <span>Book:</span>
-                    <span className="font-semibold">{(commentary as any).verse?.chapter?.book?.name}</span>
+                    <span className="font-semibold">{commentary.verse?.topic?.chapter?.book?.name}</span>
                 </div>
                 <div className="flex items-center gap-5 text-base font-normal">
                     <span>Chapter:</span>
-                    <span className="font-semibold">{(commentary as any)?.verse?.chapter?.name}</span>
+                    <span className="font-semibold">{commentary?.verse?.topic?.chapter?.name}</span>
                 </div>
                 <div className="flex items-center gap-5 text-base font-normal">
                     <span>Verse:</span>
-                    <span className="font-semibold">{(commentary as any)?.verse?.name}</span>
+                    <span className="font-semibold">{commentary?.verse?.number}</span>
                 </div>
                 <div className="flex items-center gap-5 text-base font-normal">
                     <span>Name:</span>
@@ -84,7 +112,7 @@ function CommentaryDetailsCard({ commentary }: { commentary: Commentary }) {
                 </div>
                 <div className="flex items-center gap-5 text-base font-normal">
                     <span>Author:</span>
-                    <span className="font-semibold">{(commentary as any)?.author?.name}</span>
+                    <span className="font-semibold">{commentary?.author?.name}</span>
                 </div>
             </CardContent>
         </Card>

@@ -4,6 +4,8 @@
 
 const definedMessages = {
     SLUG_MUST_BE_UNIQUE: "Slug must be unique.",
+    BOOK_NAME_MUST_BE_UNIQUE: "Book name must be unique.",
+    TOPIC_NUMBER_MUST_BE_UNIQUE: "Topic number must be unique.",
     VERSE_NUMBER_MUST_BE_UNIQUE: "A verse at this number in this chapter already exists.",
     EMAIL_ALREADY_EXISTS: "A user already exists with this email.",
     USER_NOT_FOUND: "Email not registered.",

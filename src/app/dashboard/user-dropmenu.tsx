@@ -1,4 +1,3 @@
-'use client'
 import { LogoutButton } from "@/components/dashboard/buttons"
 import { Button } from "@/components/dashboard/ui/button"
 import {
@@ -10,12 +9,17 @@ import {
 } from "@/components/dashboard/ui/dropdown-menu"
 import Spinner from "@/components/spinner"
 import { PersonIcon } from "@radix-ui/react-icons"
-import { useSession } from "next-auth/react"
+import { Session } from "next-auth"
 
-export function UserDropdownMenu() {
-    const { data: session, status } = useSession({ required: true })
-    if (status === "loading") return <Spinner className="w-8 border-white" />;
-    if (!session) return null;
+
+type Props = {
+    session: Session
+}
+
+export function UserDropdownMenu({ session }: Props) {
+    // const { data: session, status } = useSession({ required: true })
+    // if (status === "loading") return <Spinner className="w-8 border-white" />;
+    // if (!session) return null;
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>

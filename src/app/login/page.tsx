@@ -1,4 +1,3 @@
-import HeaderComponent from "@/components/frontend/HeaderComponent";
 import LoginForm from "@/components/frontend/forms/login.form";
 import { getServerAuth } from "@/server/auth";
 import { redirect } from "next/navigation";
@@ -13,9 +12,6 @@ export default async function Page() {
 
     return (
         <div className="overflow-hidden overflow-y-auto">
-            {/* Header component */}
-            <HeaderComponent />
-            {/* Content */}
             <div className="bg-primary min-h-screen flex items-center justify-center  pt-5">
                 <div className="">
                     <div

@@ -7,33 +7,33 @@ import { Card, CardContent, CardFooter } from "@/components/dashboard/ui/card";
 import { Button } from "@/components/dashboard/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
-import { Author, Book, Chapter, Commentary, Verse } from "@prisma/client";
 import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter, useSearchParams } from "next/navigation";
-import { ComboBox } from "../ui/select";
+import { ComboBox, SelectEl } from "../ui/select";
 import { Textarea } from "../ui/textarea";
+import { useEffect, useState } from "react";
+import { IAuthor, IBook, IChapter, ICommentary, ITopic, IVerse } from "@/shared/types/models.types";
 
 
 export const commentaryFormSchema = z.object({
     info: z.string().nullable().default(""),
-    name: z.string({ required_error: "This field is required." }),
-    text: z.string({ required_error: "This field is required." }),
-    author: z.number({ required_error: "This field is required." }),
-    verse: z.number({ required_error: "This field is required." }),
-    book: z.number({ required_error: "This field is required." }),
-    chapter: z.number({ required_error: "This field is required." }),
+    name: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    text: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    author: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    verse: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    book: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    chapter: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    topic: z.number({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
 })
 
 
 export type CommentaryFormSchema = z.infer<typeof commentaryFormSchema>
 
 
-export default function CommentariesForm(
-    { books, commentary, authors }: {
-        commentary?: Commentary, books: Book[], authors: Author[]
-    }
-) {
+export default function CommentariesForm({ commentary }: { commentary?: ICommentary }) {
+    const [books, setBooks] = useState<IBook[] | null>(null)
+    const [authors, setAuthors] = useState<IAuthor[] | null>(null)
     const searchParams = useSearchParams()
     const params = {
         book: () => {
@@ -52,21 +52,56 @@ export default function CommentariesForm(
             const authorId = searchParams.get("author")
             return authorId ? parseInt(authorId) : undefined
         },
+        topic: () => {
+            const topicId = searchParams.get("topic")
+            return topicId ? parseInt(topicId) : undefined
+        },
     }
     const router = useRouter()
     const form = useForm<CommentaryFormSchema>({
         resolver: zodResolver(commentaryFormSchema),
-        mode: "onBlur",
+        mode: "all",
         defaultValues: {
             name: commentary?.name,
             verse: commentary ? commentary?.verseId : params.verse(),
             author: commentary?.authorId,
-            chapter: commentary ? (commentary as any)?.verse?.chapter?.id : params.chapter(),
-            book: commentary ? (commentary as any)?.verse?.chapter?.book?.id : params.book(),
+            chapter: commentary ? commentary?.verse?.topic?.chapter?.id : params.chapter(),
+            book: commentary ? commentary?.verse?.topic?.chapter?.book?.id : params.book(),
             text: commentary?.text,
+            topic: commentary ? commentary?.verse?.topicId : params.topic()
         }
     })
     const { formState } = form
+    const [chapters, setChapters] = useState<IChapter[] | null>(null)
+    const [topics, setTopics] = useState<ITopic[] | null>(null)
+    const [verses, setVerses] = useState<IVerse[] | null>(null)
+
+
+
+    useEffect(() => {
+        clientApiHandlers.books.get({
+            page: 1, perPage: -1, include: {
+                chapters: {
+                    include: {
+                        topics: {
+                            include: {
+                                verses: { where: { archived: false } }
+                            },
+                            where: { archived: false }
+                        }
+                    },
+                    where: { archived: false }
+                }
+            }
+        })
+            .then((res) => {
+                setBooks(res.data ?? [])
+            })
+        clientApiHandlers.authors.get({ page: 1, perPage: -1 })
+            .then((res) => {
+                setAuthors(res.data ?? [])
+            })
+    }, [])
 
 
     const resetFormValues = () => {
@@ -79,7 +114,6 @@ export default function CommentariesForm(
             book: undefined,
         })
     }
-
 
 
 
@@ -106,19 +140,32 @@ export default function CommentariesForm(
 
 
 
-    const getChaptersList = () => {
-        const bookId = form.getValues("book")
-        if (!bookId) return []
-        const book = books.find((b) => b.id === bookId);
-        return (book as any)?.chapters ?? []
-    }
-    const getVersesList = () => {
-        const chapterId = form.getValues("chapter")
-        if (!chapterId) return []
-        const chapters = getChaptersList();
-        const chapter = chapters?.find((ch: Chapter) => ch.id === chapterId);
-        return (chapter as any)?.verses ?? []
-    }
+    useEffect(() => {
+        const getChaptersList = () => {
+            const bookId = form.getValues("book")
+            if (!bookId) return null
+            const book = books?.find((b) => b.id === bookId);
+            return book?.chapters ?? []
+        }
+        const getTopicsList = () => {
+            const chapterId = form.getValues("chapter")
+            if (!chapterId) return null
+            const chapters = getChaptersList();
+            const chapter = chapters?.find((ch) => ch.id === chapterId);
+            return chapter?.topics ?? []
+        }
+        const getVersesList = () => {
+            const topicId = form.getValues("topic")
+            if (!topicId) return null
+            const topics = getTopicsList();
+            const topic = topics?.find((topic) => topic.id === topicId);
+            return topic?.verses ?? []
+        }
+        setChapters(getChaptersList())
+        setTopics(getTopicsList())
+        setVerses(getVersesList())
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [form.formState])
 
 
 
@@ -133,9 +180,9 @@ export default function CommentariesForm(
                             name="name"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-1">
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Name <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="text" {...field} />
+                                        <Input type="text" required {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -149,17 +196,16 @@ export default function CommentariesForm(
                             name="author"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Author</FormLabel>
+                                    <FormLabel>Author <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <ComboBox
+                                        <SelectEl
                                             placeholder="Select Author"
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    field.onChange(parseInt(opt.value))
-                                                }
+                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
                                             }}
                                             ref={field.ref}
-                                            options={authors.map((author) => ({
+                                            loading={!authors}
+                                            options={authors?.map((author) => ({
                                                 label: author.name,
                                                 value: author.id.toString(),
                                                 rawValue: author
@@ -179,17 +225,17 @@ export default function CommentariesForm(
                             name="book"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Book</FormLabel>
+                                    <FormLabel>Book <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <ComboBox
+                                        <SelectEl
                                             placeholder="Select Book"
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    field.onChange(parseInt(opt.value))
-                                                }
+                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
+                                                form.resetField("chapter", { defaultValue: undefined })
                                             }}
                                             ref={field.ref}
-                                            options={books.map((book) => ({
+                                            loading={!books}
+                                            options={books?.map((book) => ({
                                                 label: book.name,
                                                 value: book.id.toString(),
                                                 rawValue: book
@@ -209,21 +255,50 @@ export default function CommentariesForm(
                             name="chapter"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Chapter</FormLabel>
+                                    <FormLabel>Chapter <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <ComboBox
+                                        <SelectEl
                                             placeholder="Select Chapter"
-                                            disabled={!form.getValues("book")}
+                                            disabled={!chapters}
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    field.onChange(parseInt(opt.value))
-                                                }
+                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
+                                                form.resetField("topic", { defaultValue: undefined })
                                             }}
                                             ref={field.ref}
-                                            options={getChaptersList()?.map((chapter: Chapter) => ({
-                                                label: chapter.name,
+                                            options={chapters?.map((chapter) => ({
+                                                label: String(chapter.name),
                                                 value: chapter.id.toString(),
                                                 rawValue: chapter
+                                            }))}
+                                            value={field.value?.toString()}
+                                        />
+                                    </FormControl>
+                                    {
+                                        fieldState.error &&
+                                        <FormMessage />
+                                    }
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="topic"
+                            render={({ field, fieldState }) => (
+                                <FormItem>
+                                    <FormLabel>Topic <span className="text-red-500">*</span></FormLabel>
+                                    <FormControl>
+                                        <SelectEl
+                                            placeholder="Select Topic"
+                                            disabled={!topics}
+                                            onChange={(opt) => {
+                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
+                                                form.resetField("verse", { defaultValue: undefined })
+                                            }}
+                                            ref={field.ref}
+                                            options={topics?.map((topic) => ({
+                                                label: topic.name,
+                                                value: topic.id.toString(),
+                                                rawValue: topic
                                             }))}
                                             value={field.value?.toString()}
                                         />
@@ -240,19 +315,17 @@ export default function CommentariesForm(
                             name="verse"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Verse</FormLabel>
+                                    <FormLabel>Verse <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <ComboBox
-                                            placeholder="Select Verse"
-                                            disabled={!form.getValues("chapter")}
+                                        <SelectEl
+                                            placeholder="Select IVerse"
+                                            disabled={!verses}
                                             onChange={(opt) => {
-                                                if (opt?.value) {
-                                                    field.onChange(parseInt(opt.value))
-                                                }
+                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
                                             }}
                                             ref={field.ref}
-                                            options={getVersesList()?.map((verse: Verse) => ({
-                                                label: verse.name,
+                                            options={verses?.map((verse: IVerse) => ({
+                                                label: String(verse.number),
                                                 value: verse.id.toString(),
                                                 rawValue: verse
                                             }))}
@@ -271,9 +344,9 @@ export default function CommentariesForm(
                             name="text"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-full">
-                                    <FormLabel>Text</FormLabel>
+                                    <FormLabel>Text <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Textarea rows={8} {...field} />
+                                        <Textarea rows={8} required {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&

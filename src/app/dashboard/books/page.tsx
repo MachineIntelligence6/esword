@@ -1,25 +1,28 @@
 'use client'
 import BooksTable from "@/components/dashboard/tables/books.table";
 import BooksForm from "@/components/dashboard/forms/books.form";
-import { Book } from "@prisma/client";
 import { useState } from "react";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/dashboard/ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
 import Link from "next/link";
+import { IBook } from "@/shared/types/models.types";
 
 
 
 export default function Page() {
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState<IBook | null>(null);
   const { toast } = useToast();
 
-  const handleDelete = async (book: Book) => {
+  const handleDelete = async (book: IBook) => {
     const res = await clientApiHandlers.books.archive(book.id)
     if (res.succeed) {
+      window.location.reload()
+    } else if (res.code === "DATA_LINKED") {
       toast({
-        title: "Book Deleted",
-        description: definedMessages.BOOK_DELETED
+        title: "Book can not be deleted.",
+        variant: "destructive",
+        description: "All chapters linked with this book must be unlinked in order to delete this book."
       })
     } else {
       toast({

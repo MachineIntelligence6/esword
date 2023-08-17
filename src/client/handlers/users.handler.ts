@@ -1,7 +1,8 @@
 import axios from "axios";
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Prisma, User, Verse } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { UserFormSchema } from "@/components/dashboard/forms/users.form";
+import { IUser } from "@/shared/types/models.types";
 
 
 
@@ -10,9 +11,9 @@ type PaginationProps = BasePaginationProps<Prisma.UserInclude>
 
 export async function get(
     { page = 1, perPage, include }: PaginationProps
-): Promise<PaginatedApiResponse<User[]>> {
+): Promise<PaginatedApiResponse<IUser[]>> {
     try {
-        const res = await axios.get<PaginatedApiResponse<User[]>>(
+        const res = await axios.get<PaginatedApiResponse<IUser[]>>(
             `/api/users?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}`
         )
         return res.data
@@ -28,9 +29,9 @@ export async function get(
 
 
 
-export async function create(data: UserFormSchema): Promise<ApiResponse<User>> {
+export async function create(data: UserFormSchema): Promise<ApiResponse<IUser>> {
     try {
-        const res = await axios.post<ApiResponse<User>>("/api/users", data)
+        const res = await axios.post<ApiResponse<IUser>>("/api/users", data)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {
@@ -41,9 +42,9 @@ export async function create(data: UserFormSchema): Promise<ApiResponse<User>> {
     }
 }
 
-export async function update(id: number, update: UserFormSchema): Promise<ApiResponse<User>> {
+export async function update(id: number, update: UserFormSchema): Promise<ApiResponse<IUser>> {
     try {
-        const res = await axios.put<ApiResponse<User>>(`/api/users/${id}`, update)
+        const res = await axios.put<ApiResponse<IUser>>(`/api/users/${id}`, update)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {

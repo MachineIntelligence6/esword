@@ -1,17 +1,15 @@
 'use client'
-import { Badge } from "@/components/dashboard/ui/badge"
 import { Checkbox } from "@/components/dashboard/ui/checkbox"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "./shared/table"
 import { DataTableRowActions } from "./shared/row-actions"
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
-import { Author } from "@prisma/client";
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
-import defaults from "@/shared/constants/defaults"
 import clientApiHandlers from "@/client/handlers"
+import { IAuthor } from "@/shared/types/models.types"
 
 
 type Props = TableActionProps & {
@@ -20,7 +18,7 @@ type Props = TableActionProps & {
 }
 
 export default function AuthorsTable({ showPagination, showToolbar, ...props }: Props) {
-    const [tableData, setTableData] = useState<PaginatedApiResponse<Author[]> | null>(null);
+    const [tableData, setTableData] = useState<PaginatedApiResponse<IAuthor[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
@@ -62,8 +60,8 @@ export default function AuthorsTable({ showPagination, showToolbar, ...props }: 
 
 
 
-function columns(rowActions: TableActionProps): ColumnDef<Author, any>[] {
-    const tableCols: ColumnDef<Author, any>[] = [
+function columns(rowActions: TableActionProps): ColumnDef<IAuthor, any>[] {
+    const tableCols: ColumnDef<IAuthor, any>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -85,15 +83,15 @@ function columns(rowActions: TableActionProps): ColumnDef<Author, any>[] {
             enableSorting: false,
             enableHiding: false,
         },
-        {
-            id: "index",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="#" />
-            ),
-            cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-            enableSorting: false,
-            enableHiding: false,
-        },
+        // {
+        //     id: "index",
+        //     header: ({ column }) => (
+        //         <DataTableColumnHeader column={column} title="#" />
+        //     ),
+        //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
+        //     enableSorting: false,
+        //     enableHiding: false,
+        // },
         {
             accessorKey: "name",
             header: ({ column }) => (

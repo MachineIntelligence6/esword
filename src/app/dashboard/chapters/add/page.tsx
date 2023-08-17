@@ -5,8 +5,6 @@ import serverApiHandlers from "@/server/handlers";
 
 
 export default async function Page() {
-  const { data: books } = await serverApiHandlers.books.getAll({ perPage: -1 })
-
   return (
     <div>
       <div className="flex items-center gap-5">
@@ -16,7 +14,7 @@ export default async function Page() {
         </h1>
       </div>
       <div className="mt-8">
-        <ChaptersForm books={books ?? []} />
+        <ChaptersForm />
       </div>
     </div>
   )

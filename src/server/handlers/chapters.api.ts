@@ -1,7 +1,8 @@
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Chapter, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
+import { IChapter } from "@/shared/types/models.types";
 
 
 
@@ -10,7 +11,7 @@ type PaginationProps = BasePaginationProps<Prisma.ChapterInclude> & {
 }
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, book = -1, include }: PaginationProps): Promise<PaginatedApiResponse<Chapter[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, book = -1, include }: PaginationProps): Promise<PaginatedApiResponse<IChapter[]>> {
     try {
         const chapters = await db.chapter.findMany({
             where: {
@@ -27,10 +28,15 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, book
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
             include: (
-                include ? include : {
-                    book: false,
-                    verses: false
-                }
+                include ?
+                    {
+                        ...include,
+                        // ...(include.verses && { verses: { where: { archived: false } } })
+                    }
+                    : {
+                        book: false,
+                        topics: false
+                    }
             )
         })
         const chaptersCount = await db.chapter.count({
@@ -63,7 +69,7 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, book
 
 
 
-export async function getByRef(ref: string, include?: Prisma.ChapterInclude): Promise<ApiResponse<Chapter>> {
+export async function getByRef(ref: string, include?: Prisma.ChapterInclude): Promise<ApiResponse<IChapter>> {
     try {
         const chapter = await db.chapter.findFirst({
             where: {
@@ -77,7 +83,17 @@ export async function getByRef(ref: string, include?: Prisma.ChapterInclude): Pr
                 ],
                 archived: false
             },
-            include: (include ? include : { book: false, verses: false })
+            include: (
+                include ?
+                    {
+                        ...include,
+                        // ...(include.verses && { verses: { where: { archived: false } } })
+                    }
+                    : {
+                        book: false,
+                        topics: false
+                    }
+            )
         })
         if (!chapter) {
             return {
@@ -104,8 +120,16 @@ export async function getByRef(ref: string, include?: Prisma.ChapterInclude): Pr
 
 
 
-export async function archive(id: number): Promise<ApiResponse<Chapter>> {
+export async function archive(id: number): Promise<ApiResponse<IChapter>> {
     try {
+        const chapter = await db.chapter.findFirst({ where: { id: id }, include: { topics: true } })
+        if (chapter?.topics && chapter.topics.length > 0) {
+            return {
+                succeed: false,
+                code: "DATA_LINKED",
+                data: null
+            }
+        }
         await db.chapter.update({
             where: { id: id },
             data: {
@@ -129,13 +153,12 @@ export async function archive(id: number): Promise<ApiResponse<Chapter>> {
 
 
 type CreateChapterReq = {
-    name: string;
+    name: number;
     slug: string;
-    bookId: number;
-    number: number;
+    book: number;
 }
 
-export async function create(req: Request): Promise<ApiResponse> {
+export async function create(req: Request): Promise<ApiResponse<IChapter>> {
     try {
         const chapterReq = await req.json() as CreateChapterReq
         const chapterExist = await db.chapter.findFirst({
@@ -147,17 +170,16 @@ export async function create(req: Request): Promise<ApiResponse> {
                 code: "SLUG_MUST_BE_UNIQUE",
             }
         }
-        // const book = await db.book.findFirst({ where: { id: chapterReq.bookId }, include: { chapters: false } })
-        // if (!book) throw new Error("")
+        const book = await db.book.findFirst({ where: { id: chapterReq.book }, include: { chapters: false } })
+        if (!book) throw new Error("")
         const chapter = await db.chapter.create({
             data: {
                 name: chapterReq.name,
                 slug: chapterReq.slug,
-                bookId: chapterReq.bookId,
-                number: chapterReq.number
+                bookId: chapterReq.book,
             },
             include: {
-                verses: false,
+                topics: false,
                 book: false
             }
         })
@@ -182,13 +204,13 @@ export async function create(req: Request): Promise<ApiResponse> {
 
 
 type UpdateChapterReq = {
-    name?: string | null
-    slug?: string | null
-    book?: number | null
+    name?: number
+    slug?: string
+    book?: number
 }
 
 
-export async function update(req: Request, id: number): Promise<ApiResponse> {
+export async function update(req: Request, id: number): Promise<ApiResponse<IChapter>> {
     try {
         const chapterReq = await req.json() as UpdateChapterReq
         if (chapterReq.slug) {
