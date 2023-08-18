@@ -3,20 +3,16 @@ import VersesComponent from "./VersesComponent";
 
 
 
-
-
 export default function VersesContentComponent() {
     const toggleHighlight = (): void => {
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) {
             return; // Do nothing if there is no active selection or no range
         }
-
         const range = selection.getRangeAt(0);
         const span = document.createElement('span');
         span.className = 'highlight bg-yellow-200';
         const isHighlighted = range.commonAncestorContainer.parentElement?.classList.contains('highlight');
-
         if (isHighlighted) {
             const parentElement = range.commonAncestorContainer.parentElement;
             if (parentElement) {
@@ -33,7 +29,6 @@ export default function VersesContentComponent() {
     const handleZoomIn = () => {
         setScale((prevScale) => Math.min(1.6, prevScale + 0.1));  // Increase scale by 0.1
     };
-
     const handleZoomOut = () => {
         setScale((prevScale) => Math.max(0.6, prevScale - 0.1)); // Decrease scale by 0.1 but never below 0.1
     };
