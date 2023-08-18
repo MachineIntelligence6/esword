@@ -1,10 +1,6 @@
 @tailwind base;
-
-
-
 @tailwind components;
 @tailwind utilities;
-
 
 html {
     font-family: 'Times New Roman', Times, serif;
@@ -13,4 +9,25 @@ html {
 .font-inter {
     font-family: 'Inter';
 }
+
+/* Default styles for the icons */
+
+
+/* Styles to change icon position on hover */
+.fa-solid.fa-bookmark {
+    transition: transform 0.2s;
+    color: #19374a; 
+}
+
+.fa-solid.fa-bookmark:hover {
+    transform: translateY(-2px);
+}
+
+
+
+
+
+
+
+
 
