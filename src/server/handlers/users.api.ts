@@ -3,17 +3,20 @@ import db from '@/server/db'
 import { Prisma, UserRole } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { hashPassword } from "../auth";
-import { IUser } from "@/shared/types/models.types";
+import { IUser, IUserRole } from "@/shared/types/models.types";
 
 
-type PaginationProps = BasePaginationProps<Prisma.UserInclude>
+type PaginationProps = BasePaginationProps<Prisma.UserInclude> & {
+    role?: IUserRole
+}
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<IUser[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, role = "ALL", include }: PaginationProps): Promise<PaginatedApiResponse<IUser[]>> {
     try {
         const users = await db.user.findMany({
             where: {
                 archived: false,
+                ...(role !== "ALL" && { role: role })
             },
             orderBy: {
                 id: "asc"

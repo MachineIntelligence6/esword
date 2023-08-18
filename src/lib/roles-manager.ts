@@ -13,6 +13,13 @@ const editorAccessiblePaths = [
     /^\/dashboard\/topics\/.*$/,
     /^\/dashboard\/verses$/,
     /^\/dashboard\/verses\/.*$/,
+    /^\/dashboard\/commentaries$/,
+    /^\/dashboard\/commentaries\/.*$/,
+    /^\/dashboard\/authors$/,
+    /^\/dashboard\/authors\/.*$/,
+    /^\/dashboard\/notes$/,
+    /^\/dashboard\/notes\/.*$/,
+    /^\/dashboard\/settings$/,
 ]
 
 

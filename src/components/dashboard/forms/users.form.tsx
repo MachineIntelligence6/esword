@@ -22,7 +22,14 @@ export const userFormSchema = z.object({
     email: z.string({ required_error: "This field is required." })
         .min(1, { message: "This field is required." })
         .email({ message: "Please enter a valid email." }),
-    password: z.string({ required_error: "This field is required." }).optional(),
+    password: z.string({ required_error: "This field is required." })
+        .optional()
+        .refine((password) => {
+            if (!password) return true;
+            return password.length >= 8
+        }, {
+            message: "Password must contain at least 8 characters"
+        }),
     role: z.string({ required_error: "This field is required." }),
 })
 

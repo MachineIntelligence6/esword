@@ -98,7 +98,7 @@ export function DeleteRowAction(
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
                     <Button variant={"destructive"} onClick={handleDelete}>
                         {
                             processing ?

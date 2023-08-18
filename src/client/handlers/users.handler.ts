@@ -1,20 +1,22 @@
 import axios from "axios";
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 import { UserFormSchema } from "@/components/dashboard/forms/users.form";
-import { IUser } from "@/shared/types/models.types";
+import { IUser, IUserRole } from "@/shared/types/models.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.UserInclude>
+type PaginationProps = BasePaginationProps<Prisma.UserInclude> & {
+    role?: IUserRole
+}
 
 
 export async function get(
-    { page = 1, perPage, include }: PaginationProps
+    { page = 1, perPage, role = "ALL", include }: PaginationProps
 ): Promise<PaginatedApiResponse<IUser[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IUser[]>>(
-            `/api/users?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}`
+            `/api/users?page=${page}&perPage=${perPage}&role=${role}&include=${JSON.stringify(include)}`
         )
         return res.data
     } catch (error) {

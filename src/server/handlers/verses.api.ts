@@ -275,8 +275,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<IVer
 type CsvIVerse = {
     book: string;
     chapter: number;
-    topicNumber: number;
-    topicName: string;
+    topic: string;
     number: number;
     text: string;
 }
@@ -295,10 +294,9 @@ export async function importFromCSV(req: Request): Promise<ApiResponse<IVerse[]>
         const csvIVerses: CsvIVerse[] = csvRecords.map((record: any[]) => ({
             book: record[0],
             chapter: Number(record[1]),
-            topicNumber: record[2],
-            topicName: record[3],
-            number: Number(record[4]),
-            text: record[5],
+            topic: record[2],
+            number: Number(record[3]),
+            text: record[4],
         }));
 
         const createdIVerses: IVerse[] = []
@@ -307,7 +305,7 @@ export async function importFromCSV(req: Request): Promise<ApiResponse<IVerse[]>
             const book = await db.book.upsert({
                 where: { name: csvIVerse.book.trim() },
                 create: {
-                    name: csvIVerse.book,
+                    name: csvIVerse.book.trim(),
                     abbreviation: "",
                     slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_")
                 },
@@ -323,27 +321,39 @@ export async function importFromCSV(req: Request): Promise<ApiResponse<IVerse[]>
                 },
                 update: {}
             })
+            const dbLastTopic = await db.topic.findFirst({
+                orderBy: {
+                    number: "desc"
+                },
+                where: {
+                    chapterId: chapter.id
+                }
+            })
+            const topicNumber = dbLastTopic ? dbLastTopic.number + 1 : 1;
             let topic = await db.topic.findFirst({
                 where: {
-                    name: csvIVerse.topicName,
-                    number: csvIVerse.topicNumber,
+                    OR: [
+                        { name: csvIVerse.topic },
+                        { number: topicNumber }
+                    ],
                     chapter: {
                         id: chapter.id,
                         bookId: chapter.bookId
                     }
                 }
             })
-            if (!topic) {
+            if (!topic || topic?.name !== csvIVerse.topic) {
                 topic = await db.topic.create({
                     data: {
-                        name: csvIVerse.topicName,
-                        number: csvIVerse.topicNumber,
+                        name: csvIVerse.topic,
+                        number: topic?.number === topicNumber ? (topicNumber + 1) : topicNumber,
                         chapterId: chapter.id
                     }
                 })
             }
             let verse = await db.verse.findFirst({
                 where: {
+                    number: csvIVerse.number,
                     topic: {
                         id: topic.id,
                         chapter: {
@@ -358,7 +368,7 @@ export async function importFromCSV(req: Request): Promise<ApiResponse<IVerse[]>
                     data: {
                         number: csvIVerse.number,
                         text: csvIVerse.text,
-                        topicId: chapter.id,
+                        topicId: topic.id,
                     },
                 })
                 createdIVerses.push(verse)

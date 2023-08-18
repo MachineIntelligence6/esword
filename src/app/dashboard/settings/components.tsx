@@ -70,7 +70,7 @@ export function ImportIVersesComponent() {
                                 <Spinner className="w-10 h-10 border-4" />
                                 : <UploadIcon className="w-8 h-8" />}
                     <h3 className="text-xl mt-8 font-semibold">
-                        {pickedFile ? pickedFile.name : "Import IVerses"}
+                        {pickedFile ? pickedFile.name : "Import Verses"}
                     </h3>
                     <p className="text-sm">
                         {

@@ -72,9 +72,9 @@ export default function NotesTable({ user, verse }: Props) {
         // viewAction: (note: Note) => (
         //     <Link href={`/dashboard/notes/${note.id}`}>View</Link>
         // ),
-        // editAction: (note: Note) => (
-        //     <Link href={`/dashboard/notes/${note.id}/edit`}>Edit</Link>
-        // ),
+        editAction: (note: INote) => (
+            <Link href={`/dashboard/notes/${note.id}/edit`}>Edit</Link>
+        ),
         deleteAction: handleDelete
     })
 

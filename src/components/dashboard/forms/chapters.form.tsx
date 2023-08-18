@@ -51,10 +51,14 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
     }, [])
 
 
-    const onNameChange = () => {
+
+    const updateSlug = () => {
+        const bookId = form.getValues("book")
         const nameVal = form.getValues("name")
-        if (!nameVal) return;
-        const slug = "chapter_" + nameVal.toString()
+        if (!bookId || !nameVal) return;
+        const book = books?.find((book) => book.id === bookId)
+        if (!book) return;
+        const slug = `${book.slug}_${nameVal}`
         form.setValue("slug", slug, { shouldValidate: true })
     }
 
@@ -121,24 +125,8 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                                             {...field}
                                             onChange={(e) => {
                                                 field.onChange(e.target.valueAsNumber)
-                                                onNameChange()
+                                                updateSlug()
                                             }} />
-                                    </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="slug"
-                            render={({ field, fieldState }) => (
-                                <FormItem className="col-span-1">
-                                    <FormLabel>Slug <span className="text-red-500">*</span></FormLabel>
-                                    <FormControl>
-                                        <Input type="text" required  {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -159,11 +147,28 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                                             placeholder="Select Book"
                                             onChange={(opt) => {
                                                 field.onChange(opt?.value ? Number(opt.value) : undefined)
+                                                updateSlug()
                                             }}
                                             ref={field.ref}
                                             loading={!books}
                                             options={books?.map((book) => ({ label: book.name, value: book.id.toString(), rawValue: book }))}
                                         />
+                                    </FormControl>
+                                    {
+                                        fieldState.error &&
+                                        <FormMessage />
+                                    }
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="slug"
+                            render={({ field, fieldState }) => (
+                                <FormItem className="col-span-1">
+                                    <FormLabel>Slug <span className="text-red-500">*</span></FormLabel>
+                                    <FormControl>
+                                        <Input type="text" required  {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
