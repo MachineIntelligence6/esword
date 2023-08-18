@@ -147,18 +147,17 @@ export default function VersesContentComponent() {
                     {/* bookmark icons section */}
                     <div className="flex flex-col gap-4 pt-3 px-2 w-10 overflow-y-auto">
                         <a href="">
-                            <i className="fa-solid fa-bookmark"></i>
+                            <img src="/icons/bookfill-icon.png " className="bookmark" />
                         </a>
                         <a href="">
-                            <i className="fa-solid fa-bookmark"></i>
+                            <img src="/icons/bookfill-icon.png " className="bookmark" />
                         </a>
                         <a href="">
-                            <i className="fa-solid fa-bookmark"></i>
+                            <img src="/icons/bookfill-icon.png " className="bookmark" />
                         </a>
                         <a href="">
-                            <i className="fa-solid fa-bookmark"></i>
+                            <img src="/icons/bookfill-icon.png " className="bookmark" />
                         </a>
-
                     </div>
                 </div>
             </div>

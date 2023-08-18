@@ -14,12 +14,9 @@ html {
 
 
 /* Styles to change icon position on hover */
-.fa-solid.fa-bookmark {
-    transition: transform 0.2s;
-    color: #19374a; 
-}
 
-.fa-solid.fa-bookmark:hover {
+
+.bookmark:hover {
     transform: translateY(-2px);
 }
 
