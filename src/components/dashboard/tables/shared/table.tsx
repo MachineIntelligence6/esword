@@ -25,13 +25,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/dashboard/ui/table"
+} from "@/components/ui/table"
 
 import { DataTablePagination, TablePagination } from "./pagination"
 import { ArrowDownIcon, ArrowUpIcon, CaretSortIcon, Cross2Icon, EyeNoneIcon, MixerHorizontalIcon } from "@radix-ui/react-icons"
 
-import { Button } from "@/components/dashboard/ui/button"
-import { Input } from "@/components/dashboard/ui/input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 import {
   DropdownMenu,
@@ -41,7 +41,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from "@/components/dashboard/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import Spinner from "@/components/spinner"
 import { DeleteBatchRowsAction } from "./row-actions"

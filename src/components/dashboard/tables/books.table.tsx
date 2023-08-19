@@ -1,5 +1,5 @@
 'use client'
-import { Checkbox } from "@/components/dashboard/ui/checkbox"
+import { Checkbox } from "@/components/ui/checkbox"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "./shared/table"
 import { DataTableRowActions } from "./shared/row-actions"

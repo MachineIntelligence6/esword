@@ -1,8 +1,8 @@
 'use client'
 import clientApiHandlers from "@/client/handlers"
-import { Button } from "@/components/dashboard/ui/button"
-import { Card, CardContent } from "@/components/dashboard/ui/card"
-import { useToast } from "@/components/dashboard/ui/use-toast"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast"
 import Spinner from "@/components/spinner"
 import { cn } from "@/lib/utils"
 import { FileIcon, UploadIcon } from "@radix-ui/react-icons"

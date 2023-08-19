@@ -6,10 +6,10 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from "@/components/dashboard/ui/card"
+} from "@/components/ui/card"
 import VersesTable from "@/components/dashboard/tables/verses.table";
 import Link from "next/link";
-import { buttonVariants } from "@/components/dashboard/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import db from "@/server/db";

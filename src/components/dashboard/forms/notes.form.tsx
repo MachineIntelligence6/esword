@@ -1,17 +1,17 @@
 'use client';
 import dynamic from "next/dynamic";
-import { Card, CardContent, CardFooter, CardTitle } from "../ui/card";
+import { Card, CardContent, CardFooter, CardTitle } from "../../ui/card";
 import 'react-quill/dist/quill.snow.css';
 import Spinner from "@/components/spinner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { SelectEl } from "../ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../ui/form";
+import { SelectEl } from "../../ui/select";
 import { useEffect, useState } from "react";
 import { IBook, IChapter, INote, ITopic, IUser, IVerse } from "@/shared/types/models.types";
 import clientApiHandlers from "@/client/handlers";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { useRouter } from "next/navigation";
 import definedMessages from "@/shared/constants/messages";
 import Link from "next/link";
@@ -26,29 +26,33 @@ const ReactQuill = dynamic(() => import("react-quill"), {
 });
 
 
-const modules = {
-    toolbar: [
-        [
-            { 'header': '1' },
-            { 'header': '2' },
-            { 'header': [1, 2, 3, 4, 5, 6, false] }
-        ],
-        [{ 'font': [] }],
-        // [{ size: [] }],
-        // [{ 'color': [] }, { 'background': [] }],
-        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-        [
-            { 'list': 'ordered' },
-            { 'list': 'bullet' },
-            { 'indent': '-1' },
-            { 'indent': '+1' }
-        ],
-        ['link'],
-        ['clean']
-    ],
-    clipboard: {
-        // toggle to add extra line breaks when pasting HTML:
-        matchVisual: false,
+const modules = (readonly?: boolean) => {
+    return {
+        ...(readonly ? { toolbar: null } : {
+            toolbar: [
+                [
+                    { 'header': '1' },
+                    { 'header': '2' },
+                    { 'header': [1, 2, 3, 4, 5, 6, false] }
+                ],
+                [{ 'font': [] }],
+                // [{ size: [] }],
+                // [{ 'color': [] }, { 'background': [] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [
+                    { 'list': 'ordered' },
+                    { 'list': 'bullet' },
+                    { 'indent': '-1' },
+                    { 'indent': '+1' }
+                ],
+                ['link'],
+                ['clean']
+            ],
+        }),
+        clipboard: {
+            // toggle to add extra line breaks when pasting HTML:
+            matchVisual: false,
+        }
     }
 }
 
@@ -74,10 +78,11 @@ export type NotesEditorFormSchema = z.infer<typeof notesEditorFormSchema>
 
 type Props = {
     note: INote;
+    readonly?: boolean;
 }
 
 
-export default function NotesEditorForm({ note }: Props) {
+export default function NotesEditorForm({ note, readonly }: Props) {
     const router = useRouter()
     const { data: session } = useSession();
     const form = useForm<NotesEditorFormSchema>({
@@ -94,6 +99,7 @@ export default function NotesEditorForm({ note }: Props) {
 
 
     const handleUpdate = async (data: NotesEditorFormSchema) => {
+        if (readonly) return;
         const res = await clientApiHandlers.notes.update(note.id, data.text)
         if (res.succeed && res.data) return router.push(`/dashboard/notes`)
         if (res.code === "UNKOWN_ERROR") {
@@ -170,9 +176,10 @@ export default function NotesEditorForm({ note }: Props) {
                                             <ReactQuill
                                                 theme="snow"
                                                 bounds="#editor-container"
+                                                readOnly={readonly}
                                                 {...field}
                                                 formats={formats}
-                                                modules={modules}
+                                                modules={modules(readonly)}
                                                 placeholder="Type..." />
                                         </div>
                                     </FormControl>
@@ -194,22 +201,27 @@ export default function NotesEditorForm({ note }: Props) {
                         />
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                        <Button
-                            variant="outline"
-                            disabled={formState.isSubmitting}
-                            onClick={() => window.history.back()}>
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={!formState.isDirty || formState.isSubmitting}>
-                            {
-                                formState.isSubmitting ?
-                                    <Spinner className="border-white" />
-                                    :
-                                    "Update"
-                            }
-                        </Button>
+                        {
+                            !readonly &&
+                            <>
+                                <Button
+                                    variant="outline"
+                                    disabled={formState.isSubmitting}
+                                    onClick={() => window.history.back()}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={!formState.isDirty || formState.isSubmitting}>
+                                    {
+                                        formState.isSubmitting ?
+                                            <Spinner className="border-white" />
+                                            :
+                                            "Update"
+                                    }
+                                </Button>
+                            </>
+                        }
                     </CardFooter>
                 </form>
             </Form>

@@ -3,11 +3,11 @@ import serverApiHandlers from "@/server/handlers";
 import { notFound } from "next/navigation";
 import CommentariesTable from "@/components/dashboard/tables/commentaries.table";
 import Link from "next/link";
-import { buttonVariants } from "@/components/dashboard/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import db from "@/server/db";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/dashboard/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 
 export default async function Page({ params }: { params: { id: string } }) {

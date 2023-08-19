@@ -7,8 +7,8 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from "@/components/dashboard/ui/card"
-import { Button, buttonVariants } from "@/components/dashboard/ui/button";
+} from "@/components/ui/card"
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { cn } from "@/lib/utils";

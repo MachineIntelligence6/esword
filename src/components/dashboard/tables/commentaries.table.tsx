@@ -1,12 +1,12 @@
 'use client'
-import { Checkbox } from "@/components/dashboard/ui/checkbox"
+import { Checkbox } from "@/components/ui/checkbox"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "./shared/table"
 import { DataTableRowActions } from "./shared/row-actions"
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import { useToast } from "@/components/dashboard/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
 import Link from "next/link"
 import { PaginatedApiResponse } from "@/shared/types/api.types"

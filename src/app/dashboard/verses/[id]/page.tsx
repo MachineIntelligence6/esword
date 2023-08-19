@@ -6,13 +6,13 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from "@/components/dashboard/ui/card"
+} from "@/components/ui/card"
 import CommentariesTable from "@/components/dashboard/tables/commentaries.table";
 import Link from "next/link";
-import { buttonVariants } from "@/components/dashboard/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/dashboard/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NotesTable from "@/components/dashboard/tables/notes.table";
 import db from "@/server/db";
 import { IVerse } from "@/shared/types/models.types";

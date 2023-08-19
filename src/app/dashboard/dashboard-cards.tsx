@@ -1,7 +1,7 @@
 'use client'
 import clientApiHandlers from "@/client/handlers"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard/ui/card"
-import { Separator } from "@/components/dashboard/ui/separator"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import Spinner from "@/components/spinner"
 import { extractTextFromHtml } from "@/lib/utils"
 import { PaginatedApiResponse } from "@/shared/types/api.types"

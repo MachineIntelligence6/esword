@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImportIVersesComponent } from "./components"
 
 
@@ -8,7 +8,7 @@ export default function Page() {
 
     return (
         <div>
-            <Card className="min-h-[700px]">
+            <Card className="min-h-[600px]">
                 <CardHeader className="border-b-8 border-silver-light py-4">
                     <CardTitle className="text-2xl">Settings</CardTitle>
                 </CardHeader>

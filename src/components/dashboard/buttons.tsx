@@ -1,8 +1,8 @@
 'use client'
 import { ArrowLeftIcon, ExitIcon } from "@radix-ui/react-icons";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { signOut } from "next-auth/react";
-import { DropdownMenuItem } from "./ui/dropdown-menu";
+import { DropdownMenuItem } from "../ui/dropdown-menu";
 
 
 

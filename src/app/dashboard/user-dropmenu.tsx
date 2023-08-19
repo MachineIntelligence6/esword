@@ -1,12 +1,12 @@
 import { LogoutButton } from "@/components/dashboard/buttons"
-import { Button } from "@/components/dashboard/ui/button"
+import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/dashboard/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import Spinner from "@/components/spinner"
 import { PersonIcon } from "@radix-ui/react-icons"
 import { Session } from "next-auth"

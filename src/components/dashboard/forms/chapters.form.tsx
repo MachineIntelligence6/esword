@@ -1,16 +1,16 @@
 'use client'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/dashboard/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Input } from "@/components/dashboard/ui/input";
-import { Card, CardContent, CardFooter } from "@/components/dashboard/ui/card";
-import { Button } from "@/components/dashboard/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter } from "next/navigation";
-import { ComboBox, SelectEl } from "../ui/select";
+import { ComboBox, SelectEl } from "../../ui/select";
 import { useEffect, useState } from "react";
 import { IBook, IChapter } from "@/shared/types/models.types";
 

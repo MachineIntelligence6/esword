@@ -1,17 +1,17 @@
 'use client'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/dashboard/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { UseFormReturn, useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Input } from "@/components/dashboard/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/dashboard/ui/card";
-import { Button } from "@/components/dashboard/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
 import { useEffect, useState } from "react";
 import { z } from 'zod'
 import { IBook, IChapter, ITopic } from "@/shared/types/models.types";
-import { SelectEl } from "../ui/select";
+import { SelectEl } from "../../ui/select";
 
 
 export const topicFormSchema = z.object({

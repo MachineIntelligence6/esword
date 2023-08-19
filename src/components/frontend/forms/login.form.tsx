@@ -1,10 +1,10 @@
 'use client'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/dashboard/ui/form";
-import { Input } from "@/components/dashboard/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/dashboard/ui/button";
-import { Checkbox } from "@/components/dashboard/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
 import { getSession, signIn } from 'next-auth/react'
 import { ApiResCode } from "@/shared/types/api.types";

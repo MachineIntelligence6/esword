@@ -1,5 +1,5 @@
 import AuthProvider from '@/components/auth-provider'
-import { Toaster } from '@/components/dashboard/ui/toaster'
+import { Toaster } from '@/components/ui/toaster'
 import { getServerAuth } from '@/server/auth'
 import '@/styles/tailwind.css'
 import type { Metadata } from 'next'

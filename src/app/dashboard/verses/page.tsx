@@ -1,14 +1,14 @@
-import { buttonVariants } from "@/components/dashboard/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import Link from "next/link"
 import VersesTable from "@/components/dashboard/tables/verses.table"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/dashboard/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 
 
 export default async function Page() {
   return (
     <div>
-      <Card className="min-h-[700px]">
+      <Card className="min-h-[600px]">
         <CardHeader className="border-b-8 border-silver-light py-4">
           <div className="flex items-center justify-between">
             <CardTitle className="font-bold text-2xl">

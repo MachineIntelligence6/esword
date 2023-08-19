@@ -1,6 +1,6 @@
 'use client'
 import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/components/dashboard/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { usePathname } from 'next/navigation'
 import Link from "next/link";
 import { canUserAccessPath } from "@/lib/roles-manager";
