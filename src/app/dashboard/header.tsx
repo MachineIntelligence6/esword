@@ -11,7 +11,7 @@ type Props = {
 
 export default function DashboardHeader({ session }: Props) {
     return (
-        <header className="sticky top-0 z-50">
+        <header className="sticky top-0 z-50 shadow">
             <nav className="flex justify-between px-6 items-center h-[80px] w-full bg-primary">
                 <div>
                     <Link href="/home">

@@ -49,8 +49,8 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center gap-5 justify-between">
+        <div className="space-y-4">
+            <div className="flex items-center gap-5 justify-between bg-white rounded-md shadow p-3">
                 <div className="flex items-center gap-5">
                     <BackButton />
                     <h1 className="font-semibold text-2xl">
@@ -80,8 +80,16 @@ export default async function Page({ params }: { params: { id: string } }) {
             </div>
             <TopicDetailsCard topic={topic} />
             <div className="pt-5">
-                <h3 className="font-semibold text-2xl mb-5">Verses</h3>
-                <VersesTable topic={topic} />
+                <Card>
+                    <CardHeader className="border-b-8 border-silver-light py-4">
+                        <CardTitle className="font-bold text-2xl">
+                            Verses
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-5">
+                        <VersesTable topic={topic} />
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

@@ -14,8 +14,20 @@ export const GET = async (req: Request) => {
         include = JSON.parse(includeStr ?? "")
     } catch (error) {
     }
+    const whereStr = params.get("where")
+    let where: Prisma.BookWhereInput | undefined;
+    try {
+        where = JSON.parse(whereStr ?? "")
+    } catch (error) {
+    }
+    const orderByStr = params.get("orderBy")
+    let orderBy: Prisma.BookOrderByWithRelationInput | undefined;
+    try {
+        orderBy = JSON.parse(orderByStr ?? "")
+    } catch (error) {
+    }
 
-    const res = await serverApiHandlers.books.getAll({ page, perPage, include })
+    const res = await serverApiHandlers.books.getAll({ page, perPage, include, where, orderBy })
     return NextResponse.json(res)
 }
 

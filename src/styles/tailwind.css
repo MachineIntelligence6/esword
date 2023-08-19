@@ -5,6 +5,19 @@
 
 
 
+
+*::-webkit-scrollbar {
+    background: lightgray;
+    width: 5px;
+    height: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+    border-radius: 30px;
+    background: gray;
+}
+
+
 .ql-container {
     min-height: 300px !important;
     max-height: 600px !important;

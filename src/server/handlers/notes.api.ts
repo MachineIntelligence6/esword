@@ -3,28 +3,30 @@ import db from '@/server/db'
 import defaults from "@/shared/constants/defaults";
 import { Prisma } from "@prisma/client";
 import { INote } from "@/shared/types/models.types";
+import { NotesPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.NoteInclude> & {
-    user?: number;
-    verse?: number;
-}
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, user = -1, include }: PaginationProps): Promise<PaginatedApiResponse<INote[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, user = -1, include, where, orderBy }: NotesPaginationProps): Promise<PaginatedApiResponse<INote[]>> {
     try {
         const notes = await db.note.findMany({
-            where: {
-                ...(user !== -1 && {
-                    userId: user
-                }),
-                ...(verse !== -1 && {
-                    verseId: verse
-                }),
-                archived: false,
-            },
-            orderBy: {
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false
+                }
+                : {
+                    ...(user !== -1 && {
+                        userId: user
+                    }),
+                    ...(verse !== -1 && {
+                        verseId: verse
+                    }),
+                    archived: false,
+                },
+            orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
             ...(perPage !== -1 && {
@@ -32,7 +34,10 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
             include: (
-                include ? include : {
+                include ? {
+                    ...include,
+                    ...(include.user && { user: { select: { name: true, email: true, role: true } } })
+                } : {
                     user: false,
                     verse: false
                 }
@@ -55,7 +60,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
                 page: page,
                 perPage: perPage,
                 results: notes.length,
-                totalPages: Math.ceil(notesCount / perPage)
+                totalPages: Math.ceil(notesCount / perPage),
+                count: notesCount,
             },
             data: notes
         }
@@ -78,7 +84,10 @@ export async function getById(id: number, include?: Prisma.NoteInclude): Promise
                 id: id,
                 archived: false
             },
-            include: (include ? include : { user: false, verse: false })
+            include: (include ? {
+                ...include,
+                ...(include.user && { user: { select: { name: true, email: true, role: true } } })
+            } : { user: false, verse: false })
         })
         if (!note) {
             return {
@@ -169,9 +178,7 @@ export async function create(req: Request): Promise<ApiResponse<INote>> {
 
 
 type UpdateNoteReq = {
-    text?: string | null;
-    verse?: number | null;
-    user?: number | null;
+    text?: string;
 }
 
 
@@ -181,8 +188,6 @@ export async function update(req: Request, id: number): Promise<ApiResponse<INot
         const note = await db.note.update({
             data: {
                 ...(noteReq.text && { text: noteReq.text }),
-                ...(noteReq.verse && { verseId: noteReq.verse }),
-                ...(noteReq.user && { userId: noteReq.user }),
             },
             where: {
                 id: id

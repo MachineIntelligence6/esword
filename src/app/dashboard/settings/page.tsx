@@ -1,22 +1,25 @@
 'use client'
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard/ui/card"
 import { ImportIVersesComponent } from "./components"
 
 
 export default function Page() {
 
     return (
-        <div className="space-y-8">
-            <div>
-                <h1 className="font-bold text-2xl">
-                    Settings
-                </h1>
-            </div>
-            <div className="grid grid-cols-2">
-                <div className="col-span-1">
-                    <ImportIVersesComponent />
-                </div>
-            </div>
+        <div>
+            <Card className="min-h-[700px]">
+                <CardHeader className="border-b-8 border-silver-light py-4">
+                    <CardTitle className="text-2xl">Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="p-5">
+                    <div className="grid grid-cols-2">
+                        <div className="col-span-1">
+                            <ImportIVersesComponent />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     )
 }

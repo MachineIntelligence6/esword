@@ -7,6 +7,7 @@ import Link from "next/link";
 import AuthorsTable from "@/components/dashboard/tables/authors.table";
 import AuthorsForm from "@/components/dashboard/forms/authors.form";
 import { IAuthor } from "@/shared/types/models.types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard/ui/card";
 
 
 
@@ -34,15 +35,15 @@ export default function Page() {
     }
   }
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-bold text-2xl">
-          Authors
-        </h1>
-      </div>
-      <div className="grid grid-cols-12 gap-10">
-        <div className="col-span-8 w-full">
-          {
+    <div className="grid grid-cols-12 gap-5">
+      <div className="col-span-8 w-full">
+        <Card className="min-h-[700px]">
+          <CardHeader className="border-b-8 border-silver-light py-4">
+            <CardTitle className="font-bold text-2xl">
+              Authors
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5">
             <AuthorsTable
               viewAction={(author: IAuthor) => (
                 <Link href={`/dashboard/authors/${author.id}`}>View</Link>
@@ -53,11 +54,13 @@ export default function Page() {
                 </span>
               )}
               deleteAction={handleDelete} />
-          }
-        </div>
-        <div className="col-span-4 mt-12">
-          <AuthorsForm author={selectedAuthor} onReset={() => setSelectedAuthor(null)} />
-        </div>
-      </div>    </div>
+
+          </CardContent>
+        </Card>
+      </div>
+      <div className="col-span-4">
+        <AuthorsForm author={selectedAuthor} onReset={() => setSelectedAuthor(null)} />
+      </div>
+    </div>
   )
 }

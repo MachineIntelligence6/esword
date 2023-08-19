@@ -155,7 +155,7 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/chapters/${row.original.id}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
+                            className="max-w-[100px] text-primary truncate font-normal">
                             {row.getValue("slug")}
                         </Link>
                     </div>
@@ -171,7 +171,7 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/books/${row.original.bookId}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
+                            className="max-w-[100px] text-primary truncate font-normal">
                             {row.original.book?.name}
                         </Link>
                     </div>

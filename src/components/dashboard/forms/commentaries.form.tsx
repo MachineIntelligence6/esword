@@ -325,7 +325,7 @@ export default function CommentariesForm({ commentary }: { commentary?: IComment
                                             }}
                                             ref={field.ref}
                                             options={verses?.map((verse: IVerse) => ({
-                                                label: String(verse.number),
+                                                label: `${verse.number} (${verse.text.substring(0, 30)}...)`,
                                                 value: verse.id.toString(),
                                                 rawValue: verse
                                             }))}

@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/dashboard/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import db from "@/server/db";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/dashboard/ui/card";
 
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -39,15 +40,15 @@ export default async function Page({ params }: { params: { id: string } }) {
     });
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center gap-5 justify-between">
+        <div className="space-y-4">
+            <div className="flex items-center gap-5 justify-between bg-white rounded-md shadow p-3">
                 <div className="flex items-start gap-5">
                     <BackButton />
                     <div className="max-w-screen-xl">
                         <h1 className="font-semibold text-2xl">
                             {author?.name}
                         </h1>
-                        <p className="mt-3">{author.description}</p>
+                        <p className="mt-2">{author.description}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -72,8 +73,16 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </div>
             </div>
             <div className="pt-5">
-                <h3 className="font-semibold text-2xl mb-5">Commentaries</h3>
-                <CommentariesTable author={author} />
+                <Card>
+                    <CardHeader className="border-b-8 border-silver-light py-4">
+                        <CardTitle className="font-bold text-2xl">
+                            Commentaries
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-5">
+                        <CommentariesTable author={author} />
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

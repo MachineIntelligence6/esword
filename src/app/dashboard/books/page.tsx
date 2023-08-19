@@ -7,6 +7,7 @@ import { useToast } from "@/components/dashboard/ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
 import Link from "next/link";
 import { IBook } from "@/shared/types/models.types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard/ui/card";
 
 
 
@@ -33,15 +34,15 @@ export default function Page() {
     }
   }
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-bold text-2xl">
-          Books
-        </h1>
-      </div>
-      <div className="grid grid-cols-12 gap-10">
-        <div className="col-span-8 w-full">
-          {
+    <div className="grid grid-cols-12 gap-5">
+      <div className="col-span-8 w-full">
+        <Card className="min-h-[700px]">
+          <CardHeader className="border-b-8 border-silver-light py-4">
+            <CardTitle className="font-bold text-2xl">
+              Books
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5">
             <BooksTable
               viewAction={(book) => (
                 <Link href={`/dashboard/books/${book.id}`}>View</Link>
@@ -52,11 +53,12 @@ export default function Page() {
                 </span>
               )}
               deleteAction={handleDelete} />
-          }
-        </div>
-        <div className="col-span-4 mt-12">
-          <BooksForm book={selectedBook} onReset={() => setSelectedBook(null)} />
-        </div>
+
+          </CardContent>
+        </Card>
+      </div>
+      <div className="col-span-4">
+        <BooksForm book={selectedBook} onReset={() => setSelectedBook(null)} />
       </div>
     </div>
   )

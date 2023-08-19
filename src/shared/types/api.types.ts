@@ -12,10 +12,12 @@ export type ApiResponse<TData = any> = {
 }
 
 
-export type BasePaginationProps<TInclude = null> = {
+export type BasePaginationProps<TInclude = null, TWhere = unknown, TOrderBy = unknown> = {
     page?: number,
     perPage?: number;
     include?: TInclude
+    where?: TWhere
+    orderBy?: TOrderBy
 }
 
 
@@ -24,6 +26,7 @@ export type PaginatedApiResponse<TData = any> = ApiResponse<TData> & {
         page: number;
         perPage: number;
         results: number;
+        count: number;
         totalPages: number
     }
 }

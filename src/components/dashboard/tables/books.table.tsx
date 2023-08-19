@@ -116,7 +116,7 @@ function columns(rowActions: TableActionProps): ColumnDef<IBook, any>[] {
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/books/${row.original.id}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
+                            className="max-w-[100px] text-primary truncate font-normal">
                             {row.getValue("slug")}
                         </Link>
                     </div>

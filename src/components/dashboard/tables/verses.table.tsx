@@ -174,7 +174,7 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/chapters/${row.original.topic?.chapter?.id}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
+                            className="max-w-[100px] text-primary truncate font-normal">
                             {`${row.original.topic?.chapter?.book?.name}/${row.original.topic?.chapter?.name}`}
                         </Link>
                     </div>

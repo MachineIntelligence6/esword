@@ -3,20 +3,25 @@ import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBook } from "@/shared/types/models.types";
+import { BooksPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.BookInclude>
 
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<IBook[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include, where, orderBy }: BooksPaginationProps): Promise<PaginatedApiResponse<IBook[]>> {
     try {
         const books = await db.book.findMany({
-            where: {
-                archived: false
-            },
-            orderBy: {
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false
+                } :
+                {
+                    archived: false
+                },
+            orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
             ...(perPage !== -1 && {
@@ -37,7 +42,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                 page: page,
                 perPage: perPage,
                 results: books.length,
-                totalPages: Math.ceil(booksCount / perPage)
+                totalPages: Math.ceil(booksCount / perPage),
+                count: booksCount,
             },
             data: books
         }

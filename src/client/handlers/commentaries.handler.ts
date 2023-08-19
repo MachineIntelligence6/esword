@@ -5,21 +5,18 @@ import { AuthorFormSchema } from "@/components/dashboard/forms/authors.form";
 import { CommentaryFormSchema } from "@/components/dashboard/forms/commentaries.form";
 import defaults from "@/shared/constants/defaults";
 import { ICommentary } from "@/shared/types/models.types";
+import { CommentariesPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.CommentaryInclude> & {
-    author?: number;
-    verse?: number;
-}
 
 
-export async function get(
-    { page = 1, perPage = defaults.PER_PAGE_ITEMS, author = -1, verse = -1, include }: PaginationProps
-): Promise<PaginatedApiResponse<ICommentary[]>> {
+export async function get({ page = 1, perPage = defaults.PER_PAGE_ITEMS,
+    author = -1, verse = -1, include, where, orderBy
+}: CommentariesPaginationProps): Promise<PaginatedApiResponse<ICommentary[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<ICommentary[]>>(
-            `/api/commentaries?page=${page}&perPage=${perPage}&author=${author}&verse=${verse}&include=${JSON.stringify(include)}`
+            `/api/commentaries?page=${page}&perPage=${perPage}&author=${author}&verse=${verse}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
         )
         return res.data
     } catch (error) {

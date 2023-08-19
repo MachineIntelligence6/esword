@@ -16,8 +16,20 @@ export const GET = async (req: Request) => {
         include = JSON.parse(includeStr ?? "")
     } catch (error) {
     }
+    const whereStr = params.get("where")
+    let where: Prisma.NoteWhereInput | undefined;
+    try {
+        where = JSON.parse(whereStr ?? "")
+    } catch (error) {
+    }
+    const orderByStr = params.get("orderBy")
+    let orderBy: Prisma.NoteOrderByWithRelationInput | undefined;
+    try {
+        orderBy = JSON.parse(orderByStr ?? "")
+    } catch (error) {
+    }
 
-    const res = await serverApiHandlers.notes.getAll({ page, perPage, verse: verse, user: user, include: include })
+    const res = await serverApiHandlers.notes.getAll({ page, perPage, verse, user, include, where, orderBy })
     return NextResponse.json(res)
 }
 

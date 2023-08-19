@@ -50,14 +50,14 @@ export default async function Page({ params }: { params: { id: string } }) {
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center gap-5 justify-between">
+            <div className="flex items-start gap-5 justify-between bg-white rounded-md shadow p-3">
                 <div className="flex items-start gap-5">
                     <BackButton />
                     <div className="max-w-screen-xl">
                         <h1 className="font-semibold text-2xl">
                             {commentary?.name}
                         </h1>
-                        <p className="mt-3">{commentary.text}</p>
+                        <p className="mt-2">{commentary.text}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ function ICommentaryDetailsCard({ commentary }: { commentary: ICommentary }) {
                     <span className="font-semibold">{commentary?.verse?.topic?.chapter?.name}</span>
                 </div>
                 <div className="flex items-center gap-5 text-base font-normal">
-                    <span>IVerse:</span>
+                    <span>Verse:</span>
                     <span className="font-semibold">{commentary?.verse?.number}</span>
                 </div>
                 <div className="flex items-center gap-5 text-base font-normal">

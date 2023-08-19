@@ -53,7 +53,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, book
                 page: page,
                 perPage: perPage,
                 results: chapters.length,
-                totalPages: Math.ceil(chaptersCount / perPage)
+                totalPages: Math.ceil(chaptersCount / perPage),
+                count: chaptersCount,
             },
             data: chapters
         }

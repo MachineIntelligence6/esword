@@ -166,7 +166,7 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/authors/${row.original.author?.id}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
+                            className="max-w-[100px] text-primary truncate font-normal">
                             {row.original.author?.name}
                         </Link>
                     </div>
@@ -183,8 +183,8 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/verses/${row.original.verseId}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {`${chapter?.book?.name}/${chapter?.name}/${row.original.verse?.number}`}
+                            className="max-w-[100px] text-primary truncate font-normal">
+                            {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`}
                         </Link>
                     </div>
                 )

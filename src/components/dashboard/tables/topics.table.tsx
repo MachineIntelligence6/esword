@@ -131,7 +131,7 @@ function columns(rowActions: TableActionProps): ColumnDef<ITopic, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/chapters/${row.original.chapterId}`} className="max-w-[100px] text-blue-500 truncate font-normal">
+                        <Link href={`/dashboard/chapters/${row.original.chapterId}`} className="max-w-[100px] text-primary truncate font-normal">
                             {`${row.original.chapter?.book?.name} / ${row.original.chapter?.name}`}
                         </Link>
                     </div>

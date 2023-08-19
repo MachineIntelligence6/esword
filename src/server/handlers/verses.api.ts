@@ -4,24 +4,29 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { parse as csvParse } from 'csv-parse/sync'
 import { IVerse } from "@/shared/types/models.types";
+import { VersesPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.VerseInclude> & {
-    topic?: number;
-}
 
-
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, topic = -1, include }: PaginationProps): Promise<PaginatedApiResponse<IVerse[]>> {
+export async function getAll({
+    page = 1, perPage = defaults.PER_PAGE_ITEMS,
+    topic = -1, include, where, orderBy
+}: VersesPaginationProps): Promise<PaginatedApiResponse<IVerse[]>> {
     try {
         const verses = await db.verse.findMany({
-            where: {
-                ...(topic !== -1 && {
-                    topicId: topic
-                }),
-                archived: false,
-            },
-            orderBy: {
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false,
+                } :
+                {
+                    ...(topic !== -1 && {
+                        topicId: topic
+                    }),
+                    archived: false,
+                },
+            orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
             ...(perPage !== -1 && {
@@ -56,7 +61,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, topi
                 page: page,
                 perPage: perPage,
                 results: verses.length,
-                totalPages: Math.ceil(versesCount / perPage)
+                totalPages: Math.ceil(versesCount / perPage),
+                count: versesCount
             },
             data: verses
         }
@@ -274,6 +280,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<IVer
 
 type CsvIVerse = {
     book: string;
+    bookAbbr: string;
     chapter: number;
     topic: string;
     number: number;
@@ -293,10 +300,11 @@ export async function importFromCSV(req: Request): Promise<ApiResponse<IVerse[]>
         const csvRecords: any[] = csvParse(csvInputData, { delimiter: "$", from_line: 2, relaxQuotes: true })
         const csvIVerses: CsvIVerse[] = csvRecords.map((record: any[]) => ({
             book: record[0],
-            chapter: Number(record[1]),
-            topic: record[2],
-            number: Number(record[3]),
-            text: record[4],
+            bookAbbr: record[1],
+            chapter: Number(record[2]),
+            topic: record[3],
+            number: Number(record[4]),
+            text: record[5],
         }));
 
         const createdIVerses: IVerse[] = []
@@ -306,7 +314,7 @@ export async function importFromCSV(req: Request): Promise<ApiResponse<IVerse[]>
                 where: { name: csvIVerse.book.trim() },
                 create: {
                     name: csvIVerse.book.trim(),
-                    abbreviation: "",
+                    abbreviation: csvIVerse.bookAbbr,
                     slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_")
                 },
                 update: {}

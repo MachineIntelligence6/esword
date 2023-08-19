@@ -36,7 +36,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                 page: page,
                 perPage: perPage,
                 results: authors.length,
-                totalPages: Math.ceil(authorsCount / perPage)
+                totalPages: Math.ceil(authorsCount / perPage),
+                count: authorsCount,
             },
             data: authors
         }

@@ -50,7 +50,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, chap
                 page: page,
                 perPage: perPage,
                 results: topics.length,
-                totalPages: Math.ceil(topicsCount / perPage)
+                totalPages: Math.ceil(topicsCount / perPage),
+                count: topicsCount,
             },
             data: topics
         }

@@ -3,6 +3,7 @@ import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared
 import { Prisma } from "@prisma/client";
 import { BookFormSchema } from "@/components/dashboard/forms/books.form";
 import { IBook } from "@/shared/types/models.types";
+import { BooksPaginationProps } from "@/shared/types/pagination.types";
 
 
 
@@ -10,11 +11,11 @@ import { IBook } from "@/shared/types/models.types";
 
 
 export async function get(
-    { page = 1, perPage, include }: BasePaginationProps<Prisma.BookInclude>
+    { page = 1, perPage, include, where, orderBy }: BooksPaginationProps
 ): Promise<PaginatedApiResponse<IBook[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IBook[]>>(
-            `/api/books?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}`
+            `/api/books?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
         )
         return res.data
     } catch (error) {

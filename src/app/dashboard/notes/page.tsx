@@ -1,20 +1,21 @@
-import Link from "next/link"
 import NotesTable from "@/components/dashboard/tables/notes.table"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/dashboard/ui/card"
 
 
 
 export default function Page() {
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="font-bold text-2xl">
-          All Notes
-        </h1>
-        {/* <Link href="/dashboard/notes/add" className={buttonVariants({ variant: "default" })}>
-          Add New
-        </Link> */}
-      </div>
-      <NotesTable />
+    <div>
+      <Card className="min-h-[700px]">
+        <CardHeader className="border-b-8 border-silver-light py-4">
+          <CardTitle className="font-bold text-2xl">
+            All Notes
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-5">
+          <NotesTable />
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -16,8 +16,20 @@ export const GET = async (req: Request) => {
         include = JSON.parse(includeStr ?? "")
     } catch (error) {
     }
+    const whereStr = params.get("where")
+    let where: Prisma.CommentaryWhereInput | undefined;
+    try {
+        where = JSON.parse(whereStr ?? "")
+    } catch (error) {
+    }
+    const orderByStr = params.get("orderBy")
+    let orderBy: Prisma.CommentaryOrderByWithRelationInput | undefined;
+    try {
+        orderBy = JSON.parse(orderByStr ?? "")
+    } catch (error) {
+    }
 
-    const res = await serverApiHandlers.commentaries.getAll({ page, perPage, verse: verse, author: author, include: include })
+    const res = await serverApiHandlers.commentaries.getAll({ page, perPage, verse, author, include, where, orderBy })
     return NextResponse.json(res)
 }
 

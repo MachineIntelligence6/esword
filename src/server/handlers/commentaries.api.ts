@@ -3,28 +3,33 @@ import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { ICommentary } from "@/shared/types/models.types";
+import { CommentariesPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.CommentaryInclude> & {
-    author?: number;
-    verse?: number;
-}
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, author = -1, include }: PaginationProps): Promise<PaginatedApiResponse<ICommentary[]>> {
+
+export async function getAll({
+    page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1,
+    author = -1, include, where, orderBy
+}: CommentariesPaginationProps): Promise<PaginatedApiResponse<ICommentary[]>> {
     try {
         const commentaries = await db.commentary.findMany({
-            where: {
-                ...(author !== -1 && {
-                    authorId: author
-                }),
-                ...(verse !== -1 && {
-                    verseId: verse
-                }),
-                archived: false,
-            },
-            orderBy: {
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false
+                } : {
+                    ...(author !== -1 && {
+                        authorId: author
+                    }),
+                    ...(verse !== -1 && {
+                        verseId: verse
+                    }),
+                    archived: false,
+                },
+            orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
             ...(perPage !== -1 && {
@@ -55,7 +60,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
                 page: page,
                 perPage: perPage,
                 results: commentaries.length,
-                totalPages: Math.ceil(commentariesCount / perPage)
+                totalPages: Math.ceil(commentariesCount / perPage),
+                count: commentariesCount
             },
             data: commentaries
         }

@@ -13,6 +13,7 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { INote, IUser, IVerse } from "@/shared/types/models.types"
 import Link from "next/link"
+import { extractTextFromHtml } from "@/lib/utils"
 
 
 
@@ -33,7 +34,20 @@ export default function NotesTable({ user, verse }: Props) {
         setTableData(null)
         const res = await clientApiHandlers.notes.get({
             page: currentPage, perPage: perPage,
-            include: { user: true, verse: true },
+            include: {
+                user: true,
+                verse: {
+                    include: {
+                        topic: {
+                            include: {
+                                chapter: {
+                                    include: { book: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             user: user?.id,
             verse: verse?.id
         })
@@ -136,8 +150,8 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <span className="max-w-[500px] line-clamp-2 font-medium">
-                            {row.getValue("text")}
+                        <span className="max-w-[500px] line-clamp-1 font-medium">
+                            {extractTextFromHtml(row.original.text)}
                         </span>
                     </div>
                 )
@@ -152,7 +166,7 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/users/${row.original.userId}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
+                            className="max-w-[100px] text-primary truncate font-normal">
                             {row.original.user?.name}
                         </Link>
                     </div>
@@ -165,11 +179,12 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
                 <DataTableColumnHeader column={column} title="Verse" />
             ),
             cell: ({ row }) => {
+                const chapter = row.original.verse?.topic?.chapter
                 return (
                     <div className="flex items-center">
                         <Link href={`/dashboard/verses/${row.original.verseId}`}
-                            className="max-w-[100px] text-blue-500 truncate font-normal">
-                            {row.original.verse?.number}
+                            className="max-w-[100px] text-primary truncate font-normal">
+                            {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`}
                         </Link>
                     </div>
                 )

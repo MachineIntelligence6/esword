@@ -7,6 +7,7 @@ import Link from "next/link";
 import UsersTable from "@/components/dashboard/tables/users.table";
 import UsersForm from "@/components/dashboard/forms/users.form";
 import { IUser } from "@/shared/types/models.types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard/ui/card";
 
 
 
@@ -29,15 +30,15 @@ export default function Page() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-bold text-2xl">
-          Users
-        </h1>
-      </div>
-      <div className="grid grid-cols-12 gap-10">
-        <div className="col-span-8 w-full">
-          {
+    <div className="grid grid-cols-12 gap-5">
+      <div className="col-span-8 w-full">
+        <Card className="min-h-[700px]">
+          <CardHeader className="border-b-8 border-silver-light py-4">
+            <CardTitle className="font-bold text-2xl">
+              All Topics
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5">
             <UsersTable
               viewAction={(user: IUser) => (
                 <Link href={`/dashboard/users/${user.id}`}>View</Link>
@@ -46,11 +47,11 @@ export default function Page() {
                 <span onClick={() => setSelectedUser(user)}>Edit</span>
               )}
               deleteAction={handleDelete} />
-          }
-        </div>
-        <div className="col-span-4 mt-12">
-          <UsersForm user={selectedUser} onReset={() => setSelectedUser(null)} />
-        </div>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="col-span-4">
+        <UsersForm user={selectedUser} onReset={() => setSelectedUser(null)} />
       </div>
     </div>
   )

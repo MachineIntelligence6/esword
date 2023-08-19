@@ -50,8 +50,8 @@ export default async function Page({ params }: { params: { id: string } }) {
     });
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center gap-5 justify-between">
+        <div className="space-y-3">
+            <div className="flex items-center gap-5 justify-between bg-white rounded-md shadow p-3">
                 <div className="flex items-start gap-5">
                     <BackButton />
                     <div className="max-w-screen-xl">
@@ -83,7 +83,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </div>
             </div>
             <IVerseDetailsCard verse={verse} />
-            <div className="mt-5">
+            <div className="pt-5">
                 <ContentTabs verse={verse} />
             </div>
         </div>
@@ -98,24 +98,38 @@ function ContentTabs({ verse }: ContentTabsProps) {
     return (
         <Tabs defaultValue="commentaries" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="commentaries">Commentaries</TabsTrigger>
-                <TabsTrigger value="notes">Notes</TabsTrigger>
+                <TabsTrigger value="commentaries" className="text-base">Commentaries</TabsTrigger>
+                <TabsTrigger value="notes" className="text-base">Notes</TabsTrigger>
             </TabsList>
             <TabsContent value="commentaries">
-                <div className="flex items-center justify-between pb-5">
-                    <h3 className="font-semibold text-2xl">Commentaries</h3>
-                    <Link href={`/dashboard/commentaries/add?book=${verse.topic?.chapter?.book?.id}&chapter=${verse?.topic?.chapter?.id}&verse=${verse.id}`}
-                        className={buttonVariants({ variant: "default" })}>
-                        Add New
-                    </Link>
-                </div>
-                <CommentariesTable verse={verse} />
+                <Card>
+                    <CardHeader className="border-b-8 border-silver-light py-4">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="font-bold text-2xl">
+                                Commentaries
+                            </CardTitle>
+                            <Link href={`/dashboard/commentaries/add?book=${verse.topic?.chapter?.book?.id}&chapter=${verse?.topic?.chapter?.id}&verse=${verse.id}`}
+                                className={buttonVariants({ variant: "default" })}>
+                                Add New
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-5">
+                        <CommentariesTable verse={verse} />
+                    </CardContent>
+                </Card>
             </TabsContent>
             <TabsContent value="notes">
-                <div className="flex items-center justify-between pb-5">
-                    <h3 className="font-semibold text-2xl">Notes</h3>
-                </div>
-                <NotesTable verse={verse} />
+                <Card>
+                    <CardHeader className="border-b-8 border-silver-light py-4">
+                        <CardTitle className="font-bold text-2xl">
+                            Notes
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-5">
+                        <NotesTable verse={verse} />
+                    </CardContent>
+                </Card>
             </TabsContent>
         </Tabs>
     )

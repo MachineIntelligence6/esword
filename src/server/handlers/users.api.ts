@@ -39,7 +39,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, role
                 page: page,
                 perPage: perPage,
                 results: users.length,
-                totalPages: Math.ceil(usersCount / perPage)
+                totalPages: Math.ceil(usersCount / perPage),
+                count: usersCount
             },
             data: users.map((user) => ({
                 ...user,
