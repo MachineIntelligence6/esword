@@ -145,9 +145,9 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
             },
             topicsList: topics
         }))
-        const firstTopic = topics?.[0]
-        const firstVerse = firstTopic?.verses?.[0]
-        if (firstTopic && firstVerse) await get().setActiveVerse(firstVerse.id, firstTopic.id);
+        // const firstTopic = topics?.[0]
+        // const firstVerse = firstTopic?.verses?.[0]
+        // if (firstTopic && firstVerse) await get().setActiveVerse(firstVerse.id, firstTopic.id);
     },
     setActiveVerse: async (verseId: number, topicId: number) => {
         if (verseId === get().activeVerse.id) return;

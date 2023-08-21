@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { BasePaginationProps } from "./api.types";
+import { IUserRole } from "./models.types";
 
 
 
@@ -23,4 +24,8 @@ export type TopicsPaginationProps = BasePaginationProps<Prisma.TopicInclude, Pri
 
 export type ChaptersPaginationProps = BasePaginationProps<Prisma.ChapterInclude, Prisma.ChapterWhereInput, Prisma.ChapterOrderByWithRelationInput> & {
     book?: number;
+}
+
+export type UserPaginationProps = BasePaginationProps<Prisma.UserInclude, Prisma.UserWhereInput, Prisma.UserOrderByWithRelationInput> & {
+    role?: IUserRole
 }

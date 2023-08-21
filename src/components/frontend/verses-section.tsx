@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import Link from "next/link";
-import { IVerse } from "@/shared/types/models.types";
+import { IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
 import { TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
@@ -44,7 +44,19 @@ export function VersesSection() {
 
 
 function VersesSectionContent() {
-    const { topicsList, setActiveVerse, activeChapter, activeBook, initialLoading, booksList, chaptersList, activeVerse } = useReadBookStore()
+    const {
+        topicsList, setActiveVerse, activeChapter,
+        activeBook, initialLoading,
+        booksList, chaptersList, activeVerse,
+        setActiveChapter
+    } = useReadBookStore()
+
+    const activeChIndex = chaptersList?.findIndex((ch) => ch.id === activeChapter.id) ?? -1;
+    const previousChapter = (activeChIndex !== -1 && chaptersList && activeChIndex > 0) ? chaptersList[activeChIndex - 1] : undefined;
+    let nextChapter: IChapter | undefined
+    if (activeChIndex != -1 && chaptersList && ((activeChIndex + 1) < chaptersList.length)) {
+        nextChapter = chaptersList[activeChIndex + 1]
+    }
 
     const toggleHighlight = (): void => {
         const selection = window.getSelection();
@@ -74,6 +86,16 @@ function VersesSectionContent() {
     const handleZoomOut = () => {
         setScale((prevScale) => Math.max(0.6, prevScale - 0.1)); // Decrease scale by 0.1 but never below 0.1
     };
+
+
+    const goToNextChapter = () => {
+        if (!nextChapter) return;
+        setActiveChapter(nextChapter.id)
+    }
+    const goToPrevChapter = () => {
+        if (!previousChapter) return;
+        setActiveChapter(previousChapter.id)
+    }
 
 
     const highlightRef = useRef(null);
@@ -115,10 +137,18 @@ function VersesSectionContent() {
                         <p>
                             <Image width={18} height={18} src="./images/line.svg" alt="Line" />
                         </p>
-                        <button type="button" className="left-move">
+                        <button
+                            type="button"
+                            className=""
+                            disabled={!previousChapter}
+                            onClick={goToPrevChapter}>
                             <Image width={18} height={18} src="./images/leftarrow.svg" alt="Left Arrow" />
                         </button>
-                        <button type="button" className="right-move">
+                        <button
+                            type="button"
+                            className=""
+                            disabled={!nextChapter}
+                            onClick={goToNextChapter}>
                             <Image width={18} height={18} src="./images/rightarrow.svg" alt="Right Arrow" />
                         </button>
                     </div>

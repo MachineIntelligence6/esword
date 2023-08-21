@@ -115,8 +115,26 @@ export async function getById(id: number, include?: Prisma.TopicInclude): Promis
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        let topic = await db.topic.findFirst({ where: { id: id }, include: { verses: true } })
+        if (topic?.verses && topic.verses.length > 0) {
+            return {
+                succeed: false,
+                code: "DATA_LINKED",
+                data: null
+            }
+        }
+        if (!topic) throw new Error()
         await db.topic.update({
             where: { id: id },
+            data: {
+                archived: true,
+                verses: {
+
+                }
+            }
+        })
+        await db.verse.updateMany({
+            where: { topicId: topic.id },
             data: {
                 archived: true,
             }

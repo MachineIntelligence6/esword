@@ -2,18 +2,15 @@
 
 
 
-@layer base {
-    button:disabled {
-        opacity: 0.6;
-    }
-}
 
 
 @tailwind components;
 @tailwind utilities;
 
 
-
+button:disabled {
+    opacity: 0.6;
+}
 
 
 *::-webkit-scrollbar {

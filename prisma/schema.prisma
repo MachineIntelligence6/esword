@@ -42,15 +42,17 @@ model Book {
 }
 
 model Chapter {
-  id        Int      @id @default(autoincrement())
-  name      Int
-  slug      String   @unique
-  bookId    Int      @map("book_id")
-  book      Book     @relation(fields: [bookId], references: [id])
-  topics    Topic[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
-  archived  Boolean  @default(false)
+  id             Int      @id @default(autoincrement())
+  name           Int
+  commentaryName String?  @map("commentary_name")
+  commentaryText String?  @map("commentary_text")
+  slug           String   @unique
+  bookId         Int      @map("book_id")
+  book           Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  topics         Topic[]
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt() @map("updated_at")
+  archived       Boolean  @default(false)
 
   @@map("chapters")
 }
@@ -60,7 +62,7 @@ model Topic {
   name      String
   number    Int
   chapterId Int     @map("chapter_id")
-  chapter   Chapter @relation(fields: [chapterId], references: [id])
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   verses    Verse[]
   archived  Boolean @default(false)
 
@@ -73,7 +75,7 @@ model Verse {
   text         String       @db.LongText
   audio        String?
   topicId      Int          @map("topic_id")
-  topic        Topic        @relation(fields: [topicId], references: [id])
+  topic        Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
   commentaries Commentary[]
   notes        Note[]
   createdAt    DateTime     @default(now()) @map("created_at")
@@ -87,9 +89,9 @@ model Note {
   id        Int      @id @default(autoincrement())
   text      String   @db.LongText
   verseId   Int      @map("verse_id")
-  verse     Verse    @relation(fields: [verseId], references: [id])
+  verse     Verse    @relation(fields: [verseId], references: [id], onDelete: Cascade)
   userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
   archived  Boolean  @default(false)
@@ -102,9 +104,9 @@ model Commentary {
   name      String   @db.MediumText
   text      String   @db.LongText
   verseId   Int      @map("verse_id")
-  verse     Verse    @relation(fields: [verseId], references: [id])
+  verse     Verse    @relation(fields: [verseId], references: [id], onDelete: Cascade)
   authorId  Int      @map("author_id")
-  author    Author   @relation(fields: [authorId], references: [id])
+  author    Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
   archived  Boolean  @default(false)

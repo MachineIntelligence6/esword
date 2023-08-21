@@ -13,26 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Page() {
   const [selectedTopic, setSelectedTopic] = useState<ITopic | null>(null);
-  const { toast } = useToast();
 
-  const handleDelete = async (topic: ITopic) => {
-    const res = await clientApiHandlers.topics.archive(topic.id)
-    if (res.succeed) {
-      window.location.reload()
-    } else if (res.code === "DATA_LINKED") {
-      toast({
-        title: "Topic can not be deleted.",
-        variant: "destructive",
-        description: "All verses linked with this topic must be unlinked in order to delete this topic."
-      })
-    } else {
-      toast({
-        title: "Error",
-        variant: "destructive",
-        description: definedMessages.UNKNOWN_ERROR
-      })
-    }
-  }
   return (
     <div className="grid grid-cols-12 gap-5">
       <div className="col-span-8 w-full">
@@ -44,15 +25,12 @@ export default function Page() {
           </CardHeader>
           <CardContent className="p-5">
             <TopicsTable
-              viewAction={(topic: ITopic) => (
-                <Link href={`/dashboard/topics/${topic.id}`}>View</Link>
-              )}
               editAction={(topic: ITopic) => (
                 <span onClick={() => setSelectedTopic(topic)}>
                   Edit
                 </span>
               )}
-              deleteAction={handleDelete} />
+            />
 
           </CardContent>
         </Card>

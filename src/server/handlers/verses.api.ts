@@ -128,8 +128,20 @@ export async function getById(id: number, include?: Prisma.VerseInclude): Promis
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
-        await db.verse.update({
+        const verse = await db.verse.update({
             where: { id: id },
+            data: {
+                archived: true,
+            }
+        })
+        await db.commentary.updateMany({
+            where: { verseId: verse.id },
+            data: {
+                archived: true,
+            }
+        })
+        await db.note.updateMany({
+            where: { verseId: verse.id },
             data: {
                 archived: true,
             }

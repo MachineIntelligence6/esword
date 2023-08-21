@@ -1,8 +1,8 @@
 import { Author, Book, Chapter, Commentary, Note, Topic, User, UserRole, Verse } from "@prisma/client"
 
 export type IChapter = Chapter & {
-    book?: IBook,
-    topics?: ITopic[]
+    book?: IBook;
+    topics?: ITopic[];
 }
 
 export type IVerse = Verse & {

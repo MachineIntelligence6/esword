@@ -101,18 +101,20 @@ export function DNotesCard() {
                                 <div className="divide-y-2 divide-slate-200 max-h-96 overflow-y-auto px-5">
                                     {
                                         notes.map((note) => (
-                                            <div key={note.id} className="flex items-center justify-between px-2 py-3 gap-4">
-                                                <h4 className="font-medium text-base min-w-max max-w-[100px] truncate">
+                                            <div key={note.id} className="grid grid-cols-12 px-2 py-3 gap-2">
+                                                <h4 className="font-medium text-base col-span-2 w-full max-w-full truncate">
                                                     {note.user?.name}
                                                 </h4>
-                                                <Separator orientation="vertical" className="h-5" />
-                                                <p className="line-clamp-1 max-w-full text-sm">
+                                                {/* <Separator orientation="vertical" className="h-5" /> */}
+                                                <p className="line-clamp-1 w-full col-span-8 max-w-full text-sm">
                                                     {extractTextFromHtml(note.text)}
                                                 </p>
-                                                <Separator orientation="vertical" className="h-5" />
-                                                <Link href={`/dashboard/notes/${note.id}`} className="text-primary text-sm">
-                                                    View
-                                                </Link>
+                                                {/* <Separator orientation="vertical" className="h-5" /> */}
+                                                <div className="col-span-2 flex justify-end">
+                                                    <Link href={`/dashboard/notes/${note.id}`} className="text-primary text-sm">
+                                                        View
+                                                    </Link>
+                                                </div>
                                             </div>
                                         ))
                                     }
@@ -232,18 +234,18 @@ export function DCommentariesCard() {
                                 <div className="divide-y-2 divide-slate-200 max-h-96 overflow-y-auto px-5">
                                     {
                                         commentaries.map((commentary) => (
-                                            <div key={commentary.id} className="flex items-center justify-between px-2 py-3 gap-4">
-                                                <h4 className="font-medium text-base min-w-max max-w-[100px] truncate">
+                                            <div key={commentary.id} className="grid grid-cols-12 px-2 py-3 gap-2">
+                                                <h4 className="font-medium col-span-2 max-w-full w-full truncate">
                                                     {commentary.author?.name}
                                                 </h4>
-                                                <Separator orientation="vertical" className="h-5" />
-                                                <p className="line-clamp-1 max-w-full text-sm">
+                                                <p className="line-clamp-1 col-span-8 max-w-full w-full text-sm text-start">
                                                     {commentary.name}
                                                 </p>
-                                                <Separator orientation="vertical" className="h-5" />
-                                                <Link href={`/dashboard/commentaries/${commentary.id}`} className="text-primary text-sm">
-                                                    View
-                                                </Link>
+                                                <div className="col-span-2 flex justify-end">
+                                                    <Link href={`/dashboard/commentaries/${commentary.id}`} className="text-primary text-sm">
+                                                        View
+                                                    </Link>
+                                                </div>
                                             </div>
                                         ))
                                     }
@@ -279,59 +281,56 @@ export function DLogsCard() {
             </CardHeader>
             <CardContent className="py-4 px-0">
                 <div className="divide-y-2 divide-slate-200 max-h-96 overflow-y-auto px-5">
-                    <div className="flex items-center justify-between px-2 py-3 gap-4">
-                        <h4 className="font-medium text-base min-w-max max-w-[100px] truncate">
+                    <div className="grid grid-cols-12 px-2 py-3 gap-2">
+                        <h4 className="font-medium col-span-2 w-full max-w-full truncate">
                             User Name
                         </h4>
-                        <Separator orientation="vertical" className="h-5" />
-                        <p className="line-clamp-1 max-w-full text-sm">
+                        <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
                             Activity
                         </p>
-                        <Separator orientation="vertical" className="h-5" />
-                        <p className="min-w-max text-sm" suppressHydrationWarning>
+                        <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
                             {new Date().toLocaleString()}
                         </p>
-                        <Separator orientation="vertical" className="h-5" />
-                        <Link href='#' className="text-primary text-sm">
-                            View
-                        </Link>
+                        <div className="col-span-2 flex justify-end">
+                            <Link href='#' className="text-primary text-sm">
+                                View
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-12 px-2 py-3 gap-2">
+                        <h4 className="font-medium col-span-2 w-full max-w-full truncate">
+                            User Name
+                        </h4>
+                        <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
+                            Activity
+                        </p>
+                        <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
+                            {new Date().toLocaleString()}
+                        </p>
+                        <div className="col-span-2 flex justify-end">
+                            <Link href='#' className="text-primary text-sm">
+                                View
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-12 px-2 py-3 gap-2">
+                        <h4 className="font-medium col-span-2 w-full max-w-full truncate">
+                            User Name
+                        </h4>
+                        <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
+                            Activity
+                        </p>
+                        <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
+                            {new Date().toLocaleString()}
+                        </p>
+                        <div className="col-span-2 flex justify-end">
+                            <Link href='#' className="text-primary text-sm">
+                                View
+                            </Link>
+                        </div>
                     </div>
 
-                    <div className="flex items-center justify-between px-2 py-3 gap-4">
-                        <h4 className="font-medium text-base min-w-max max-w-[100px] truncate">
-                            User Name
-                        </h4>
-                        <Separator orientation="vertical" className="h-5" />
-                        <p className="line-clamp-1 max-w-full text-sm">
-                            Activity
-                        </p>
-                        <Separator orientation="vertical" className="h-5" />
-                        <p className="min-w-max text-sm" suppressHydrationWarning>
-                            {new Date().toLocaleString()}
-                        </p>
-                        <Separator orientation="vertical" className="h-5" />
-                        <Link href='#' className="text-primary text-sm">
-                            View
-                        </Link>
-                    </div>
-
-                    <div className="flex items-center justify-between px-2 py-3 gap-4">
-                        <h4 className="font-medium text-base min-w-max max-w-[100px] truncate">
-                            User Name
-                        </h4>
-                        <Separator orientation="vertical" className="h-5" />
-                        <p className="line-clamp-1 max-w-full text-sm">
-                            Activity
-                        </p>
-                        <Separator orientation="vertical" className="h-5" />
-                        <p className="min-w-max text-sm" suppressHydrationWarning>
-                            {new Date().toLocaleString()}
-                        </p>
-                        <Separator orientation="vertical" className="h-5" />
-                        <Link href='#' className="text-primary text-sm">
-                            View
-                        </Link>
-                    </div>
+                    
 
                 </div>
             </CardContent>

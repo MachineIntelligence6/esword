@@ -3,20 +3,19 @@ import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared
 import { Prisma, UserRole } from "@prisma/client";
 import { UserFormSchema } from "@/components/dashboard/forms/users.form";
 import { IUser, IUserRole } from "@/shared/types/models.types";
+import { UserPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.UserInclude> & {
-    role?: IUserRole
-}
+
 
 
 export async function get(
-    { page = 1, perPage, role = "ALL", include }: PaginationProps
+    { page = 1, perPage, role = "ALL", include, where, orderBy }: UserPaginationProps
 ): Promise<PaginatedApiResponse<IUser[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IUser[]>>(
-            `/api/users?page=${page}&perPage=${perPage}&role=${role}&include=${JSON.stringify(include)}`
+            `/api/users?page=${page}&perPage=${perPage}&role=${role}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
         )
         return res.data
     } catch (error) {

@@ -31,7 +31,7 @@ export default function AuthorsTable({ showPagination, showToolbar, ...props }: 
 
     useEffect(() => {
         loadData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, perPage])
 
 
@@ -46,7 +46,10 @@ export default function AuthorsTable({ showPagination, showToolbar, ...props }: 
     return (
         <BaseTable
             data={tableData?.data}
-            columns={columns(props)}
+            columns={columns({
+                ...props,
+                deleteMessage: "This action will delete the author and all data (commentaries) linked with it."
+            })}
             pagination={pagination}
             showPagination={showPagination}
             showToolbar={showToolbar}

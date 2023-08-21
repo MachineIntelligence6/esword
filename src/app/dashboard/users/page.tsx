@@ -35,7 +35,7 @@ export default function Page() {
         <Card className="min-h-[600px]">
           <CardHeader className="border-b-8 border-silver-light py-4">
             <CardTitle className="font-bold text-2xl">
-              All Topics
+              Users
             </CardTitle>
           </CardHeader>
           <CardContent className="p-5">

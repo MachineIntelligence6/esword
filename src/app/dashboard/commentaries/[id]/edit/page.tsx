@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   return (
     <div>
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-5 bg-white rounded-md shadow p-3">
         <BackButton />
         <h1 className="font-semibold text-2xl">
           Update Commentary

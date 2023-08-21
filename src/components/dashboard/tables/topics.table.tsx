@@ -11,6 +11,8 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import clientApiHandlers from "@/client/handlers"
 import { IChapter, ITopic } from "@/shared/types/models.types"
 import Link from "next/link"
+import { useToast } from "@/components/ui/use-toast"
+import definedMessages from "@/shared/constants/messages"
 
 
 type Props = TableActionProps & {
@@ -21,6 +23,28 @@ export default function TopicsTable({ chapter, ...props }: Props) {
     const [tableData, setTableData] = useState<PaginatedApiResponse<ITopic[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+
+    const { toast } = useToast();
+
+    const handleDelete = async (topic: ITopic) => {
+        const res = await clientApiHandlers.topics.archive(topic.id)
+        if (res.succeed) {
+            window.location.reload()
+        } else if (res.code === "DATA_LINKED") {
+            toast({
+                title: "Topic can not be deleted.",
+                variant: "destructive",
+                description: "All verses linked with this topic must be unlinked in order to delete this topic."
+            })
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
 
     const loadData = async () => {
         setTableData(null)
@@ -49,7 +73,13 @@ export default function TopicsTable({ chapter, ...props }: Props) {
     return (
         <BaseTable
             data={tableData?.data}
-            columns={columns(props)}
+            columns={columns({
+                ...props,
+                viewAction: (topic: ITopic) => (
+                    <Link href={`/dashboard/topics/${topic.id}`}>View</Link>
+                ),
+                deleteAction: handleDelete
+            })}
             pagination={pagination}
             getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
             setFilterValue={(table, value) => {

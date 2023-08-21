@@ -19,7 +19,8 @@ export function DataTableRowActions<TData>({
     row,
     editAction,
     viewAction,
-    deleteAction
+    deleteAction,
+    deleteMessage
 }: DataTableRowActionsProps<TData>) {
     const { data: session } = useSession()
     const [delAlertOpen, setDelAlertOpen] = useState(false);
@@ -65,6 +66,7 @@ export function DataTableRowActions<TData>({
                 <DeleteRowAction
                     open={delAlertOpen}
                     setOpen={setDelAlertOpen}
+                    deleteMessage={deleteMessage}
                     onDelete={async () => await deleteAction?.(row.original)} />
             }
         </div>
@@ -74,10 +76,11 @@ export function DataTableRowActions<TData>({
 
 
 export function DeleteRowAction(
-    { open, setOpen, onDelete }: {
+    { open, setOpen, onDelete, deleteMessage }: {
         open: boolean;
         setOpen: (value: boolean) => void;
-        onDelete?: () => Promise<void>
+        onDelete?: () => Promise<void>;
+        deleteMessage?: string
     }
 ) {
     const [processing, setProcessing] = useState(false);
@@ -94,7 +97,9 @@ export function DeleteRowAction(
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action will delete the current row.
+                        {
+                            deleteMessage ? deleteMessage : "This action will delete the current row."
+                        }
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

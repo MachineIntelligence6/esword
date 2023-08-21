@@ -10,19 +10,26 @@ import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { IUser } from "@/shared/types/models.types"
+import { useSession } from "next-auth/react"
 
 
 type Props = TableActionProps & {
 }
 
 export default function UsersTable({ ...props }: Props) {
+    const { data: session } = useSession()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IUser[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
     const loadData = async () => {
+        if (!session) return;
         setTableData(null)
-        const res = await clientApiHandlers.users.get({ page: currentPage, perPage: perPage })
+        const res = await clientApiHandlers.users.get({
+            page: currentPage,
+            perPage: perPage,
+            ...(session.user.role !== "ADMIN" && { where: { role: { not: "ADMIN" } } })
+        })
         setTableData(res)
     }
 
@@ -44,7 +51,10 @@ export default function UsersTable({ ...props }: Props) {
     return (
         <BaseTable
             data={tableData?.data}
-            columns={columns(props)}
+            columns={columns({
+                ...props,
+                deleteMessage: "This action will delete the user account and all data (notes) linked with it."
+            })}
             pagination={pagination}
             getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
             setFilterValue={(table, value) => {

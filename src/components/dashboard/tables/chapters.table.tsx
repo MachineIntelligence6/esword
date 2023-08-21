@@ -163,6 +163,36 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
             }
         },
         {
+            accessorKey: "commentaryName",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Commentary Name" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <div className="flex max-w-[100px] space-x-2">
+                        <span className="max-w-[100px] truncate font-medium">
+                            {row.original.commentaryName}
+                        </span>
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: "commentaryText",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Commentary Text" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <div className="flex max-w-[100px] space-x-2">
+                        <span className="max-w-[100px] truncate font-medium">
+                            {row.original.commentaryText}
+                        </span>
+                    </div>
+                )
+            },
+        },
+        {
             accessorKey: "book",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Book" />

@@ -12,14 +12,17 @@ import { z } from 'zod'
 import { useRouter } from "next/navigation";
 import { ComboBox, SelectEl } from "../../ui/select";
 import { useEffect, useState } from "react";
-import { IBook, IChapter } from "@/shared/types/models.types";
+import { IAuthor, IBook, IChapter } from "@/shared/types/models.types";
+import { Textarea } from "@/components/ui/textarea";
 
 
 export const chapterFormSchema = z.object({
     info: z.string().nullable().default(""),
     name: z.number({ required_error: "This field is required." }).min(0, { message: "This field is required." }),
     slug: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
-    book: z.number({ required_error: "This field is required." }).min(0, { message: "This field is required." })
+    book: z.number({ required_error: "This field is required." }).min(0, { message: "This field is required." }),
+    commentaryName: z.string({ required_error: "This field is required." }).optional(),
+    commentaryText: z.string({ required_error: "This field is required." }).optional(),
 })
 
 
@@ -30,13 +33,16 @@ export type ChapterFormSchema = z.infer<typeof chapterFormSchema>
 export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
     const router = useRouter()
     const [books, setBooks] = useState<IBook[] | null>(null)
+    const [authors, setAuthors] = useState<IAuthor[] | null>(null)
     const form = useForm<ChapterFormSchema>({
         resolver: zodResolver(chapterFormSchema),
         mode: "all",
         defaultValues: {
             name: chapter?.name,
             slug: chapter?.slug,
-            book: chapter?.bookId
+            book: chapter?.bookId,
+            commentaryName: chapter?.commentaryName ?? undefined,
+            commentaryText: chapter?.commentaryText ?? undefined,
         }
     })
     const { formState } = form
@@ -47,6 +53,10 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
         clientApiHandlers.books.get({ page: 1, perPage: -1 })
             .then((res) => {
                 setBooks(res.data ?? [])
+            })
+        clientApiHandlers.authors.get({ page: 1, perPage: -1 })
+            .then((res) => {
+                setAuthors(res.data ?? [])
             })
     }, [])
 
@@ -177,6 +187,41 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                                 </FormItem>
                             )}
                         />
+                        <div className="col-span-full">
+                            <h4 className="font-bold">Commentary <span className="font-normal">(optional)</span></h4>
+                        </div>
+                        <FormField
+                            control={form.control}
+                            name="commentaryName"
+                            render={({ field, fieldState }) => (
+                                <FormItem className="col-span-1">
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input type="text"  {...field} />
+                                    </FormControl>
+                                    {
+                                        fieldState.error &&
+                                        <FormMessage />
+                                    }
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="commentaryText"
+                            render={({ field, fieldState }) => (
+                                <FormItem className="col-span-full">
+                                    <FormLabel>Text</FormLabel>
+                                    <FormControl>
+                                        <Textarea rows={4}  {...field} />
+                                    </FormControl>
+                                    {
+                                        fieldState.error &&
+                                        <FormMessage />
+                                    }
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="info"
@@ -189,6 +234,7 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                                 </FormItem>
                             )}
                         />
+
                     </CardContent>
                     <CardFooter className="flex justify-between">
                         <Button variant="outline" onClick={() => window.history.back()}>Cancel</Button>

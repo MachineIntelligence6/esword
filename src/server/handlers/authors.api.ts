@@ -97,8 +97,14 @@ export async function getById(id: number, include?: Prisma.AuthorInclude): Promi
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
-        await db.author.update({
+        const author = await db.author.update({
             where: { id: id },
+            data: {
+                archived: true,
+            }
+        })
+        await db.commentary.updateMany({
+            where: { authorId: author.id },
             data: {
                 archived: true,
             }

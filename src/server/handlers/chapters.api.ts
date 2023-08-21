@@ -1,6 +1,6 @@
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Prisma } from "@prisma/client";
+import { Chapter, Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IChapter } from "@/shared/types/models.types";
 import { ChaptersPaginationProps } from "@/shared/types/pagination.types";
@@ -34,12 +34,11 @@ export async function getAll({
             include: (
                 include ?
                     {
-                        ...include,
-                        // ...(include.verses && { verses: { where: { archived: false } } })
+                        ...include,                      // ...(include.verses && { verses: { where: { archived: false } } })
                     }
                     : {
                         book: false,
-                        topics: false
+                        topics: false,
                     }
             )
         })
@@ -96,7 +95,7 @@ export async function getByRef(ref: string, include?: Prisma.ChapterInclude): Pr
                     }
                     : {
                         book: false,
-                        topics: false
+                        topics: false,
                     }
             )
         })
@@ -161,6 +160,8 @@ type CreateChapterReq = {
     name: number;
     slug: string;
     book: number;
+    commentaryName?: string
+    commentaryText?: string
 }
 
 export async function create(req: Request): Promise<ApiResponse<IChapter>> {
@@ -182,6 +183,8 @@ export async function create(req: Request): Promise<ApiResponse<IChapter>> {
                 name: chapterReq.name,
                 slug: chapterReq.slug,
                 bookId: chapterReq.book,
+                commentaryName: chapterReq.commentaryName,
+                commentaryText: chapterReq.commentaryText,
             },
             include: {
                 topics: false,
@@ -209,9 +212,11 @@ export async function create(req: Request): Promise<ApiResponse<IChapter>> {
 
 
 type UpdateChapterReq = {
-    name?: number
-    slug?: string
-    book?: number
+    name?: number;
+    slug?: string;
+    book?: number;
+    commentaryName?: string;
+    commentaryText?: string;
 }
 
 
@@ -234,6 +239,8 @@ export async function update(req: Request, id: number): Promise<ApiResponse<ICha
                 ...(chapterReq.name && { name: chapterReq.name }),
                 ...(chapterReq.slug && { slug: chapterReq.slug }),
                 ...(chapterReq.book && { bookId: chapterReq.book }),
+                ...(chapterReq.commentaryName && { commentaryName: chapterReq.commentaryName }),
+                ...(chapterReq.commentaryText && { commentaryText: chapterReq.commentaryText }),
             },
             where: {
                 id: id

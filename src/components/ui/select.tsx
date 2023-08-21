@@ -121,7 +121,7 @@ export type SelectOption = {
 type SelectElProps = {
   options?: Array<SelectOption>;
   loading?: boolean;
-  value: string;
+  value?: string;
   onChange?: (opt?: SelectOption | null) => void;
   placeholder?: string;
   disabled?: boolean;

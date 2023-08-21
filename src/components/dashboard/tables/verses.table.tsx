@@ -66,7 +66,8 @@ export default function VersesTable({ topic }: { topic?: ITopic }) {
         editAction: (verse: IVerse) => (
             <Link href={`/dashboard/verses/${verse.id}/edit`}>Edit</Link>
         ),
-        deleteAction: handleDelete
+        deleteAction: handleDelete,
+        deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it."
     })
 
 
