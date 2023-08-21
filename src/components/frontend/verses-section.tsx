@@ -7,7 +7,7 @@ import { IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
 import { TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
-import { AlignLeftIcon, ArrowLeftIcon, BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, FaceIcon, FileTextIcon, ImageIcon, PinLeftIcon, PlayIcon, SunIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
+import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, FaceIcon, FileTextIcon, ImageIcon, PinLeftIcon, PlayIcon, SunIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
 
 
 
@@ -117,17 +117,30 @@ function VersesSectionContent() {
                             <PlayIcon width={22} height={22} />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
-                        <button type="button" className="highlighter" onClick={toggleHighlight}>
+                        <button
+                            type="button"
+                            className="highlighter"
+                            disabled={(!topicsList || topicsList.length <= 0)}
+                            onClick={toggleHighlight}>
                             <Image width={18} height={18} src="./images/ph_text-aa-fill.svg" alt="Highlight" />
                         </button>
-                        <button>
+                        <button
+                            type="button"
+                            disabled={(!topicsList || topicsList.length <= 0)}>
                             <BookmarkIcon className="w-5 h-5 text-gray-500" />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
-                        <button type="button" className="zoom-in" onClick={handleZoomIn}>
+                        <button
+                            type="button"
+                            className="zoom-in"
+                            disabled={(!topicsList || topicsList.length <= 0)}
+                            onClick={handleZoomIn}>
                             <ZoomInIcon width={22} height={22} />
                         </button>
-                        <button type="button" className="zoom-out disabled:opacity-60" disabled={scale <= 1} onClick={handleZoomOut}>
+                        <button
+                            type="button"
+                            className="zoom-out disabled:opacity-60"
+                            disabled={(scale <= 1) || (!topicsList || topicsList.length <= 0)} onClick={handleZoomOut}>
                             <ZoomOutIcon width={22} height={22} />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
