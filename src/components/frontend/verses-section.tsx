@@ -7,7 +7,7 @@ import { IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
 import { TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
-import { BookmarkIcon } from "@radix-ui/react-icons";
+import { AlignLeftIcon, ArrowLeftIcon, BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, FaceIcon, FileTextIcon, ImageIcon, PinLeftIcon, PlayIcon, SunIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
 
 
 
@@ -109,57 +109,51 @@ function VersesSectionContent() {
                     VERSES
                 </h3>
             </div>
-            <div className="block expanable-content lg-open">
+            <div className="block expanable-content lg-open ">
                 {/* buttons tab */}
                 <div className="lg:flex block justify-between lg:border-b min-h-[39px] max-h-[39px]">
                     <div className="flex xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 border-b lg:px-1 px-5 xl:px-6 justify-between items-center py-2">
                         <button disabled>
-                            <Image width={18} height={18} src="./images/ph_play-light.svg" alt="Play" />
+                            <PlayIcon width={22} height={22} />
                         </button>
-                        <p>
-                            <Image width={18} height={18} src="./images/line.svg" className="" alt="Line" />
-                        </p>
+                        <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button type="button" className="highlighter" onClick={toggleHighlight}>
                             <Image width={18} height={18} src="./images/ph_text-aa-fill.svg" alt="Highlight" />
                         </button>
                         <button>
                             <BookmarkIcon className="w-5 h-5 text-gray-500" />
                         </button>
-                        <p>
-                            <Image width={18} height={18} src="./images/line.svg" alt="Line" />
-                        </p>
+                        <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button type="button" className="zoom-in" onClick={handleZoomIn}>
-                            <Image width={18} height={18} src="./images/zoomIn.svg" alt="Zoom In" />
+                            <ZoomInIcon width={22} height={22} />
                         </button>
                         <button type="button" className="zoom-out disabled:opacity-60" disabled={scale <= 1} onClick={handleZoomOut}>
-                            <Image width={18} height={18} src="./images/zoomout.svg" alt="Zoom Out" />
+                            <ZoomOutIcon width={22} height={22} />
                         </button>
-                        <p>
-                            <Image width={18} height={18} src="./images/line.svg" alt="Line" />
-                        </p>
+                        <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button
                             type="button"
                             className=""
                             disabled={!previousChapter}
                             onClick={goToPrevChapter}>
-                            <Image width={18} height={18} src="./images/leftarrow.svg" alt="Left Arrow" />
+                            <ChevronLeftIcon width={22} height={22} />
                         </button>
                         <button
                             type="button"
                             className=""
                             disabled={!nextChapter}
                             onClick={goToNextChapter}>
-                            <Image width={18} height={18} src="./images/rightarrow.svg" alt="Right Arrow" />
+                            <ChevronRightIcon width={22} height={22} />
                         </button>
                     </div>
                 </div>
                 {/* content */}
-                <div className="flex lg:mt-0 mt-[10px] max-w-full overflow-hidden max-h-screen lg:max-h-[calc(100vh_-_150px)]" ref={highlightRef}>
-                    <div className="overflow-y-auto py-10 max-h-full w-full max-w-full">
-                        <div className="zoom-text min-h-full bg-white space-y-8" style={{ transform: `scale(${scale})` }}>
+                <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)]" ref={highlightRef}>
+                    <div className=" py-10 max-h-[100vh] w-full max-w-full overflow-auto">
+                        <div className="min-h-full bg-white space-y-8" style={{ transform: `scale(${scale}) ` }}>
                             {
                                 showPlaceholder ?
-                                    <div className="flex flex-col py-5 h-full">
+                                    <div className="flex flex-col  h-full">
                                         <div className="flex items-center justify-center flex-col">
                                             <TopicLoadingPlaceholder />
                                             <VersesLoadingPlaceholder />
