@@ -2,25 +2,28 @@ import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared
 import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
-import { ITopic, IVerse } from "@/shared/types/models.types";
+import { ITopic } from "@/shared/types/models.types";
+import { TopicsPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.TopicInclude> & {
-    chapter?: number;
-}
 
-
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, chapter = -1, include }: PaginationProps): Promise<PaginatedApiResponse<ITopic[]>> {
+export async function getAll({
+    page = 1, perPage = defaults.PER_PAGE_ITEMS,
+    chapter = -1, include, where, orderBy
+}: TopicsPaginationProps): Promise<PaginatedApiResponse<ITopic[]>> {
     try {
         const topics = await db.topic.findMany({
-            where: {
+            where: where ? {
+                ...where,
+                archived: where.archived ?? false
+            } : {
                 ...(chapter !== -1 && {
                     chapterId: chapter
                 }),
                 archived: false,
             },
-            orderBy: {
+            orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
             ...(perPage !== -1 && {

@@ -15,13 +15,13 @@ async function main() {
         },
         update: {}
     })
-    await prisma.note.create({
-        data: {
-            text: "",
-            userId: 1,
-            verseId: 1,
-        }
-    })
+    // await prisma.note.create({
+    //     data: {
+    //         text: "",
+    //         userId: 1,
+    //         verseId: 1,
+    //     }
+    // })
     // await prisma.author.create({
     //     data: {
     //         name: "Author 1",

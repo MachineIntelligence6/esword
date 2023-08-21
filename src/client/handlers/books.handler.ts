@@ -27,6 +27,21 @@ export async function get(
     }
 }
 
+export async function getById(id: number): Promise<ApiResponse<IBook>> {
+    try {
+        const res = await axios.get<ApiResponse<IBook>>(
+            `/api/books/${id}`
+        )
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
+
 
 
 export async function create(data: BookFormSchema): Promise<ApiResponse<IBook>> {

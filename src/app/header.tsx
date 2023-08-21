@@ -1,23 +1,26 @@
 'use client'
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 
 
-export default function HeaderComponent() {
+export default function SiteHeader() {
+    const pathname = usePathname()
+    if (pathname.startsWith("/dashboard")) return null
     return (
         <header >
-            <nav className="flex justify-between lg:px-0  items-center h-[60px] fixed top-0 left-0 w-full z-50 bg-primary font-Inter">
+            <nav className="flex justify-between lg:px-0  items-center h-[60px] fixed top-0 left-0 w-full z-50 bg-primary">
                 <div className="lg:px-1">
-                    <Link href="/home">
+                    <Link href="/">
                         <Image width={250} height={100} alt="" src="/images/logo.png" className="object-contain bg-cover h-auto w-[250px]" />
                     </Link>
                 </div>
                 <div>
-                    <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm font-inter">
+                    <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm">
                         <div className="flex lg:gap-x-0">
                             <div className="font-bold py-3 lg:block hidden">
-                                <Link href="/home">Home</Link>
+                                <Link href="/">Home</Link>
                             </div>
                             <select name="" id="" className="bg-transparent lg:hidden md:w-auto w-16">
                                 <option value="Home" className="text-black">Home</option>

@@ -3,24 +3,28 @@ import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IChapter } from "@/shared/types/models.types";
+import { ChaptersPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.ChapterInclude> & {
-    book?: number;
-}
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, book = -1, include }: PaginationProps): Promise<PaginatedApiResponse<IChapter[]>> {
+export async function getAll({
+    page = 1, perPage = defaults.PER_PAGE_ITEMS,
+    book = -1, include, where, orderBy
+}: ChaptersPaginationProps): Promise<PaginatedApiResponse<IChapter[]>> {
     try {
         const chapters = await db.chapter.findMany({
-            where: {
+            where: where ? {
+                ...where,
+                archived: where.archived ?? false
+            } : {
                 ...(book !== -1 && {
                     bookId: book
                 }),
                 archived: false,
             },
-            orderBy: {
+            orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
             ...(perPage !== -1 && {

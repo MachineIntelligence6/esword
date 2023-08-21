@@ -3,19 +3,17 @@ import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared
 import { Prisma } from "@prisma/client";
 import { ITopic } from "@/shared/types/models.types";
 import { TopicFormSchema } from "@/components/dashboard/forms/topics.form";
+import { TopicsPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.TopicInclude> & {
-    chapter?: number
-}
 
-export async function get(
-    { page = 1, perPage, chapter = -1, include }: PaginationProps
-): Promise<PaginatedApiResponse<ITopic[]>> {
+export async function get({
+    page = 1, perPage, chapter = -1, include, where, orderBy
+}: TopicsPaginationProps): Promise<PaginatedApiResponse<ITopic[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<ITopic[]>>(
-            `/api/topics?page=${page}&perPage=${perPage}&chapter=${chapter}&include=${JSON.stringify(include)}`
+            `/api/topics?page=${page}&perPage=${perPage}&chapter=${chapter}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
         )
         return res.data
     } catch (error) {

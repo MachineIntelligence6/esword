@@ -3,6 +3,7 @@ import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IAuthor } from "@/shared/types/models.types";
+import { revalidatePath } from "next/cache";
 
 
 
@@ -176,6 +177,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
             }
         })
         if (!author) throw new Error("");
+        // revalidatePath(`/dashboard/authors/${}`)
         return {
             succeed: true,
             code: "SUCCESS",

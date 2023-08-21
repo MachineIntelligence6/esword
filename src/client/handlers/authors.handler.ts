@@ -24,6 +24,21 @@ export async function get(
     }
 }
 
+export async function getById(id: number): Promise<ApiResponse<IAuthor>> {
+    try {
+        const res = await axios.get<ApiResponse<IAuthor>>(
+            `/api/authors/${id}`
+        )
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
+
 
 
 

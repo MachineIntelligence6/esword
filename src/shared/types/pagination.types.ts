@@ -16,4 +16,11 @@ export type CommentariesPaginationProps = BasePaginationProps<Prisma.CommentaryI
 export type VersesPaginationProps = BasePaginationProps<Prisma.VerseInclude, Prisma.VerseWhereInput, Prisma.VerseOrderByWithRelationInput> & {
     topic?: number;
 }
+export type TopicsPaginationProps = BasePaginationProps<Prisma.TopicInclude, Prisma.TopicWhereInput, Prisma.TopicOrderByWithRelationInput> & {
+    chapter?: number;
+}
 
+
+export type ChaptersPaginationProps = BasePaginationProps<Prisma.ChapterInclude, Prisma.ChapterWhereInput, Prisma.ChapterOrderByWithRelationInput> & {
+    book?: number;
+}

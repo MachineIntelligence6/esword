@@ -3,18 +3,32 @@ import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared
 import { ChapterFormSchema } from "@/components/dashboard/forms/chapters.form";
 import { IChapter } from "@/shared/types/models.types";
 import { Prisma } from "@prisma/client";
-
-type PaginationProps = BasePaginationProps<Prisma.ChapterInclude> & {
-    book?: number;
-}
+import { ChaptersPaginationProps } from "@/shared/types/pagination.types";
 
 
-export async function get(
-    { page = 1, perPage, book = -1, include }: PaginationProps
-): Promise<PaginatedApiResponse<IChapter[]>> {
+
+
+export async function get({
+    page = 1, perPage, book = -1,
+    include, where, orderBy
+}: ChaptersPaginationProps): Promise<PaginatedApiResponse<IChapter[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IChapter[]>>(
-            `/api/chapters?page=${page}&perPage=${perPage}&book=${book}&include=${JSON.stringify(include)}`
+            `/api/chapters?page=${page}&perPage=${perPage}&book=${book}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+        )
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
+export async function getById(id: number): Promise<ApiResponse<IChapter>> {
+    try {
+        const res = await axios.get<ApiResponse<IChapter>>(
+            `/api/chapters/${id}`
         )
         return res.data
     } catch (error) {

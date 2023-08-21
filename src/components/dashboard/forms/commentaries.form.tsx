@@ -318,7 +318,7 @@ export default function CommentariesForm({ commentary }: { commentary?: IComment
                                     <FormLabel>Verse <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <SelectEl
-                                            placeholder="Select IVerse"
+                                            placeholder="Select Verse"
                                             disabled={!verses}
                                             onChange={(opt) => {
                                                 field.onChange(opt?.value ? Number(opt.value) : undefined)

@@ -25,6 +25,21 @@ export async function get({
     }
 }
 
+export async function getById(id: number): Promise<ApiResponse<IVerse>> {
+    try {
+        const res = await axios.get<ApiResponse<IVerse>>(
+            `/api/verses/${id}`
+        )
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
+
 
 
 export async function create(data: VerseFormSchema): Promise<ApiResponse<IVerse>> {
