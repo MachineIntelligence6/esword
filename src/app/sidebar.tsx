@@ -48,7 +48,7 @@ function SidebarBooksComponent() {
                                     onClick={() => setActiveBook(book.id)}
                                     className={cn(
                                         "px-5 py-2 transition-all w-full text-start block max-w-full overflow-hidden text-ellipsis whitespace-nowrap",
-                                        activeBook.id === book.id ? "bg-primary font-bold text-white" : "hover:font-bold hover:text-white hover:bg-primary"
+                                        activeBook.id === book.id ? "bg-primary/30 font-bold text-primary-dark" : "hover:font-bold hover:text-primary-dark hover:bg-primary/30"
                                     )}>
                                     {book.name}
                                 </button>
@@ -102,7 +102,7 @@ function SidebarChaptersComponent() {
                                     onClick={() => setActiveChapter(chapter.id)}
                                     className={cn(
                                         "px-3 py-2 transition-all",
-                                        activeChapter.id === chapter.id ? "font-bold text-white bg-primary" : "hover:font-bold hover:text-white hover:bg-primary"
+                                        activeChapter.id === chapter.id ? "font-bold text-primary-dark bg-primary/30" : "hover:font-bold hover:text-primary-dark hover:bg-primary/30"
                                     )}>
                                     {chapter.name}
                                 </button>

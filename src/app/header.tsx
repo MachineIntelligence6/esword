@@ -19,13 +19,8 @@ export default function SiteHeader() {
                 <div>
                     <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm">
                         <div className="flex lg:gap-x-0">
-                            <div className="font-bold py-3 lg:block hidden">
-                                <Link href="/">Home</Link>
-                            </div>
-                            <select name="" id="" className="bg-transparent lg:hidden md:w-auto w-16">
-                                <option value="Home" className="text-black">Home</option>
-                                <option value="Home" className="text-black">Donation</option>
-                            </select>
+                            {/* use of dropdown function */}
+                            <Dropdown />
                         </div>
                         <div>
                             <div className="font-normal py-3 lg:block hidden">
@@ -45,3 +40,35 @@ export default function SiteHeader() {
     );
 }
 
+
+
+
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ChevronDownIcon } from "@radix-ui/react-icons";
+
+function Dropdown() {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger>
+                <div className="font-bold flex gap-1  items-center py-3">
+                    <Link href="/">Home</Link>
+                    <ChevronDownIcon className="h-4 w-4 shrink-0 text-white transition-transform lg:hidden"/>
+                </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="lg:hidden ">
+                <DropdownMenuItem>
+                    <a href="/" className="text-black hover:bg-primary/30 hover:text-primary-dark hover:font-bold">
+                        Home
+                    </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <a href="/donate" className="text-black">
+                        Donation
+                    </a>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+
+    )
+}

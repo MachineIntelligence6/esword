@@ -25,7 +25,7 @@ export default function CommentariesContentComponent() {
 
     return (
         <>
-            <div className="lg:min-h-[400px] max-h-[40vh] flex flex-col">
+            <div className="lg:min-h-[400px] max-h-[40vh] flex flex-col ">
                 {/* title */}
                 <div
                     className="toggle-btn bg-silver-light py-3 font-inter lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b lg:flex justify-between hidden">
@@ -46,8 +46,8 @@ export default function CommentariesContentComponent() {
                                         type="button"
                                         onClick={() => setActiveAuthor(author)}
                                         className={cn(
-                                            "text-xs font-medium px-3 py-2 transition-all",
-                                            activeAuthor?.id === author.id ? "bg-primary text-white font-bold" : "hover:bg-primary hover:text-white hover:font-bold"
+                                            "text-xs font-medium px-3 py-2 transition-all rounded-lg",
+                                            activeAuthor?.id === author.id ? "bg-primary/30 text-primary-dark font-bold" : "hover:bg-primary/30 hover:text-primary-dark hover:font-bold"
                                         )}>
                                         {author.name}
                                     </button>

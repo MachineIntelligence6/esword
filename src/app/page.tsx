@@ -27,8 +27,8 @@ export default function Page() {
 
 
     return (
-        <div>
-            <div className="flex lg:flex-row flex-col max-h-screen lg:overflow-hidden">
+        <div className="">
+            <div className="flex lg:flex-row flex-col max-h-screen lg:overflow-hidden ">
                 {/* Books and chapter component */}
                 <div className="pt-[60px]">
                     <SiteSidebar />
