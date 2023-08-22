@@ -28,7 +28,7 @@ function SidebarBooksComponent() {
                 <select
                     name="book"
                     onChange={(e) => setActiveBook(Number(e.target.value))}
-                    className="lg:hidden mx-4 pt-1">
+                    className="lg:hidden mx-4 pt-1 font-bold">
                     {
                         booksList?.map((book) => (
                             <option key={book.id} value={book.id}>
@@ -79,7 +79,7 @@ function SidebarChaptersComponent() {
                 <select
                     name="chapter"
                     onChange={(e) => setActiveChapter(Number(e.target.value))}
-                    className="lg:hidden pt-1 mx-4">
+                    className="lg:hidden pt-1 mx-4 font-bold">
                     {
                         chaptersList?.map((chapter) => (
                             <option key={chapter.id} value={chapter.id}>
