@@ -1,7 +1,7 @@
 'use client'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from "@/components/ui/accordion"
 import CommentariesContentComponent from "@/components/frontend/commentaries-section";
-import NotesContentComponent from "@/components/frontend/NotesContentComponent";
+import NotesContentComponent from "@/components/frontend/notes-section";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -12,17 +12,24 @@ import SiteSidebar from "@/app/sidebar";
 
 export default function Page() {
     const searchParams = useSearchParams()
-    const { setActiveBook, setActiveChapter, loadInitialData } = useReadBookStore()
+    const { setActiveBook, loadInitialData } = useReadBookStore()
 
 
     const doInitialLoadWork = async () => {
-        await loadInitialData()
+        const book = searchParams.get("book") ?? undefined
+        const chapter = parseInt(searchParams.get("chapter") ?? "-1")
+        const verse = parseInt(searchParams.get("verse") ?? "-1")
+        await loadInitialData(
+            book,
+            chapter === -1 ? undefined : chapter,
+            verse === -1 ? undefined : verse,
+        )
     }
 
     useEffect(() => {
         doInitialLoadWork()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [loadInitialData, searchParams, setActiveBook, setActiveChapter])
+    }, [loadInitialData, searchParams, setActiveBook])
 
 
 
@@ -30,10 +37,8 @@ export default function Page() {
         <div className="">
             <div className="flex lg:flex-row flex-col max-h-screen lg:overflow-hidden ">
                 {/* Books and chapter component */}
-                <div className="pt-[60px]">
-                    <SiteSidebar />
-                </div>
-                <div className="md:pt-5 lg:pt-[60px] w-full" >
+                <SiteSidebar />
+                <div className="w-full" >
                     <div className="lg:flex block w-full">
                         <VersesSection />
                         <div className="xl:max-w-[30%] xl:min-w-[30%] lg:max-w-[40%] lg:min-w-[40%] max-h-full min-h-full lg:flex  lg:flex-col" >
@@ -63,7 +68,6 @@ export default function Page() {
                                 <div className="hidden lg:block h-full">
                                     <NotesContentComponent />
                                 </div>
-                                {/* Editor section for small screens */}
                                 <div>
                                     <Accordion type="single" collapsible>
                                         <AccordionItem value="item-1">

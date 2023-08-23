@@ -69,6 +69,30 @@ export function ChaptersLoadingPlaceholder() {
     )
 }
 
+export function BookmarksLoadingPlaceholder() {
+    return (
+        <ContentLoader
+            speed={3}
+            width={60}
+            // height={600}
+            viewBox="0 0 60 2000"
+            backgroundColor="#f3f3f3"
+            foregroundColor="#ecebeb"
+            className="w-full overflow-x-hidden p-1 h-full max-h-full"
+        >
+            <rect y="0" rx="2" ry="2" width="60" height="60" />
+            <rect y="80" rx="2" ry="2" width="60" height="60" />
+            <rect y="160" rx="2" ry="2" width="60" height="60" />
+            <rect y="240" rx="2" ry="2" width="60" height="60" />
+            <rect y="320" rx="2" ry="2" width="60" height="60" />
+            <rect y="400" rx="2" ry="2" width="60" height="60" />
+            <rect y="480" rx="2" ry="2" width="60" height="60" />
+            <rect y="560" rx="2" ry="2" width="60" height="60" />
+            <rect y="640" rx="2" ry="2" width="60" height="60" />
+        </ContentLoader>
+    )
+}
+
 export function TopicLoadingPlaceholder() {
     return (
         <ContentLoader

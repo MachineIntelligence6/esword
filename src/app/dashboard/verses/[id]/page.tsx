@@ -108,7 +108,7 @@ function ContentTabs({ verse }: ContentTabsProps) {
                             <CardTitle className="font-bold text-2xl">
                                 Commentaries
                             </CardTitle>
-                            <Link href={`/dashboard/commentaries/add?book=${verse.topic?.chapter?.book?.id}&chapter=${verse?.topic?.chapter?.id}&verse=${verse.id}`}
+                            <Link target="_blank" href={`/dashboard/commentaries/add?book=${verse.topic?.chapter?.book?.id}&chapter=${verse?.topic?.chapter?.id}&verse=${verse.id}`}
                                 className={buttonVariants({ variant: "default" })}>
                                 Add New
                             </Link>

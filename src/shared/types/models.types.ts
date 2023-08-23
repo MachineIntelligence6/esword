@@ -1,4 +1,4 @@
-import { Author, Book, Chapter, Commentary, Note, Topic, User, UserRole, Verse } from "@prisma/client"
+import { Activity, Author, Book, Bookmark, Chapter, Commentary, Note, Topic, User, UserRole, Verse } from "@prisma/client"
 
 export type IChapter = Chapter & {
     book?: IBook;
@@ -13,6 +13,10 @@ export type IVerse = Verse & {
 export type ITopic = Topic & {
     verses?: IVerse[];
     chapter?: IChapter
+}
+export type IBookmark = Bookmark & {
+    verse?: IVerse;
+    user?: IUser
 }
 
 export type IBook = Book & {
@@ -37,9 +41,16 @@ export type IUser = User & {
     notes?: INote[];
 }
 
+export type IActivity = Activity & {
+    user?: IUser;
+}
+
+
 export type IUserRole = UserRole | "ALL"
 
 
 
-export type SessionUser = Omit<User, "password">
+export type SessionUser = Omit<Omit<User, "password">, "id"> & {
+    id: string
+}
 

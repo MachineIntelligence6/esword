@@ -1,4 +1,5 @@
 import serverApiHandlers from "@/server/handlers"
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server"
 
 
@@ -6,9 +7,16 @@ import { NextResponse } from "next/server"
 
 type RouteParams = { params: { id: string } }
 
-// Get By Slug
+// Get By Id
 export async function GET(req: Request, { params }: RouteParams) {
-    const res = await serverApiHandlers.verses.getById(parseInt(params.id))
+    const searchParams = new URLSearchParams(req.url.split("?")[1])
+    const includeStr = searchParams.get("include")
+    let include: Prisma.VerseInclude | undefined;
+    try {
+        include = JSON.parse(includeStr ?? "")
+    } catch (error) {
+    }
+    const res = await serverApiHandlers.verses.getById(parseInt(params.id), include)
     return NextResponse.json(res)
 }
 

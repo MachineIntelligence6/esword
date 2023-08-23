@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import db from "@/server/db"
 import bcrypt from 'bcryptjs'
 import { User } from "@prisma/client"
+import { SessionUser } from "@/shared/types/models.types"
 
 
 
@@ -56,7 +57,7 @@ export const authOptions: AuthOptions = {
         },
         async session({ session, token }) {
             if (token.user) {
-                session.user = token.user as User
+                session.user = token.user as SessionUser
             }
             return session
         },

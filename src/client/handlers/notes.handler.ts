@@ -29,9 +29,9 @@ export async function get({
 
 
 
-export async function create(data: CommentaryFormSchema): Promise<ApiResponse<ICommentary>> {
+export async function create(data: { text: string; verse: number; }): Promise<ApiResponse<INote>> {
     try {
-        const res = await axios.post<ApiResponse<ICommentary>>("/api/commentaries", data)
+        const res = await axios.post<ApiResponse<INote>>("/api/notes", data)
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {

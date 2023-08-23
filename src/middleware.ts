@@ -3,6 +3,7 @@ import { NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 import { canUserAccessPath } from './lib/roles-manager'
 import { ApiResponse } from './shared/types/api.types'
+import { SessionUser } from './shared/types/models.types'
 
 
 const unauthorizedRes: ApiResponse<null> = {
@@ -13,7 +14,7 @@ const unauthorizedRes: ApiResponse<null> = {
 
 export default withAuth(
     function middleware(req: NextRequestWithAuth) {
-        const user = (req.nextauth.token as { user: User | null }).user
+        const user = (req.nextauth.token as { user: SessionUser | null }).user
         if (!user) return NextResponse.redirect(new URL("/login", req.url))
         // Dashboard Global Restrictions
         if (req.nextUrl.pathname.startsWith("/dashboard")) {
@@ -29,6 +30,9 @@ export default withAuth(
             if (req.method.toLowerCase() === "delete" && user.role !== "ADMIN") {
                 return NextResponse.json(unauthorizedRes)
             }
+        }
+        if (req.nextUrl.pathname.startsWith("/api/activities") && user.role !== "ADMIN") {
+            return NextResponse.json(unauthorizedRes)
         }
     },
     {

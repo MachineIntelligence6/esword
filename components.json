@@ -10,7 +10,7 @@
     "cssVariables": false
   },
   "aliases": {
-    "components": "@/components/dashboard",
+    "components": "@/components",
     "utils": "@/lib/utils"
   }
 }

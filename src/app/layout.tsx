@@ -5,6 +5,7 @@ import '@/styles/tailwind.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SiteHeader from './header'
+import { cn } from '@/lib/utils'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,9 +25,12 @@ export default async function RootLayout({
   const session = await getServerAuth()
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={cn(
+        inter.className,
+        "max-h-screen overflow-hidden"
+      )}>
         <AuthProvider session={session}>
-          <SiteHeader />
+          <SiteHeader session={session} />
           {children}
           <Toaster />
         </AuthProvider>

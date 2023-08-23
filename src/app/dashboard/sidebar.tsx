@@ -4,9 +4,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { usePathname } from 'next/navigation'
 import Link from "next/link";
 import { canUserAccessPath } from "@/lib/roles-manager";
-import { useSession } from "next-auth/react";
-import assert from "assert";
-import Spinner from "@/components/spinner";
 import { Session } from "next-auth";
 
 
@@ -52,6 +49,10 @@ export const menuItems: Array<MenuItem> = [
     {
         path: "/dashboard/users",
         label: "Users"
+    },
+    {
+        path: "/dashboard/activities",
+        label: "Activities"
     },
     {
         path: "/dashboard/settings",

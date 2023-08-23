@@ -4,7 +4,7 @@ import { DBooksCard, DCommentariesCard, DLogsCard, DNotesCard } from "./dashboar
 
 export default function Page() {
     return (
-        <div className="grid grid-cols-2 gap-10">
+        <div className="grid grid-cols-2 gap-5 max-h-[calc(100vh_-_100px)] pb-10 pr-2 overflow-y-auto">
             <div className="col-span-1">
                 <DBooksCard />
             </div>

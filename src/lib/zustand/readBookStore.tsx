@@ -1,5 +1,7 @@
 import clientApiHandlers from "@/client/handlers";
-import { IAuthor, IBook, IChapter, ICommentary, ITopic, IVerse } from "@/shared/types/models.types";
+import { IAuthor, IBook, IBookmark, IChapter, ICommentary, ITopic, IVerse } from "@/shared/types/models.types";
+import { Author } from "@prisma/client";
+import { getSession } from "next-auth/react";
 import { create } from 'zustand'
 
 
@@ -11,6 +13,24 @@ type StoreStateItem<TData = unknown> = {
 }
 
 
+
+type ActiveAuthor = Author & {
+    commentaries?: CommentariesState
+}
+
+
+
+type CommentariesState = {
+    active?: ICommentary | null;
+    list?: ICommentary[] | null
+}
+type AuthorsState = {
+    active?: ActiveAuthor | null;
+    list?: Author[] | null
+}
+
+
+
 type ActiveBook = StoreStateItem<IBook> & {
     id?: number;
 }
@@ -19,13 +39,12 @@ type ActiveChapter = StoreStateItem<IChapter> & {
 }
 type ActiveVerse = StoreStateItem<IVerse> & {
     id?: number;
+    authors?: AuthorsState
 }
 type ActiveCommentary = StoreStateItem<ICommentary> & {
     id?: number;
 }
-type ActiveAuthor = StoreStateItem<IAuthor> & {
-    id?: number;
-}
+
 
 
 
@@ -33,17 +52,44 @@ type ReadBookStoreType = {
     initialLoading?: boolean;
     booksList?: IBook[] | null,
     chaptersList?: IChapter[] | null,
+    bookmarksList?: IBookmark[] | null,
     topicsList?: ITopic[] | null,
     activeBook: ActiveBook,
     activeChapter: ActiveChapter;
+    activeBookmark?: IBookmark | null;
     activeVerse: ActiveVerse;
-    activeCommentary?: ActiveCommentary;
-    activeAuthor?: ActiveAuthor;
-    setActiveBook: (book: number) => Promise<void>;
-    setActiveChapter: (chapter: number) => Promise<void>;
-    setActiveVerse: (id: number, topic: number) => Promise<void>;
-    setActiveAuthor: (author: IAuthor) => Promise<void>;
-    loadInitialData: () => Promise<void>
+    // activeAuthor?: ActiveAuthor;
+    activeVerseNote: {
+        text?: string;
+        noteId?: number;
+        changed?: boolean;
+    };
+    setActiveBookmark: (value: IBookmark) => void;
+    createNewBookmark: (verse?: IVerse) => Promise<void>;
+    loadBookmarks: () => Promise<void>;
+    setActiveVerseNote: (note?: string) => void;
+    setActiveBook: (book: number, chapter?: number, verse?: number) => Promise<void>;
+    setActiveCommentary: (commentary: number) => void;
+    setActiveChapter: (chapter: number, verse?: number) => Promise<void>;
+    setActiveVerse: (id: number) => Promise<void>;
+    setActiveAuthor: (author: number) => void;
+    loadInitialData: (book?: string, chapter?: number, verse?: number) => Promise<void>
+}
+
+const checkAndSaveNote = (state: ReadBookStoreType) => {
+    const note = state.activeVerseNote;
+    const activeVerse = state.activeVerse;
+    if ((note.noteId && note.noteId === activeVerse.id && note.text !== activeVerse.data?.notes?.[0]?.text)) {
+        clientApiHandlers.notes.create({
+            verse: note.noteId,
+            text: note.text ?? ""
+        })
+    } else if ((note.text && note.text !== "") && activeVerse.id) {
+        clientApiHandlers.notes.create({
+            verse: activeVerse.id,
+            text: note.text ?? ""
+        })
+    }
 }
 
 
@@ -52,18 +98,20 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
     activeBook: {},
     activeChapter: {},
     activeVerse: {},
-    activeCommentary: {},
-    setActiveBook: async (bookId: number) => {
+    activeVerseNote: {},
+    noteWarningPopupOpen: false,
+    setActiveBook: async (bookId, chapterNum, verseNum) => {
         if (bookId === get().activeBook.id) return;
+        checkAndSaveNote(get())
         set((state) => ({
             ...state,
-            activeBook: { number: bookId, loading: true },
+            activeBook: { id: bookId, loading: true },
             chaptersList: null,
             activeChapter: {},
-            activeAuthor: {},
             activeVerse: {},
-            activeCommentary: {},
-            topicsList: null
+            topicsList: null,
+            activeVerseNote: {},
+            commentaries: {}
         }))
         const book = get().booksList?.find((b) => b.id === bookId)
         const { data: chapters } = await clientApiHandlers.chapters.get({
@@ -82,18 +130,21 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
                 data: book
             },
         }))
-        const firstChapter = get().chaptersList?.[0]
-        if (firstChapter) await get().setActiveChapter(firstChapter.id)
+        const chapter = chapterNum ? get().chaptersList?.find((ch) => ch.name === chapterNum) : get().chaptersList?.[0]
+        if (chapter) await get().setActiveChapter(chapter.id, verseNum)
     },
-    setActiveChapter: async (chapterId: number) => {
+    setActiveChapter: async (chapterId, verseNum) => {
         if (chapterId === get().activeChapter.id) return;
+        checkAndSaveNote(get())
+        const session = await getSession()
+        if (!session) return;
         set((state) => ({
             ...state,
-            activeChapter: { number: chapterId, loading: true },
-            activeAuthor: {},
+            activeChapter: { id: chapterId, loading: true },
             activeVerse: {},
-            activeCommentary: {},
-            topicsList: null
+            topicsList: null,
+            activeVerseNote: {},
+            commentaries: {}
         }))
         const chapter = get().chaptersList?.find((ch) => ch.id === chapterId)
         const { data: topics } = await clientApiHandlers.topics.get({
@@ -120,18 +171,6 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
                                 }
                             }
                         },
-                        commentaries: {
-                            where: { archived: false },
-                            include: {
-                                author: {
-                                    include: {
-                                        commentaries: {
-                                            where: { archived: false }
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -143,56 +182,165 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
                 loading: false,
                 data: chapter
             },
-            topicsList: topics
+            topicsList: topics,
         }))
-        // const firstTopic = topics?.[0]
-        // const firstVerse = firstTopic?.verses?.[0]
-        // if (firstTopic && firstVerse) await get().setActiveVerse(firstVerse.id, firstTopic.id);
+        if (verseNum) {
+            const versesList = topics?.flatMap((topic) => topic.verses)
+            const verse = versesList?.find((verse) => verse?.number === verseNum)
+            if (verse) get().setActiveVerse(verse.id)
+        }
     },
-    setActiveVerse: async (verseId: number, topicId: number) => {
+    setActiveVerse: async (verseId: number) => {
         if (verseId === get().activeVerse.id) return;
+        checkAndSaveNote(get())
         set((state) => ({
             ...state,
-            activeVerse: { number: verseId, loading: true },
-            activeAuthor: {},
-            activeCommentary: {},
+            activeVerse: { id: verseId, loading: true, data: null },
+            activeVerseNote: {},
+            commentaries: {}
         }))
-        const topics = get().topicsList
-        const verse = topics?.find((t) => t.id === topicId)?.verses?.find((v) => v.id === verseId)
+        const session = await getSession()
+        const { data: verse } = await clientApiHandlers.verses.getById(
+            verseId,
+            {
+                topic: {
+                    include: {
+                        chapter: {
+                            include: {
+                                book: true
+                            }
+                        }
+                    }
+                },
+                commentaries: {
+                    where: { archived: false },
+                    include: {
+                        author: {
+                            include: {
+                                commentaries: {
+                                    where: { archived: false }
+                                }
+                            }
+                        }
+                    }
+                },
+                notes: {
+                    where: {
+                        archived: false,
+                        userId: Number(session?.user.id)
+                    },
+                }
+            }
+        )
+        const authors: ActiveAuthor[] = []
+        verse?.commentaries?.forEach((c) => {
+            if (!c.author || authors.some((a) => a.id === c.author?.id)) return;
+            authors.push({
+                ...c.author,
+                commentaries: {
+                    list: c.author.commentaries,
+                    active: c.author.commentaries?.[0]
+                }
+            })
+        })
+        const firstAuthor = authors?.[0]
         set((state) => ({
             ...state,
             activeVerse: {
                 id: verseId,
                 loading: false,
-                data: verse
+                data: verse,
+                authors: {
+                    list: authors,
+                    active: firstAuthor
+                }
             },
-        }))
-        const commentaries = verse?.commentaries
-        const author = (commentaries && commentaries?.length > 0) ? commentaries[0].author : undefined
-        if (author) await get().setActiveAuthor(author)
-    },
-    setActiveAuthor: async (author: IAuthor) => {
-        if (author.id === get().activeAuthor?.id) return;
-        const firstCommentary = author.commentaries?.[0]
-        set((state) => ({
-            ...state,
-            activeAuthor: {
-                id: author.id,
-                data: author
-            },
-            activeCommentary: {
-                id: firstCommentary?.id,
-                data: firstCommentary,
+            activeVerseNote: {
+                text: verse?.notes?.[0]?.text,
+                noteId: verse?.id
             }
         }))
     },
-    loadInitialData: async () => {
+    setActiveAuthor: async (authorId) => {
+        if (authorId === get().activeVerse.authors?.active?.id) return;
+        const activeVerse = get().activeVerse;
+        // const activeAuthor = get().activeVerse.authors?.active;
+        if (!activeVerse) return;
+        const author = activeVerse.authors?.list?.find((a) => a.id === authorId)
+        set((state) => ({
+            ...state,
+            activeVerse: {
+                ...activeVerse,
+                authors: {
+                    list: activeVerse.authors?.list,
+                    active: author
+                }
+            },
+        }))
+    },
+    setActiveCommentary: (commentaryId) => {
+        const activeVerse = get().activeVerse;
+        const activeAuthor = get().activeVerse.authors?.active;
+        if (!activeVerse || !activeAuthor) return;
+        console.log("head")
+        const activeCommentary = activeAuthor.commentaries?.list?.find((c) => c.id === commentaryId)
+        console.log(activeCommentary)
+        set((state) => ({
+            ...state,
+            activeVerse: {
+                ...activeVerse,
+                authors: {
+                    list: activeVerse.authors?.list,
+                    active: {
+                        ...activeAuthor,
+                        commentaries: {
+                            ...activeAuthor.commentaries,
+                            active: activeCommentary
+                        }
+                    }
+                }
+            }
+        }))
+    },
+    setActiveVerseNote: (note) => {
+        set((state) => ({
+            ...state,
+            activeVerseNote: {
+                text: note,
+                noteId: get().activeVerse.id,
+                changed: (note !== undefined || !(get().activeVerseNote.noteId && note === ""))
+            }
+        }))
+    },
+    setActiveBookmark: async (bookmark) => {
+        set((state) => ({
+            ...state,
+            activeBookmark: bookmark,
+        }))
+        if (bookmark.verse?.topic?.chapter?.book) {
+            await get().setActiveBook(bookmark.verse?.topic?.chapter?.book?.id)
+            await get().setActiveChapter(bookmark.verse?.topic?.chapter?.id)
+            await get().setActiveVerse(bookmark.verse?.id)
+        }
+    },
+    createNewBookmark: async (verse) => {
+        if (!verse) return
+        const { data: bookmark } = await clientApiHandlers.bookmarks.create(verse?.id)
+        if (bookmark) await get().loadBookmarks()
+    },
+    loadBookmarks: async () => {
+        set((state) => ({ ...state, bookmarksList: null }))
+        const { data: bookmarks } = await clientApiHandlers.bookmarks.get({ page: 1, perPage: -1 })
+        set((state) => ({ ...state, bookmarksList: bookmarks }))
+    },
+    loadInitialData: async (bookSlug, chapterNum, verseNum) => {
         set({ initialLoading: true })
         const { data: books } = await clientApiHandlers.books.get({ page: 1, perPage: -1 })
         set((state) => ({ ...state, booksList: books }))
-        const firstBook = books?.[0]
-        if (firstBook) {
-            await get().setActiveBook(firstBook.id)
+        await get().loadBookmarks()
+        const book = bookSlug ? books?.find((b) => b.slug === bookSlug) : books?.[0]
+        if (book) {
+            await get().setActiveBook(book.id, chapterNum, verseNum)
         }
         set((state) => ({ ...state, initialLoading: false }))
     }

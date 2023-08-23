@@ -93,8 +93,6 @@ export async function getById(id: number, include?: Prisma.VerseInclude): Promis
                 include ?
                     {
                         ...include,
-                        // ...(include.notes && { notes: { where: { archived: false } } }),
-                        // ...(include.commentaries && { commentaries: { where: { archived: false } } }),
                     }
                     : {
                         topic: false,

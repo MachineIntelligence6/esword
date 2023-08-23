@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String   @db.MediumText
-  password  String   @db.MediumText
-  image     String?  @db.LongText
-  role      UserRole @default(VIEWER)
-  notes     Note[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
-  archived  Boolean  @default(false)
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  name       String     @db.MediumText
+  password   String     @db.MediumText
+  image      String?    @db.LongText
+  role       UserRole   @default(VIEWER)
+  notes      Note[]
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @default(now()) @updatedAt() @map("updated_at")
+  archived   Boolean    @default(false)
+  bookmarks  Bookmark[]
+  activities Activity[]
 
   @@map("users")
 }
@@ -81,6 +83,7 @@ model Verse {
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @default(now()) @updatedAt() @map("updated_at")
   archived     Boolean      @default(false)
+  bookmarks    Bookmark[]
 
   @@map("verses")
 }
@@ -125,4 +128,43 @@ model Author {
   archived     Boolean      @default(false)
 
   @@map("authors")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  verseId   Int      @map("verse_id")
+  verse     Verse    @relation(fields: [verseId], references: [id])
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+}
+
+model Activity {
+  id        Int                @id @default(autoincrement())
+  action    ActivityActionType
+  model     ActivityModelType
+  ref       Int
+  userId    Int                @map("user_id")
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timestamp DateTime           @default(now())
+
+  @@map("activities")
+}
+
+enum ActivityActionType {
+  UPDATE
+  CREATE
+  DELETE
+}
+
+enum ActivityModelType {
+  AUTHORS
+  BOOKMARKS
+  COMMENTARIES
+  BOOKS
+  CHAPTERS
+  TOPICS
+  VERSES
+  NOTES
+  USERS
 }

@@ -25,10 +25,10 @@ export async function get({
     }
 }
 
-export async function getById(id: number): Promise<ApiResponse<IVerse>> {
+export async function getById(id: number, include: Prisma.VerseInclude): Promise<ApiResponse<IVerse>> {
     try {
         const res = await axios.get<ApiResponse<IVerse>>(
-            `/api/verses/${id}`
+            `/api/verses/${id}?include=${JSON.stringify(include)}`
         )
         return res.data
     } catch (error) {

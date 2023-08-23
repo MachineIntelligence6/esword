@@ -6,6 +6,7 @@ import * as commentariesApiHandlers from '@/server/handlers/commentaries.api'
 import * as usersApiHandlers from '@/server/handlers/users.api'
 import * as notesApiHandlers from '@/server/handlers/notes.api'
 import * as topicsApiHandlers from '@/server/handlers/topics.api'
+import * as bookmarksApiHandlers from '@/server/handlers/bookmarks.api'
 
 
 const serverApiHandlers = {
@@ -16,7 +17,8 @@ const serverApiHandlers = {
     commentaries: commentariesApiHandlers,
     users: usersApiHandlers,
     notes: notesApiHandlers,
-    topics: topicsApiHandlers
+    topics: topicsApiHandlers,
+    bookmarks: bookmarksApiHandlers
 }
 
 export default serverApiHandlers;

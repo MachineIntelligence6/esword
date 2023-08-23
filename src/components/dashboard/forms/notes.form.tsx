@@ -1,67 +1,18 @@
 'use client';
-import dynamic from "next/dynamic";
 import { Card, CardContent, CardFooter, CardTitle } from "../../ui/card";
-import 'react-quill/dist/quill.snow.css';
 import Spinner from "@/components/spinner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../ui/form";
-import { SelectEl } from "../../ui/select";
-import { useEffect, useState } from "react";
-import { IBook, IChapter, INote, ITopic, IUser, IVerse } from "@/shared/types/models.types";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "../../ui/form";
+import { INote } from "@/shared/types/models.types";
 import clientApiHandlers from "@/client/handlers";
 import { Button } from "../../ui/button";
 import { useRouter } from "next/navigation";
 import definedMessages from "@/shared/constants/messages";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-
-
-const ReactQuill = dynamic(() => import("react-quill"), {
-    ssr: false,
-    loading: () => <div className="w-full h-96 flex items-center justify-center">
-        <Spinner size="lg" />
-    </div>
-});
-
-
-const modules = (readonly?: boolean) => {
-    return {
-        ...(readonly ? { toolbar: null } : {
-            toolbar: [
-                [
-                    { 'header': '1' },
-                    { 'header': '2' },
-                    { 'header': [1, 2, 3, 4, 5, 6, false] }
-                ],
-                [{ 'font': [] }],
-                // [{ size: [] }],
-                // [{ 'color': [] }, { 'background': [] }],
-                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [
-                    { 'list': 'ordered' },
-                    { 'list': 'bullet' },
-                    { 'indent': '-1' },
-                    { 'indent': '+1' }
-                ],
-                ['link'],
-                ['clean']
-            ],
-        }),
-        clipboard: {
-            // toggle to add extra line breaks when pasting HTML:
-            matchVisual: false,
-        }
-    }
-}
-
-const formats = [
-    'header', 'font', 'size',
-    'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'bullet', 'indent',
-    'link'
-]
+import QuillEditor from "@/components/ui/editor";
 
 
 
@@ -172,16 +123,7 @@ export default function NotesEditorForm({ note, readonly }: Props) {
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-full">
                                     <FormControl>
-                                        <div id="editor-container">
-                                            <ReactQuill
-                                                theme="snow"
-                                                bounds="#editor-container"
-                                                readOnly={readonly}
-                                                {...field}
-                                                formats={formats}
-                                                modules={modules(readonly)}
-                                                placeholder="Type..." />
-                                        </div>
+                                        <QuillEditor {...field} disabled={readonly} />
                                     </FormControl>
                                     {fieldState.error && <FormMessage />}
                                 </FormItem>

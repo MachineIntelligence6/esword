@@ -4,6 +4,7 @@ import defaults from "@/shared/constants/defaults";
 import { Prisma } from "@prisma/client";
 import { INote } from "@/shared/types/models.types";
 import { NotesPaginationProps } from "@/shared/types/pagination.types";
+import { getServerAuth } from "../auth";
 
 
 
@@ -140,23 +141,47 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 type CreateNoteReq = {
     text: string;
     verse: number;
-    user: number;
 }
 
 export async function create(req: Request): Promise<ApiResponse<INote>> {
     try {
+        const session = await getServerAuth()
+        if (!session || !session.user) return {
+            code: "UNAUTHORIZED",
+            succeed: false
+        }
         const noteReq = await req.json() as CreateNoteReq
-        const note = await db.note.create({
-            data: {
-                text: noteReq.text,
-                userId: noteReq.user,
-                verseId: noteReq.verse
-            },
-            include: {
-                verse: false,
-                user: false
+        let note = await db.note.findFirst({
+            where: {
+                verseId: noteReq.verse,
+                userId: Number(session.user.id)
             }
         })
+        if (note) {
+            console.log("Updating note already exists.")
+            note = await db.note.update({
+                where: { id: note.id },
+                data: {
+                    text: noteReq.text,
+                },
+                include: {
+                    verse: false,
+                    user: false
+                }
+            })
+        } else {
+            note = await db.note.create({
+                data: {
+                    text: noteReq.text,
+                    userId: Number(session.user.id),
+                    verseId: noteReq.verse
+                },
+                include: {
+                    verse: false,
+                    user: false
+                }
+            })
+        }
         if (!note) throw new Error("");
         return {
             succeed: true,

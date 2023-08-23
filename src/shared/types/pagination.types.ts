@@ -20,6 +20,9 @@ export type VersesPaginationProps = BasePaginationProps<Prisma.VerseInclude, Pri
 export type TopicsPaginationProps = BasePaginationProps<Prisma.TopicInclude, Prisma.TopicWhereInput, Prisma.TopicOrderByWithRelationInput> & {
     chapter?: number;
 }
+export type BookmarksPaginationProps = BasePaginationProps<Prisma.BookmarkInclude, Prisma.BookmarkWhereInput, Prisma.BookmarkOrderByWithRelationInput> & {
+    verse?: number;
+}
 
 
 export type ChaptersPaginationProps = BasePaginationProps<Prisma.ChapterInclude, Prisma.ChapterWhereInput, Prisma.ChapterOrderByWithRelationInput> & {

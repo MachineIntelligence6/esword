@@ -1,13 +1,20 @@
 'use client'
-import { useRef, useState } from "react";
+import { Ref, RefObject, useEffect, useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import Link from "next/link";
-import { IChapter, IVerse } from "@/shared/types/models.types";
+import { IBookmark, IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
-import { TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
+import { BookmarksLoadingPlaceholder, TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
-import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, FaceIcon, FileTextIcon, ImageIcon, PinLeftIcon, PlayIcon, SunIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
+import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, EyeOpenIcon, PlayIcon, TrashIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
+import { useSearchParams } from "next/navigation";
+import { Button } from "../ui/button";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
+import clientApiHandlers from "@/client/handlers";
+import { useToast } from "../ui/use-toast";
+import definedMessages from "@/shared/constants/messages";
+import Spinner from "../spinner";
 
 
 
@@ -47,9 +54,10 @@ function VersesSectionContent() {
     const {
         topicsList, setActiveVerse, activeChapter,
         activeBook, initialLoading,
-        booksList, chaptersList, activeVerse,
-        setActiveChapter
+        booksList, chaptersList, createNewBookmark,
+        setActiveChapter, activeVerse
     } = useReadBookStore()
+    const versesContainerRef = useRef<HTMLDivElement>(null)
 
     const activeChIndex = chaptersList?.findIndex((ch) => ch.id === activeChapter.id) ?? -1;
     const previousChapter = (activeChIndex !== -1 && chaptersList && activeChIndex > 0) ? chaptersList[activeChIndex - 1] : undefined;
@@ -81,10 +89,10 @@ function VersesSectionContent() {
     const [scale, setScale] = useState(1);
 
     const handleZoomIn = () => {
-        setScale((prevScale) => Math.min(1.6, prevScale + 0.1));  // Increase scale by 0.1
+        setScale((prevScale) => Math.min(2, prevScale + 0.2));  // Increase scale by 0.1
     };
     const handleZoomOut = () => {
-        setScale((prevScale) => Math.max(0.6, prevScale - 0.1)); // Decrease scale by 0.1 but never below 0.1
+        setScale((prevScale) => Math.max(1, prevScale - 0.2)); // Decrease scale by 0.1 but never below 0.1
     };
 
 
@@ -100,7 +108,7 @@ function VersesSectionContent() {
 
     const highlightRef = useRef(null);
 
-    const showPlaceholder = initialLoading || activeBook.loading || activeChapter.loading || activeVerse.loading || !booksList || !chaptersList;
+    const showPlaceholder = initialLoading || activeBook.loading || activeChapter.loading || !booksList || !chaptersList;
     return (
         <>
             {/* title */}
@@ -109,7 +117,7 @@ function VersesSectionContent() {
                     VERSES
                 </h3>
             </div>
-            <div className="block expanable-content lg-open ">
+            <div className="block">
                 {/* buttons tab */}
                 <div className="lg:flex block justify-between lg:border-b min-h-[39px] max-h-[39px]">
                     <div className="flex xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 border-b lg:px-1 px-5 xl:px-6 justify-between items-center py-2">
@@ -126,14 +134,15 @@ function VersesSectionContent() {
                         </button>
                         <button
                             type="button"
-                            disabled={(!topicsList || topicsList.length <= 0)}>
+                            disabled={(!topicsList || topicsList.length <= 0) || !activeVerse.data}
+                            onClick={() => createNewBookmark(activeVerse.data ?? undefined)}>
                             <BookmarkIcon className="w-5 h-5 text-gray-500" />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button
                             type="button"
                             className="zoom-in"
-                            disabled={(!topicsList || topicsList.length <= 0)}
+                            disabled={(!topicsList || topicsList.length <= 0 || scale >= 2)}
                             onClick={handleZoomIn}>
                             <ZoomInIcon width={22} height={22} />
                         </button>
@@ -162,8 +171,8 @@ function VersesSectionContent() {
                 </div>
                 {/* content */}
                 <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)]" ref={highlightRef}>
-                    <div className=" py-10 max-h-[100vh] w-full max-w-full overflow-auto">
-                        <div className="min-h-full bg-white space-y-8" style={{ transform: `scale(${scale}) ` }}>
+                    <div ref={versesContainerRef} className=" pb-10 pt-2 max-h-[100vh] w-full max-w-full overflow-auto">
+                        <div className="min-h-full bg-white space-y-5" style={{ transform: `scale(${scale}) `, transformOrigin: "top left" }}>
                             {
                                 showPlaceholder ?
                                     <div className="flex flex-col  h-full">
@@ -194,7 +203,9 @@ function VersesSectionContent() {
                                                                         <VerseComponent
                                                                             key={verse.id}
                                                                             verse={verse}
-                                                                            onClick={() => setActiveVerse(verse.id, topic.id)} />
+                                                                            versesContainerRef={versesContainerRef}
+                                                                            active={activeVerse.id === verse.id}
+                                                                            onClick={() => setActiveVerse(verse.id)} />
                                                                     ))
                                                                 }
                                                             </div>
@@ -211,20 +222,7 @@ function VersesSectionContent() {
                         </div>
                     </div>
                     {/* bookmark icons section */}
-                    <div className="flex flex-col gap-4 pt-3 px-2 w-10 overflow-y-auto">
-                        <Link href="">
-                            <Image width={15} height={15} alt="" src="/icons/bookfill-icon.png " className="bookmark" />
-                        </Link>
-                        <Link href="">
-                            <Image width={15} height={15} alt="" src="/icons/bookfill-icon.png " className="bookmark" />
-                        </Link>
-                        <Link href="">
-                            <Image width={15} height={15} alt="" src="/icons/bookfill-icon.png " className="bookmark" />
-                        </Link>
-                        <Link href="">
-                            <Image width={15} height={15} alt="" src="/icons/bookfill-icon.png " className="bookmark" />
-                        </Link>
-                    </div>
+                    <BookmarksList />
                 </div>
             </div>
         </>
@@ -232,19 +230,136 @@ function VersesSectionContent() {
 }
 
 
+
+
+function BookmarksList() {
+    const { bookmarksList, setActiveBookmark, loadBookmarks, initialLoading, booksList, chaptersList, activeChapter } = useReadBookStore()
+    const [processing, setProcessing] = useState(false);
+    const { toast } = useToast();
+
+    const handleSetActiveBookmark = (bookmark: IBookmark) => {
+        setActiveBookmark(bookmark)
+    }
+    const handleDeleteBookmark = async (bookmark: IBookmark) => {
+        setProcessing(true);
+        const res = await clientApiHandlers.bookmarks.archive(bookmark.id)
+        if (res.succeed) {
+            toast({
+                title: "Bookmark deleted successfully."
+            })
+            loadBookmarks()
+        } else {
+            toast({
+                title: "Error",
+                description: definedMessages.UNKNOWN_ERROR,
+                variant: "destructive"
+            })
+        }
+        setProcessing(false)
+    }
+
+    return (
+        <>
+            {
+                bookmarksList && booksList && chaptersList && !initialLoading && !activeChapter.loading ?
+                    bookmarksList.length > 0 &&
+                    <div className="flex flex-col gap-4 pt-3 px-2 w-10 overflow-y-auto">
+                        {
+                            bookmarksList?.map((bookmark) => (
+                                <HoverCard key={bookmark.id} openDelay={10}>
+                                    <HoverCardTrigger asChild>
+                                        <button
+                                            type="button"
+                                            disabled={processing}
+                                            className="p-0 h-auto hover:scale-110 transition-all"
+                                            onClick={() => handleSetActiveBookmark(bookmark)}>
+                                            <Image width={15} height={15} alt="" src="/icons/bookfill-icon.png " />
+                                        </button>
+                                    </HoverCardTrigger>
+                                    <HoverCardContent className="w-80 p-5">
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="text-sm font-semibold">Bookmark Details</h4>
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => handleSetActiveBookmark(bookmark)}
+                                                        disabled={processing}
+                                                        variant="outline" size="xs">
+                                                        <EyeOpenIcon />
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive" size="xs"
+                                                        disabled={processing}
+                                                        onClick={() => handleDeleteBookmark(bookmark)}>
+                                                        {
+                                                            processing ?
+                                                                <Spinner className="w-4 h-4 border-white" />
+                                                                : <TrashIcon />
+                                                        }
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2 mt-5 w-full">
+                                                <div className="flex items-center justify-between gap-5 text-xs">
+                                                    <span className="block w-16">Book : </span>
+                                                    <span className="font-bold">{bookmark.verse?.topic?.chapter?.book?.name}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-5 text-xs">
+                                                    <span className="block w-16">Chapter : </span>
+                                                    <span className="font-bold">{bookmark.verse?.topic?.chapter?.name}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-5 text-xs">
+                                                    <span className="block w-16">Verse : </span>
+                                                    <span className="font-bold">{bookmark.verse?.number}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </HoverCardContent>
+                                </HoverCard>
+                            ))
+                        }
+                    </div>
+                    :
+                    <div className="w-10 h-full">
+                        <BookmarksLoadingPlaceholder />
+                    </div>
+            }
+        </>
+
+    )
+}
+
+
+
+
 type VerseComponentProps = {
     onClick?: () => void;
     verse: IVerse;
+    active?: boolean;
+    versesContainerRef: RefObject<HTMLDivElement>
 }
 
-function VerseComponent({ verse, onClick }: VerseComponentProps) {
-    const { activeVerse, setActiveVerse } = useReadBookStore()
+function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseComponentProps) {
+    const ref = useRef<HTMLDivElement>(null);
+    const { activeBookmark } = useReadBookStore()
+
+    const scrollToItem = () => {
+        if (!versesContainerRef.current || !ref.current) return;
+        versesContainerRef.current.scrollTop = ref.current.offsetTop
+    }
+
+    useEffect(() => {
+        if (active && activeBookmark) scrollToItem()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [active, activeBookmark])
 
     return (
-        <div
+        <div id={`verse_${verse.id}`} ref={ref}
             className={cn(
                 "flex font-normal gap-5 transition-all duration-200",
-                activeVerse.id === verse.id && "font-bold"
+                active && "font-bold"
             )}
             onClick={onClick}>
             <p className={"text-base text-light-green min-w-max"}>
