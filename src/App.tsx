@@ -10,6 +10,8 @@ const CreateNewPasword = React.lazy(() => import("./pages/CreateNewPasword.page"
 const DonatePage = React.lazy(() => import("./pages/Donate.page"))
 const HomePage = React.lazy(() => import("./pages/Home.page"))
 const BlogsPage = React.lazy(() => import("./pages/Blogs.page"))
+const AboutUsPage = React.lazy(() => import("./pages/About.page"))
+const BlogsDetailPage = React.lazy(() => import("./pages/BlogsDetail.page"))
 
 
 const router = createBrowserRouter([
@@ -79,6 +81,22 @@ const router = createBrowserRouter([
     element: (
       <Suspense>
         <BlogsPage />
+      </Suspense>
+    )
+  },
+  {
+    path: "/about",
+    element: (
+      <Suspense>
+        <AboutUsPage />
+      </Suspense>
+    )
+  },
+  {
+    path: "/blgdetails",
+    element: (
+      <Suspense>
+        <BlogsDetailPage />
       </Suspense>
     )
   },
