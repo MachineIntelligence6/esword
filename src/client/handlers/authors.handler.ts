@@ -3,16 +3,16 @@ import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared
 import { Prisma } from "@prisma/client";
 import { AuthorFormSchema } from "@/components/dashboard/forms/authors.form";
 import { IAuthor } from "@/shared/types/models.types";
+import { AuthorsPaginationProps } from "@/shared/types/pagination.types";
 
 
-type PaginationProps = BasePaginationProps<Prisma.AuthorInclude>
 
-export async function get(
-    { page = 1, perPage, include }: PaginationProps
-): Promise<PaginatedApiResponse<IAuthor[]>> {
+export async function get({
+    page = 1, perPage, include, where, orderBy
+}: AuthorsPaginationProps): Promise<PaginatedApiResponse<IAuthor[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IAuthor[]>>(
-            `/api/authors?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}`
+            `/api/authors?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
         )
         return res.data
     } catch (error) {

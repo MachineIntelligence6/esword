@@ -27,11 +27,13 @@ export default async function RootLayout({
     <html lang="en">
       <body className={cn(
         inter.className,
-        "max-h-screen overflow-hidden"
+        // "max-h-screen overflow-hidden"
       )}>
         <AuthProvider session={session}>
           <SiteHeader session={session} />
-          {children}
+          <div className='pt-[70px]'>
+            {children}
+          </div>
           <Toaster />
         </AuthProvider>
       </body>

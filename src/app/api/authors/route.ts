@@ -14,8 +14,20 @@ export const GET = async (req: Request) => {
         include = JSON.parse(includeStr ?? "")
     } catch (error) {
     }
+    const whereStr = params.get("where")
+    let where: Prisma.AuthorWhereInput | undefined;
+    try {
+        where = JSON.parse(whereStr ?? "")
+    } catch (error) {
+    }
+    const orderByStr = params.get("orderBy")
+    let orderBy: Prisma.AuthorOrderByWithRelationInput | undefined;
+    try {
+        orderBy = JSON.parse(orderByStr ?? "")
+    } catch (error) {
+    }
 
-    const res = await serverApiHandlers.authors.getAll({ page, perPage, include })
+    const res = await serverApiHandlers.authors.getAll({ page, perPage, include, where, orderBy })
     return NextResponse.json(res)
 }
 
@@ -24,3 +36,4 @@ export async function POST(req: Request) {
     const res = await serverApiHandlers.authors.create(req)
     return NextResponse.json(res)
 }
+

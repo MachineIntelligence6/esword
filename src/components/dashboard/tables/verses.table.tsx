@@ -13,9 +13,11 @@ import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { ITopic, IVerse } from "@/shared/types/models.types"
+import { useRouter } from "next/navigation"
 
 
-export default function VersesTable({ topic }: { topic?: ITopic }) {
+export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, archivedOnly?: boolean }) {
+    const router = useRouter()
     const { toast } = useToast()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IVerse[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -26,7 +28,8 @@ export default function VersesTable({ topic }: { topic?: ITopic }) {
         const res = await clientApiHandlers.verses.get({
             page: currentPage, perPage: perPage,
             topic: topic?.id,
-            include: { topic: { include: { chapter: { include: { book: true } } } } }
+            include: { topic: { include: { chapter: { include: { book: true } } } } },
+            ...(archivedOnly && { where: { archived: true } })
         })
         setTableData(res)
     }
@@ -59,6 +62,27 @@ export default function VersesTable({ topic }: { topic?: ITopic }) {
         }
     }
 
+
+    const handleRestore = async (verses: IVerse[]) => {
+        const res = await clientApiHandlers.archives.restore({
+            ids: verses.map((b) => b.id),
+            model: "Verse"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Verse(s) restored successfully.",
+            })
+            // window.location.reload()
+            router.push("/dashboard/verses")
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
     const tableColumns = columns({
         viewAction: (verse: IVerse) => (
             <Link href={`/dashboard/verses/${verse.id}`}>View</Link>
@@ -67,6 +91,7 @@ export default function VersesTable({ topic }: { topic?: ITopic }) {
             <Link href={`/dashboard/verses/${verse.id}/edit`}>Edit</Link>
         ),
         deleteAction: handleDelete,
+        restoreAction: handleRestore,
         deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it."
     })
 
@@ -77,6 +102,13 @@ export default function VersesTable({ topic }: { topic?: ITopic }) {
                 data={tableData?.data}
                 pagination={pagination}
                 columns={tableColumns}
+                {...(archivedOnly && {
+                    ...{
+                        toolbarActions: {
+                            restore: handleRestore
+                        }
+                    }
+                })}
                 getFilterValue={(table) => (table.getColumn("number")?.getFilterValue() as string ?? "")}
                 setFilterValue={(table, value) => table.getColumn("number")?.setFilterValue(value)}
             />

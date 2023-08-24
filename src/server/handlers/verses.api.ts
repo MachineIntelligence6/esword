@@ -48,12 +48,17 @@ export async function getAll({
             )
         })
         const versesCount = await db.verse.count({
-            where: {
-                ...(topic !== -1 && {
-                    topicId: topic
-                }),
-                archived: false,
-            },
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false,
+                } :
+                {
+                    ...(topic !== -1 && {
+                        topicId: topic
+                    }),
+                    archived: false,
+                },
         })
         return {
             succeed: true,
@@ -82,11 +87,7 @@ export async function getById(id: number, include?: Prisma.VerseInclude): Promis
     try {
         const verse = await db.verse.findFirst({
             where: {
-                OR: [
-                    {
-                        id: id
-                    }
-                ],
+                id: id,
                 archived: false
             },
             include: (
@@ -113,7 +114,6 @@ export async function getById(id: number, include?: Prisma.VerseInclude): Promis
             data: verse
         }
     } catch (error) {
-        console.log(error)
         return {
             succeed: false,
             code: "UNKOWN_ERROR",
@@ -158,6 +158,36 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 }
 
 
+
+
+export async function archiveMany(req: Request): Promise<ApiResponse<any>> {
+    try {
+        const { ids } = (await req.json() as { ids: number[] })
+        if (!ids) throw new Error()
+        let succeeded = 0;
+        let failed = 0;
+
+        for (let id of ids) {
+            const res = await archive(id)
+            if (res.succeed && res.data) succeeded += 1
+            else failed += 1
+        }
+
+        return {
+            succeed: true,
+            data: {
+                succeeded,
+                failed
+            }
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
 
 
 

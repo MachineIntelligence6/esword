@@ -44,15 +44,19 @@ export async function getAll({
             )
         })
         const commentariesCount = await db.commentary.count({
-            where: {
-                ...(author !== -1 && {
-                    authorId: author
-                }),
-                ...(verse !== -1 && {
-                    verseId: verse
-                }),
-                archived: false,
-            },
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false
+                } : {
+                    ...(author !== -1 && {
+                        authorId: author
+                    }),
+                    ...(verse !== -1 && {
+                        verseId: verse
+                    }),
+                    archived: false,
+                }
         })
         return {
             succeed: true,
@@ -130,6 +134,35 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     }
 }
 
+
+
+
+export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
+    try {
+        let succeeded = 0;
+        let failed = 0;
+
+        for (let id of ids) {
+            const res = await archive(id)
+            if (res.succeed && res.data) succeeded += 1
+            else failed += 1
+        }
+
+        return {
+            succeed: true,
+            data: {
+                succeeded,
+                failed
+            }
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
 
 
 

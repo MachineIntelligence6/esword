@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import Spinner from "@/components/spinner"
 import { extractTextFromHtml } from "@/lib/utils"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
-import { IBook, ICommentary, INote } from "@/shared/types/models.types"
+import { IActivity, IBook, ICommentary, INote } from "@/shared/types/models.types"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
@@ -266,7 +266,19 @@ export function DCommentariesCard() {
     )
 }
 
-export function DLogsCard() {
+export function DActivitiesCard() {
+    const [activities, setActivities] = useState<IActivity[] | null>(null)
+    useEffect(() => {
+        clientApiHandlers.activities.get({
+            page: 1, perPage: 10,
+            orderBy: {
+                timestamp: "desc"
+            }
+        })
+            .then((res) => {
+                setActivities(res.data ?? [])
+            })
+    }, [])
     return (
         <Card className="w-full overflow-hidden h-full min-h-[300px]">
             <CardHeader className="py-4 bg-slate-100 border-b border-slate-300">
@@ -280,59 +292,43 @@ export function DLogsCard() {
                 </div>
             </CardHeader>
             <CardContent className="py-4 px-0">
-                <div className="divide-y-2 divide-slate-200 max-h-96 overflow-y-auto px-5">
-                    <div className="grid grid-cols-12 px-2 py-3 gap-2">
-                        <h4 className="font-medium col-span-2 w-full max-w-full truncate">
-                            User Name
-                        </h4>
-                        <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
-                            Activity
-                        </p>
-                        <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
-                            {new Date().toLocaleString()}
-                        </p>
-                        <div className="col-span-2 flex justify-end">
-                            <Link href='#' className="text-primary text-sm">
-                                View
-                            </Link>
+                {
+                    activities ?
+                        (
+                            activities.length > 0 ?
+                                <div className="divide-y-2 divide-slate-200 max-h-96 overflow-y-auto px-5">
+                                    {
+                                        activities.map((activity) => (
+                                            <div key={activity.id} className="grid grid-cols-12 px-2 py-3 gap-2">
+                                                <h4 className="font-medium col-span-2 w-full max-w-full truncate">
+                                                    {activity.user?.name}
+                                                </h4>
+                                                <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
+                                                    {activity.description}
+                                                </p>
+                                                <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
+                                                    {new Date(activity.timestamp).toLocaleString()}
+                                                </p>
+                                                <div className="col-span-2 flex justify-end">
+                                                    {/* <Link href='#' className="text-primary text-sm">
+                                                        View
+                                                    </Link> */}
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                                :
+                                <div className="w-full h-full min-h-[250px] flex items-center justify-center">
+                                    <p className="font-medium">No data.</p>
+                                </div>
+                        )
+                        :
+                        <div className="w-full h-full min-h-[250px] flex items-center justify-center">
+                            <Spinner className="w-10 border-4" />
                         </div>
-                    </div>
-                    <div className="grid grid-cols-12 px-2 py-3 gap-2">
-                        <h4 className="font-medium col-span-2 w-full max-w-full truncate">
-                            User Name
-                        </h4>
-                        <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
-                            Activity
-                        </p>
-                        <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
-                            {new Date().toLocaleString()}
-                        </p>
-                        <div className="col-span-2 flex justify-end">
-                            <Link href='#' className="text-primary text-sm">
-                                View
-                            </Link>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-12 px-2 py-3 gap-2">
-                        <h4 className="font-medium col-span-2 w-full max-w-full truncate">
-                            User Name
-                        </h4>
-                        <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
-                            Activity
-                        </p>
-                        <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
-                            {new Date().toLocaleString()}
-                        </p>
-                        <div className="col-span-2 flex justify-end">
-                            <Link href='#' className="text-primary text-sm">
-                                View
-                            </Link>
-                        </div>
-                    </div>
+                }
 
-                    
-
-                </div>
             </CardContent>
         </Card>
     )

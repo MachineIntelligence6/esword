@@ -7,6 +7,9 @@ import * as usersApiHandlers from '@/server/handlers/users.api'
 import * as notesApiHandlers from '@/server/handlers/notes.api'
 import * as topicsApiHandlers from '@/server/handlers/topics.api'
 import * as bookmarksApiHandlers from '@/server/handlers/bookmarks.api'
+import * as highlightsApiHandlers from '@/server/handlers/highlights.api'
+import * as activitiesApiHandlers from '@/server/handlers/activities.api'
+import * as archivesApiHandlers from '@/server/handlers/archives.api'
 
 
 const serverApiHandlers = {
@@ -18,7 +21,10 @@ const serverApiHandlers = {
     users: usersApiHandlers,
     notes: notesApiHandlers,
     topics: topicsApiHandlers,
-    bookmarks: bookmarksApiHandlers
+    bookmarks: bookmarksApiHandlers,
+    activities: activitiesApiHandlers,
+    highlights: highlightsApiHandlers,
+    archives: archivesApiHandlers
 }
 
 export default serverApiHandlers;

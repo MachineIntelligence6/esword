@@ -55,11 +55,11 @@ export async function getAll({
             )
         })
         const bookmarksCount = await db.bookmark.count({
-            where: {
+            where: where ? where : {
                 ...(verse !== -1 && {
-                    verseId: verse,
-                    userId: Number(session.user.id)
+                    verseId: verse
                 }),
+                userId: Number(session.user.id)
             },
         })
         return {

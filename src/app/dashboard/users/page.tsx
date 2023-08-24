@@ -16,18 +16,6 @@ export default function Page() {
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const { toast } = useToast();
 
-  const handleDelete = async (user: IUser) => {
-    const res = await clientApiHandlers.users.archive(user.id)
-    if (res.succeed) {
-      window.location.reload();
-    } else {
-      toast({
-        title: "Error",
-        variant: "destructive",
-        description: definedMessages.UNKNOWN_ERROR
-      })
-    }
-  }
 
   return (
     <div className="grid grid-cols-12 gap-5">
@@ -40,13 +28,9 @@ export default function Page() {
           </CardHeader>
           <CardContent className="p-5">
             <UsersTable
-              viewAction={(user: IUser) => (
-                <Link href={`/dashboard/users/${user.id}`}>View</Link>
-              )}
               editAction={(user: IUser) => (
                 <span onClick={() => setSelectedUser(user)}>Edit</span>
-              )}
-              deleteAction={handleDelete} />
+              )} />
           </CardContent>
         </Card>
       </div>

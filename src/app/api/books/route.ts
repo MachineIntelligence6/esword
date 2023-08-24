@@ -36,3 +36,11 @@ export async function POST(req: Request) {
     const res = await serverApiHandlers.books.create(req)
     return NextResponse.json(res)
 }
+
+
+export async function DELETE(req: Request) {
+    const params = new URLSearchParams(req.url.split("?")[1])
+    const ids = params.get("ids")?.split(",")?.map((s) => Number(s)) ?? []
+    const res = await serverApiHandlers.books.archiveMany(ids)
+    return NextResponse.json(res)
+}

@@ -11,16 +11,23 @@ import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { IUser } from "@/shared/types/models.types"
 import { useSession } from "next-auth/react"
+import { useToast } from "@/components/ui/use-toast"
+import definedMessages from "@/shared/constants/messages"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 
 type Props = TableActionProps & {
+    archivedOnly?: boolean;
 }
 
-export default function UsersTable({ ...props }: Props) {
+export default function UsersTable({ archivedOnly, ...props }: Props) {
+    const router = useRouter()
     const { data: session } = useSession()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IUser[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+    const { toast } = useToast()
 
     const loadData = async () => {
         if (!session) return;
@@ -28,7 +35,8 @@ export default function UsersTable({ ...props }: Props) {
         const res = await clientApiHandlers.users.get({
             page: currentPage,
             perPage: perPage,
-            ...(session.user.role !== "ADMIN" && { where: { role: { not: "ADMIN" } } })
+            ...(session.user.role !== "ADMIN" && { where: { role: { not: "ADMIN" } } }),
+            ...(archivedOnly && { where: { archived: true } })
         })
         setTableData(res)
     }
@@ -48,14 +56,61 @@ export default function UsersTable({ ...props }: Props) {
         totalPages: tableData?.pagination?.totalPages ?? 1
     }
 
+
+
+    const handleDelete = async (user: IUser) => {
+        const res = await clientApiHandlers.users.archive(user.id)
+        if (res.succeed) {
+            window.location.reload();
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
+    const handleRestore = async (users: IUser[]) => {
+        const res = await clientApiHandlers.archives.restore({
+            ids: users.map((b) => b.id),
+            model: "User"
+        })
+        if (res.succeed) {
+            toast({
+                title: "User(s) restored successfully.",
+            })
+            // window.location.reload()
+            router.push("/dashboard/users")
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
+
     return (
         <BaseTable
             data={tableData?.data}
             columns={columns({
                 ...props,
+                viewAction: (user: IUser) => (
+                    <Link href={`/dashboard/users/${user.id}`}>View</Link>
+                ),
+                deleteAction: handleDelete,
                 deleteMessage: "This action will delete the user account and all data (notes) linked with it."
             })}
             pagination={pagination}
+            {...(archivedOnly && {
+                ...{
+                    toolbarActions: {
+                        restore: handleRestore
+                    }
+                }
+            })}
             getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
             setFilterValue={(table, value) => {
                 table.getColumn("name")?.setFilterValue(value)

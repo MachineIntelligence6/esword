@@ -1,20 +1,19 @@
 'use client'
-import { Ref, RefObject, useEffect, useRef, useState } from "react";
+import { ComponentType, RefObject, useEffect, useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
-import Link from "next/link";
-import { IBookmark, IChapter, IVerse } from "@/shared/types/models.types";
+import { IBookmark, IChapter, IHighlight, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
 import { BookmarksLoadingPlaceholder, TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
 import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, EyeOpenIcon, PlayIcon, TrashIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
-import { useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "../ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
 import Spinner from "../spinner";
+import Highlighter from "react-highlight-words";
 
 
 
@@ -55,7 +54,7 @@ function VersesSectionContent() {
         topicsList, setActiveVerse, activeChapter,
         activeBook, initialLoading,
         booksList, chaptersList, createNewBookmark,
-        setActiveChapter, activeVerse
+        setActiveChapter, activeVerse, saveHighlight
     } = useReadBookStore()
     const versesContainerRef = useRef<HTMLDivElement>(null)
 
@@ -66,23 +65,16 @@ function VersesSectionContent() {
         nextChapter = chaptersList[activeChIndex + 1]
     }
 
-    const toggleHighlight = (): void => {
+
+    const toggleHighlight = () => {
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) {
             return;
         }
-        const range = selection.getRangeAt(0);
-        const span = document.createElement('span');
-        span.className = 'highlight bg-yellow-200';
-        const isHighlighted = range.commonAncestorContainer.parentElement?.classList.contains('highlight');
-        if (isHighlighted) {
-            const parentElement = range.commonAncestorContainer.parentElement;
-            if (parentElement) {
-                parentElement.outerHTML = parentElement.innerHTML;
-            }
-        } else {
-            range.surroundContents(span);
-        }
+        const selectionEl = selection?.anchorNode?.parentElement?.parentElement?.parentElement
+        const elId = selectionEl?.id
+        const verseId = elId && elId.startsWith("verse_") ? Number(elId.split("_")[1]) : -1
+        if (verseId !== -1 && verseId === activeVerse.id) saveHighlight(verseId, selection.toString())
 
         selection.removeAllRanges();
     };
@@ -106,8 +98,6 @@ function VersesSectionContent() {
     }
 
 
-    const highlightRef = useRef(null);
-
     const showPlaceholder = initialLoading || activeBook.loading || activeChapter.loading || !booksList || !chaptersList;
     return (
         <>
@@ -128,7 +118,7 @@ function VersesSectionContent() {
                         <button
                             type="button"
                             className="highlighter"
-                            disabled={(!topicsList || topicsList.length <= 0)}
+                            // disabled={(!topicsList || topicsList.length <= 0)}
                             onClick={toggleHighlight}>
                             <Image width={18} height={18} src="./images/ph_text-aa-fill.svg" alt="Highlight" />
                         </button>
@@ -170,7 +160,7 @@ function VersesSectionContent() {
                     </div>
                 </div>
                 {/* content */}
-                <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)]" ref={highlightRef}>
+                <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)]">
                     <div ref={versesContainerRef} className=" pb-10 pt-2 max-h-[100vh] w-full max-w-full overflow-auto">
                         <div className="min-h-full bg-white space-y-5" style={{ transform: `scale(${scale}) `, transformOrigin: "top left" }}>
                             {
@@ -334,6 +324,13 @@ function BookmarksList() {
 
 
 
+
+const generateRegexPattern = (text: string, index: number) => {
+    const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape any regex special characters
+    return `(?:\\b${escapedText}\\b\\W*){${index}}\\b${escapedText}\\b`;
+};
+
+
 type VerseComponentProps = {
     onClick?: () => void;
     verse: IVerse;
@@ -355,19 +352,53 @@ function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseCom
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active, activeBookmark])
 
+
+
+    const findChunksForHighlight = (textToHighlight: string, highlight: IHighlight) => {
+        const { text, index } = highlight;
+        const regex = new RegExp(generateRegexPattern(text, index), 'g');
+        const matches = textToHighlight.match(regex);
+
+        if (matches) {
+            return matches.map((match) => {
+                const startIndex = textToHighlight.indexOf(match);
+                return { start: startIndex, end: startIndex + text.length };
+            });
+        }
+
+        return [];
+    };
+
+    const allChunks: { start: number, end: number }[] = [];
+
+    verse.highlights?.forEach((highlight) => {
+        const chunks = findChunksForHighlight(verse.text, highlight);
+        allChunks.push(...chunks);
+    });
+
+
     return (
         <div id={`verse_${verse.id}`} ref={ref}
             className={cn(
                 "flex font-normal gap-5 transition-all duration-200",
-                active && "font-bold"
+                active ? "font-bold" : "select-none"
             )}
             onClick={onClick}>
             <p className={"text-base text-light-green min-w-max"}>
                 {`${verse.topic?.chapter?.book?.abbreviation} ${verse.topic?.chapter?.name}:${verse.number}`}
             </p>
-            <p className={"text-base text-primary-dark"}>
-                {verse.text}
-            </p>
+            <Highlighter
+                searchWords={verse.highlights?.map((h) => h.text) ?? []}
+                autoEscape caseSensitive
+                textToHighlight={verse.text}
+                // highlightTag={Highlight}
+                activeClassName=""
+                className="text-base text-primary-dark"
+            // findChunks={() => allChunks}
+            />
+            {/* <p className={""}>
+                 {verse.text}
+             </p> */}
         </div>
     )
 }

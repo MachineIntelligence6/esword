@@ -12,7 +12,7 @@ import SiteSidebar from "@/app/sidebar";
 
 export default function Page() {
     const searchParams = useSearchParams()
-    const { setActiveBook, loadInitialData } = useReadBookStore()
+    const { booksList, chaptersList, loadInitialData } = useReadBookStore()
 
 
     const doInitialLoadWork = async () => {
@@ -27,9 +27,10 @@ export default function Page() {
     }
 
     useEffect(() => {
+        if (booksList && chaptersList) return;
         doInitialLoadWork()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [loadInitialData, searchParams, setActiveBook])
+    }, [])
 
 
 

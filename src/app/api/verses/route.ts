@@ -37,3 +37,4 @@ export async function POST(req: Request) {
     const res = await serverApiHandlers.verses.create(req)
     return NextResponse.json(res)
 }
+

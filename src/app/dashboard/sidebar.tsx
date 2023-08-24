@@ -55,6 +55,10 @@ export const menuItems: Array<MenuItem> = [
         label: "Activities"
     },
     {
+        path: "/dashboard/archives",
+        label: "Archives"
+    },
+    {
         path: "/dashboard/settings",
         label: "Settings"
     },

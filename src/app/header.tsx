@@ -25,7 +25,7 @@ export default function SiteHeader({ session }: Props) {
     const pathname = usePathname()
     // if (pathname.startsWith("/dashboard")) return null
     return (
-        <header className="sticky top-0 z-50 shadow">
+        <header className="fixed left-0 top-0 z-50 shadow w-full">
             <nav className="flex justify-between px-6 items-center h-[70px] w-full bg-primary">
                 <div>
                     <Link href="/">

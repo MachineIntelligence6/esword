@@ -1,5 +1,9 @@
 import Spinner from "@/components/spinner";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+    AlertDialog, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter,
+    AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -20,11 +24,29 @@ export function DataTableRowActions<TData>({
     editAction,
     viewAction,
     deleteAction,
-    deleteMessage
+    deleteMessage,
+    restoreAction
 }: DataTableRowActionsProps<TData>) {
     const { data: session } = useSession()
-    const [delAlertOpen, setDelAlertOpen] = useState(false);
-    const deleteEnabled = session?.user && session.user.role === "ADMIN" && deleteAction
+    const [alertOpen, setAlertOpen] = useState(false);
+    const archived = (row.original as any).archived
+    const deleteEnabled = session?.user && session.user.role === "ADMIN" && deleteAction && !archived
+
+    const deletePopupProps: TableActionPopupProps = {
+        title: "Are you sure to delete?",
+        description: deleteMessage ?? "This action will delete the current row and all data linked with it.",
+        actionBtn: { text: "Delete", variant: "destructive" },
+        open: alertOpen, setOpen: setAlertOpen,
+        action: async () => await deleteAction?.(row.original)
+    }
+    const restorePopupProps: TableActionPopupProps = {
+        title: "Are you sure to restore?",
+        description: deleteMessage ?? "This action will restore the current row and all data linked with it.",
+        actionBtn: { text: "Restore", variant: "default" },
+        open: alertOpen, setOpen: setAlertOpen,
+        action: async () => await restoreAction?.([row.original])
+    }
+
     return (
         <div>
             <DropdownMenu>
@@ -55,19 +77,20 @@ export function DataTableRowActions<TData>({
                     }
                     {
                         (deleteEnabled) &&
-                        <DropdownMenuItem onClick={() => setDelAlertOpen(true)}>
+                        <DropdownMenuItem onClick={() => setAlertOpen(true)}>
                             Delete
+                        </DropdownMenuItem>
+                    }
+                    {
+                        (archived && restoreAction) &&
+                        <DropdownMenuItem onClick={() => setAlertOpen(true)}>
+                            Restore
                         </DropdownMenuItem>
                     }
                 </DropdownMenuContent>
             </DropdownMenu>
             {
-                deleteEnabled &&
-                <DeleteRowAction
-                    open={delAlertOpen}
-                    setOpen={setDelAlertOpen}
-                    deleteMessage={deleteMessage}
-                    onDelete={async () => await deleteAction?.(row.original)} />
+                <TableActionPopup {...(archived ? { ...restorePopupProps } : { ...deletePopupProps })} />
             }
         </div>
     )
@@ -75,19 +98,28 @@ export function DataTableRowActions<TData>({
 
 
 
-export function DeleteRowAction(
-    { open, setOpen, onDelete, deleteMessage }: {
-        open: boolean;
-        setOpen: (value: boolean) => void;
-        onDelete?: () => Promise<void>;
-        deleteMessage?: string
+
+export type TableActionPopupProps = {
+    open: boolean;
+    setOpen: (value: boolean) => void;
+    action?: () => Promise<void>;
+    title: string;
+    description: string;
+    actionBtn: {
+        variant?: "link" | "default" | "primary" | "destructive" | "outline" | "secondary" | "ghost",
+        text: string
     }
-) {
+}
+
+export function TableActionPopup({
+    open, setOpen, action,
+    title, description, actionBtn
+}: TableActionPopupProps) {
     const [processing, setProcessing] = useState(false);
 
-    const handleDelete = async () => {
+    const handleDoAction = async () => {
         setProcessing(true);
-        await onDelete?.()
+        await action?.()
         setProcessing(false);
         setOpen(false);
     }
@@ -95,21 +127,19 @@ export function DeleteRowAction(
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{title}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        {
-                            deleteMessage ? deleteMessage : "This action will delete the current row."
-                        }
+                        {description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
-                    <Button variant={"destructive"} onClick={handleDelete}>
+                    <Button variant={actionBtn.variant} onClick={handleDoAction}>
                         {
                             processing ?
                                 <Spinner className="border-white" />
                                 :
-                                <span>Delete</span>
+                                <span>{actionBtn.text}</span>
                         }
                     </Button>
                 </AlertDialogFooter>

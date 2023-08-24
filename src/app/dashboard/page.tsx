@@ -1,10 +1,10 @@
-import { DBooksCard, DCommentariesCard, DLogsCard, DNotesCard } from "./dashboard-cards";
+import { DBooksCard, DCommentariesCard, DActivitiesCard, DNotesCard } from "./dashboard-cards";
 
 
 
 export default function Page() {
     return (
-        <div className="grid grid-cols-2 gap-5 max-h-[calc(100vh_-_100px)] pb-10 pr-2 overflow-y-auto">
+        <div className="grid grid-cols-2 gap-5">
             <div className="col-span-1">
                 <DBooksCard />
             </div>
@@ -15,7 +15,7 @@ export default function Page() {
                 <DCommentariesCard />
             </div>
             <div className="col-span-1">
-                <DLogsCard />
+                <DActivitiesCard />
             </div>
         </div>
     )

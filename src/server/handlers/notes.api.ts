@@ -45,15 +45,20 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
             )
         })
         const notesCount = await db.note.count({
-            where: {
-                ...(user !== -1 && {
-                    userId: user
-                }),
-                ...(verse !== -1 && {
-                    verseId: verse
-                }),
-                archived: false,
-            },
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false
+                }
+                : {
+                    ...(user !== -1 && {
+                        userId: user
+                    }),
+                    ...(verse !== -1 && {
+                        verseId: verse
+                    }),
+                    archived: false,
+                },
         })
         return {
             succeed: true,

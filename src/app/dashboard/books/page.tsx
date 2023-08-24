@@ -15,24 +15,7 @@ export default function Page() {
   const [selectedBook, setSelectedBook] = useState<IBook | null>(null);
   const { toast } = useToast();
 
-  const handleDelete = async (book: IBook) => {
-    const res = await clientApiHandlers.books.archive(book.id)
-    if (res.succeed) {
-      window.location.reload()
-    } else if (res.code === "DATA_LINKED") {
-      toast({
-        title: "Book can not be deleted.",
-        variant: "destructive",
-        description: "All chapters linked with this book must be unlinked in order to delete this book."
-      })
-    } else {
-      toast({
-        title: "Error",
-        variant: "destructive",
-        description: definedMessages.UNKNOWN_ERROR
-      })
-    }
-  }
+
   return (
     <div className="grid grid-cols-12 gap-5">
       <div className="col-span-8 w-full">
@@ -44,15 +27,11 @@ export default function Page() {
           </CardHeader>
           <CardContent className="p-5">
             <BooksTable
-              viewAction={(book) => (
-                <Link href={`/dashboard/books/${book.id}`}>View</Link>
-              )}
               editAction={(book) => (
                 <span onClick={() => setSelectedBook(book)}>
                   Edit
                 </span>
-              )}
-              deleteAction={handleDelete} />
+              )} />
 
           </CardContent>
         </Card>

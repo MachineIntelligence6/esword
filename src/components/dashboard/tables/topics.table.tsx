@@ -13,13 +13,16 @@ import { IChapter, ITopic } from "@/shared/types/models.types"
 import Link from "next/link"
 import { useToast } from "@/components/ui/use-toast"
 import definedMessages from "@/shared/constants/messages"
+import { useRouter } from "next/navigation"
 
 
 type Props = TableActionProps & {
-    chapter?: IChapter
+    chapter?: IChapter;
+    archivedOnly?: boolean;
 }
 
-export default function TopicsTable({ chapter, ...props }: Props) {
+export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) {
+    const router = useRouter()
     const [tableData, setTableData] = useState<PaginatedApiResponse<ITopic[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
@@ -45,13 +48,34 @@ export default function TopicsTable({ chapter, ...props }: Props) {
         }
     }
 
+    const handleRestore = async (topics: ITopic[]) => {
+        const res = await clientApiHandlers.archives.restore({
+            ids: topics.map((b) => b.id),
+            model: "Topic"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Topic(s) restored successfully.",
+            })
+            // window.location.reload()
+            router.push("/dashboard/topics")
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
 
     const loadData = async () => {
         setTableData(null)
         const res = await clientApiHandlers.topics.get({
             page: currentPage, perPage: perPage,
             chapter: chapter?.id,
-            include: { chapter: { include: { book: true } } }
+            include: { chapter: { include: { book: true } } },
+            ...(archivedOnly && { where: { archived: true } })
         })
         setTableData(res)
     }
@@ -78,9 +102,17 @@ export default function TopicsTable({ chapter, ...props }: Props) {
                 viewAction: (topic: ITopic) => (
                     <Link href={`/dashboard/topics/${topic.id}`}>View</Link>
                 ),
+                restoreAction: handleRestore,
                 deleteAction: handleDelete
             })}
             pagination={pagination}
+            {...(archivedOnly && {
+                ...{
+                    toolbarActions: {
+                        restore: handleRestore
+                    }
+                }
+            })}
             getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
             setFilterValue={(table, value) => {
                 table.getColumn("name")?.setFilterValue(value)

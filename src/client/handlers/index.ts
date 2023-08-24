@@ -7,6 +7,8 @@ import * as usersHandler from './users.handler'
 import * as notesHandler from './notes.handler'
 import * as topicsHandler from './topics.handler'
 import * as bookmarksHandler from './bookmarks.handler'
+import * as activitiesHandler from './activities.handler'
+import * as archivesHandler from './archives.handler'
 
 
 const clientApiHandlers = {
@@ -18,7 +20,9 @@ const clientApiHandlers = {
     users: usersHandler,
     notes: notesHandler,
     topics: topicsHandler,
-    bookmarks: bookmarksHandler
+    bookmarks: bookmarksHandler,
+    activities: activitiesHandler,
+    archives: archivesHandler
 }
 
 export default clientApiHandlers;

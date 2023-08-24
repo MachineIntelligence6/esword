@@ -1,22 +1,26 @@
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IAuthor } from "@/shared/types/models.types";
 import { revalidatePath } from "next/cache";
+import { AuthorsPaginationProps } from "@/shared/types/pagination.types";
 
 
 
-type PaginationProps = BasePaginationProps<Prisma.AuthorInclude>
-
-
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, include }: PaginationProps): Promise<PaginatedApiResponse<IAuthor[]>> {
+export async function getAll({
+    page = 1, perPage = defaults.PER_PAGE_ITEMS,
+    include, where, orderBy
+}: AuthorsPaginationProps): Promise<PaginatedApiResponse<IAuthor[]>> {
     try {
         const authors = await db.author.findMany({
-            where: {
+            where: where ? {
+                ...where,
+                archived: where.archived ?? false
+            } : {
                 archived: false,
             },
-            orderBy: {
+            orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
             ...(perPage !== -1 && {
@@ -30,7 +34,14 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                     : { commentaries: false }
             )
         })
-        const authorsCount = await db.author.count({ where: { archived: false } })
+        const authorsCount = await db.author.count({
+            where: where ? {
+                ...where,
+                archived: where.archived ?? false
+            } : {
+                archived: false,
+            },
+        })
         return {
             succeed: true,
             pagination: {
@@ -112,6 +123,37 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
         return {
             succeed: true,
             data: null
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
+
+
+
+export async function archiveMany(req: Request): Promise<ApiResponse<any>> {
+    try {
+        const { ids } = (await req.json() as { ids: number[] })
+        if (!ids) throw new Error()
+        let succeeded = 0;
+        let failed = 0;
+
+        for (let id of ids) {
+            const res = await archive(id)
+            if (res.succeed && res.data) succeeded += 1
+            else failed += 1
+        }
+
+        return {
+            succeed: true,
+            data: {
+                succeeded,
+                failed
+            }
         }
     } catch (error) {
         return {

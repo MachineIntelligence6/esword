@@ -13,15 +13,18 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { useEffect, useState } from "react"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { IAuthor, ICommentary, IVerse } from "@/shared/types/models.types"
+import { useRouter } from "next/navigation"
 
 
 
 type Props = {
     author?: IAuthor;
-    verse?: IVerse
+    verse?: IVerse;
+    archivedOnly?: boolean;
 }
 
-export default function CommentariesTable({ author, verse }: Props) {
+export default function CommentariesTable({ author, verse, archivedOnly }: Props) {
+    const router = useRouter()
     const { toast } = useToast()
     const [tableData, setTableData] = useState<PaginatedApiResponse<ICommentary[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -33,7 +36,8 @@ export default function CommentariesTable({ author, verse }: Props) {
             page: currentPage, perPage: perPage,
             include: { author: true, verse: { include: { topic: { include: { chapter: { include: { book: true } } } } } } },
             author: author?.id,
-            verse: verse?.id
+            verse: verse?.id,
+            ...(archivedOnly && { where: { archived: true } })
         })
         setTableData(res)
     }
@@ -67,6 +71,26 @@ export default function CommentariesTable({ author, verse }: Props) {
         }
     }
 
+    const handleRestore = async (commmentaries: ICommentary[]) => {
+        const res = await clientApiHandlers.archives.restore({
+            ids: commmentaries.map((b) => b.id),
+            model: "Commentary"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Commentaries restored successfully.",
+            })
+            // window.location.reload()
+            router.push("/dashboard/commentaries")
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
     const tableColumns = columns({
         viewAction: (commentary: ICommentary) => (
             <Link href={`/dashboard/commentaries/${commentary.id}`}>View</Link>
@@ -74,6 +98,7 @@ export default function CommentariesTable({ author, verse }: Props) {
         editAction: (commentary: ICommentary) => (
             <Link href={`/dashboard/commentaries/${commentary.id}/edit`}>Edit</Link>
         ),
+        restoreAction: handleRestore,
         deleteAction: handleDelete
     })
 
@@ -84,6 +109,13 @@ export default function CommentariesTable({ author, verse }: Props) {
                 data={tableData?.data}
                 pagination={pagination}
                 columns={tableColumns}
+                {...(archivedOnly && {
+                    ...{
+                        toolbarActions: {
+                            restore: handleRestore
+                        }
+                    }
+                })}
                 getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
                 setFilterValue={(table, value) => table.getColumn("name")?.setFilterValue(value)}
             />

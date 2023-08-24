@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import Spinner from "@/components/spinner"
-import { DeleteBatchRowsAction } from "./row-actions"
+import { DataTableToolbar, ToolbarProps } from "./toolbar"
 
 
 
@@ -55,7 +55,7 @@ interface DataTableProps<TData, TValue> extends ToolbarProps<TData> {
   rowsCount?: number;
   showPagination?: boolean;
   showToolbar?: boolean;
-  pagination: TablePagination
+  pagination: TablePagination;
 }
 
 export function BaseTable<TData, TValue>({
@@ -66,7 +66,9 @@ export function BaseTable<TData, TValue>({
   pagination,
   showPagination = true,
   showToolbar = true,
+  toolbarActions
 }: DataTableProps<TData, TValue>) {
+
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
@@ -101,7 +103,11 @@ export function BaseTable<TData, TValue>({
     <div className="space-y-4 w-full">
       {
         showToolbar &&
-        <DataTableToolbar table={table} getFilterValue={getFilterValue} setFilterValue={setFilterValue} />
+        <DataTableToolbar
+          table={table}
+          getFilterValue={getFilterValue}
+          setFilterValue={setFilterValue}
+          toolbarActions={toolbarActions} />
       }
       <div className="rounded-md border">
         <Table>
@@ -235,57 +241,6 @@ export function DataTableColumnHeader<TData, TValue>({
   )
 }
 
-
-
-
-export interface ToolbarProps<TData> {
-  getFilterValue: (table: TTable<TData>) => string;
-  setFilterValue: (table: TTable<TData>, value: string) => void;
-}
-interface DataTableToolbarProps<TData> extends ToolbarProps<TData> {
-  table: TTable<TData>;
-}
-
-export function DataTableToolbar<TData>({
-  table,
-  getFilterValue,
-  setFilterValue
-}: DataTableToolbarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0
-
-
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
-        <Input
-          placeholder="Search..."
-          value={getFilterValue(table)}
-          onChange={(event) =>
-            setFilterValue(table, event.target.value)
-          }
-          className="h-8 w-[150px] lg:w-[250px]"
-        />
-        {isFiltered && (
-          <Button
-            variant="ghost"
-            onClick={() => table.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3"
-          >
-            Reset
-            <Cross2Icon className="ml-2 h-4 w-4" />
-          </Button>
-        )}
-      </div>
-      <div className="flex items-center gap-3">
-        {/* {
-          table.getSelectedRowModel().rows.length > 0 &&
-          <DeleteBatchRowsAction onDelete={} />
-        } */}
-        <DataTableViewOptions table={table} />
-      </div>
-    </div>
-  )
-}
 
 
 

@@ -40,7 +40,10 @@ export async function getAll({
             )
         })
         const topicsCount = await db.topic.count({
-            where: {
+            where: where ? {
+                ...where,
+                archived: where.archived ?? false
+            } : {
                 ...(chapter !== -1 && {
                     chapterId: chapter
                 }),
@@ -74,11 +77,7 @@ export async function getById(id: number, include?: Prisma.TopicInclude): Promis
     try {
         const topic = await db.topic.findFirst({
             where: {
-                OR: [
-                    {
-                        id: id
-                    }
-                ],
+                id: id,
                 archived: false
             },
             include: (
@@ -153,6 +152,35 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 }
 
 
+
+export async function archiveMany(req: Request): Promise<ApiResponse<any>> {
+    try {
+        const { ids } = (await req.json() as { ids: number[] })
+        if (!ids) throw new Error()
+        let succeeded = 0;
+        let failed = 0;
+
+        for (let id of ids) {
+            const res = await archive(id)
+            if (res.succeed && res.data) succeeded += 1
+            else failed += 1
+        }
+
+        return {
+            succeed: true,
+            data: {
+                succeeded,
+                failed
+            }
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
 
 
 

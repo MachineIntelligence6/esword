@@ -36,7 +36,15 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, role
                     : { notes: false }
             )
         })
-        const usersCount = await db.user.count({ where: { archived: false } })
+        const usersCount = await db.user.count({
+            where: where ? {
+                ...where,
+                archived: where.archived ?? false
+            } : {
+                archived: false,
+                ...(role !== "ALL" && { role: role })
+            },
+        })
         return {
             succeed: true,
             pagination: {
@@ -125,6 +133,34 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 }
 
 
+
+
+export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
+    try {
+        let succeeded = 0;
+        let failed = 0;
+
+        for (let id of ids) {
+            const res = await archive(id)
+            if (res.succeed && res.data) succeeded += 1
+            else failed += 1
+        }
+
+        return {
+            succeed: true,
+            data: {
+                succeeded,
+                failed
+            }
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
+            data: null
+        }
+    }
+}
 
 
 

@@ -11,22 +11,74 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import clientApiHandlers from "@/client/handlers"
 import { IBook } from "@/shared/types/models.types"
 import Link from "next/link"
+import { useToast } from "@/components/ui/use-toast"
+import definedMessages from "@/shared/constants/messages"
+import { useRouter } from "next/navigation"
 
 
 type Props = TableActionProps & {
     showPagination?: boolean;
     showToolbar?: boolean;
+    archivedOnly?: boolean;
 }
 
-export default function BooksTable({ showPagination, showToolbar, ...props }: Props) {
+export default function BooksTable({ showPagination, showToolbar, archivedOnly, ...props }: Props) {
+    const router = useRouter()
+    const { toast } = useToast()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IBook[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
     const loadData = async () => {
         setTableData(null)
-        const res = await clientApiHandlers.books.get({ page: currentPage, perPage: perPage })
+        const res = await clientApiHandlers.books.get({
+            page: currentPage, perPage: perPage,
+            ...(archivedOnly && {
+                where: {
+                    archived: true
+                }
+            })
+        })
         setTableData(res)
+    }
+
+    const handleDelete = async (book: IBook) => {
+        const res = await clientApiHandlers.books.archive(book.id)
+        if (res.succeed) {
+            window.location.reload()
+        } else if (res.code === "DATA_LINKED") {
+            toast({
+                title: "Book can not be deleted.",
+                variant: "destructive",
+                description: "All chapters linked with this book must be unlinked in order to delete this book."
+            })
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+    const handleRestore = async (books: IBook[]) => {
+        const res = await clientApiHandlers.archives.restore({
+            ids: books.map((b) => b.id),
+            model: "Book"
+        })
+        console.log(res)
+        if (res.succeed) {
+            toast({
+                title: "Book(s) restored successfully.",
+            })
+            // window.location.reload()
+            router.push("/dashboard/books")
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
     }
 
     useEffect(() => {
@@ -46,7 +98,21 @@ export default function BooksTable({ showPagination, showToolbar, ...props }: Pr
     return (
         <BaseTable
             data={tableData?.data}
-            columns={columns(props)}
+            columns={columns({
+                ...props,
+                deleteAction: handleDelete,
+                viewAction: (book) => (
+                    <Link href={`/dashboard/books/${book.id}`}>View</Link>
+                ),
+                restoreAction: handleRestore
+            })}
+            {...(archivedOnly && {
+                ...{
+                    toolbarActions: {
+                        restore: handleRestore
+                    }
+                }
+            })}
             pagination={pagination}
             showPagination={showPagination}
             showToolbar={showToolbar}

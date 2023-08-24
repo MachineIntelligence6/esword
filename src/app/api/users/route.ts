@@ -38,3 +38,5 @@ export async function POST(req: Request) {
     const res = await serverApiHandlers.users.create(req)
     return NextResponse.json(res)
 }
+
+

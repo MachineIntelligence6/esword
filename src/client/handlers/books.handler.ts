@@ -85,5 +85,18 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     }
 }
 
+export async function restore(id: number): Promise<ApiResponse<null>> {
+    try {
+        const res = await axios.put<ApiResponse<null>>(`/api/books/${id}`, { archived: false })
+        if (res.status !== 200) throw new Error()
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR"
+        }
+    }
+}
+
 
 

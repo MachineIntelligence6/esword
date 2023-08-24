@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children?: ReactNo
     if (!session) return redirect("/login");
 
     return (
-        <div className="flex flex-col bg-silver-light">
+        <div className="flex flex-col min-h-screen bg-silver-light">
             {/* <DashboardHeader session={session} /> */}
             <div className="flex w-full min-h-full">
                 <DashboardSidebar session={session} className="w-full min-h-screen max-w-[300px]" />

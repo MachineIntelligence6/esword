@@ -12,15 +12,19 @@ import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { IActivity, IBook, IChapter } from "@/shared/types/models.types"
+import definedMessages from "@/shared/constants/messages"
+import { Session } from "next-auth"
+import { useSession } from "next-auth/react"
 
 
 
 type Props = {
-    book?: IBook
+    book?: IBook;
 }
 
 export default function ActivitiesTable({ book }: Props) {
     const { toast } = useToast()
+    const { data: session } = useSession();
     const [tableData, setTableData] = useState<PaginatedApiResponse<IActivity[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
@@ -47,40 +51,39 @@ export default function ActivitiesTable({ book }: Props) {
     }
 
 
-    // const handleDelete = async (activity: IActivity) => {
-    //     const res = await clientApiHandlers.activities.archive(activity.id)
-    //     if (res.succeed) {
-    //         window.location.reload()
-    //     } else {
-    //         toast({
-    //             title: "Error",
-    //             variant: "destructive",
-    //             description: definedMessages.UNKNOWN_ERROR
-    //         })
-    //     }
-    // }
+    const handleDelete = async (activity: IActivity) => {
+        const res = await clientApiHandlers.activities.archive(activity.id)
+        if (res.succeed) {
+            window.location.reload()
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
 
     const tableColumns = columns({
-        viewAction: (activity) => (
-            <Link href={`/dashboard/activities/${activity.id}`}>View</Link>
-        ),
-        editAction: (activity) => (
-            <Link href={`/dashboard/activities/${activity.id}/edit`}>Edit</Link>
-        ),
-        // deleteAction: handleDelete
-    })
+        // viewAction: (activity) => (
+        //     <Link href={`/dashboard/activities/${activity.id}`}>View</Link>
+        // ),
+        // editAction: (activity) => (
+        //     <Link href={`/dashboard/activities/${activity.id}/edit`}>Edit</Link>
+        // ),
+        deleteAction: handleDelete
+    }, session)
 
 
     return (
         <div>
-
             <BaseTable
                 data={tableData?.data}
                 columns={tableColumns}
                 pagination={pagination}
-                getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
+                getFilterValue={(table) => (table.getColumn("datetime")?.getFilterValue() as string ?? "")}
                 setFilterValue={(table, value) => {
-                    table.getColumn("name")?.setFilterValue(value)
+                    table.getColumn("datetime")?.setFilterValue(value)
                 }}
             />
         </div>
@@ -91,8 +94,21 @@ export default function ActivitiesTable({ book }: Props) {
 
 
 
+function generateActivityRefUrl(activity: IActivity) {
+    if (activity.action === "DELETE") {
+        return `/dashboard/archives`
+    }
+    if (activity.action === "RESTORE" || !activity.ref) {
+        return `/dashboard/${activity.model.toLowerCase()}`
+    }
+    if (activity.action === "CREATE" || activity.action === "UPDATE") {
+        return `/dashboard/${activity.model.toLowerCase()}/${activity.ref ?? ""}`
+    }
+    return '#'
+}
 
-function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
+
+function columns(rowActions: TableActionProps, session: Session | null): ColumnDef<IActivity, any>[] {
     return [
         {
             id: "select",
@@ -131,8 +147,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
             ),
             cell: ({ row }) => {
                 return (
-                    <div className="flex max-w-[100px] space-x-2">
-                        <span className="max-w-[100px] truncate font-medium">
+                    <div className="flex space-x-2">
+                        <span className="max-w-[200px] truncate font-medium">
                             {(new Date(row.original.timestamp)).toLocaleString()}
                         </span>
                     </div>
@@ -147,9 +163,11 @@ function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex max-w-[100px] space-x-2">
-                        <span className="max-w-[100px] truncate font-medium">
-                            {row.getValue("name")}
-                        </span>
+                        <Link
+                            href={`/dashboard/users/${row.original.userId}`}
+                            className="max-w-[100px] text-primary truncate font-medium">
+                            {row.original.user?.name}
+                        </Link>
                     </div>
                 )
             },
@@ -162,8 +180,10 @@ function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center">
-                        <Link href={"#"} className="max-w-[500px] font-normal line-clamp-2">
-                            {row.getValue("text")}
+                        <Link
+                            href={generateActivityRefUrl(row.original)}
+                            className="max-w-[500px] text-primary font-normal line-clamp-2">
+                            {row.getValue("description")}
                         </Link>
                     </div>
                 )

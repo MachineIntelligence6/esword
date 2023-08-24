@@ -35,7 +35,16 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, incl
                     : { chapters: false, _count: true }
             )
         })
-        const booksCount = await db.book.count({ where: { archived: false } })
+        const booksCount = await db.book.count({
+            where: where ?
+                {
+                    ...where,
+                    archived: where.archived ?? false
+                } :
+                {
+                    archived: false
+                },
+        })
         return {
             succeed: true,
             pagination: {
@@ -112,10 +121,42 @@ export async function archive(id: number): Promise<ApiResponse<IBook>> {
                 data: null
             }
         }
-        await db.book.update({ where: { id: id }, data: { archived: true } })
+        const deletedBook = await db.book.update({
+            where: { id: id },
+            data: {
+                archived: true,
+            }
+        })
         return {
             succeed: true,
+            data: deletedBook
+        }
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR",
             data: null
+        }
+    }
+}
+
+export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
+    try {
+        let succeeded = 0;
+        let failed = 0;
+
+        for (let id of ids) {
+            const res = await archive(id)
+            if (res.succeed && res.data) succeeded += 1
+            else failed += 1
+        }
+
+        return {
+            succeed: true,
+            data: {
+                succeeded,
+                failed
+            }
         }
     } catch (error) {
         return {
@@ -137,19 +178,19 @@ export async function create(req: Request): Promise<ApiResponse> {
             where: {
                 OR: [
                     { slug: bookReq.slug },
-                    { name: bookReq.name }
+                    { name: bookReq.name.trim() }
                 ]
             }
         })
         if (bookExist) {
             return {
                 succeed: false,
-                code: bookExist.name === bookReq.name ? "BOOK_NAME_MUST_BE_UNIQUE" : "SLUG_MUST_BE_UNIQUE",
+                code: bookExist.name === bookReq.name.trim() ? "BOOK_NAME_MUST_BE_UNIQUE" : "SLUG_MUST_BE_UNIQUE",
             }
         }
         const book = await db.book.create({
             data: {
-                name: bookReq.name,
+                name: bookReq.name.trim(),
                 slug: bookReq.slug,
                 abbreviation: bookReq.abbreviation
             },
@@ -179,6 +220,7 @@ type UpdateBookReq = {
     name?: string
     slug?: string
     abbreviation?: string
+    archived?: boolean;
 }
 
 
@@ -191,7 +233,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
                 where: {
                     OR: [
                         { slug: bookReq.slug },
-                        { name: bookReq.name }
+                        { name: bookReq.name?.trim() }
                     ]
                 }
             })
@@ -204,7 +246,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
         }
         const book = await db.book.update({
             data: {
-                ...(bookReq.name && { name: bookReq.name }),
+                ...(bookReq.name && { name: bookReq.name.trim() }),
                 ...(bookReq.slug && { slug: bookReq.slug }),
                 ...(bookReq.abbreviation && { abbreviation: bookReq.abbreviation }),
             },

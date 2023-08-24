@@ -14,6 +14,7 @@ import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { INote, IUser, IVerse } from "@/shared/types/models.types"
 import Link from "next/link"
 import { extractTextFromHtml } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 
 
@@ -25,7 +26,6 @@ type Props = {
 
 export default function NotesTable({ user, verse }: Props) {
     const { toast } = useToast()
-
     const [tableData, setTableData] = useState<PaginatedApiResponse<INote[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
@@ -89,7 +89,7 @@ export default function NotesTable({ user, verse }: Props) {
         editAction: (note: INote) => (
             <Link href={`/dashboard/notes/${note.id}/edit`}>Edit</Link>
         ),
-        deleteAction: handleDelete
+        // deleteAction: handleDelete
     })
 
 

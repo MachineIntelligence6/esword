@@ -13,14 +13,17 @@ import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { IBook, IChapter } from "@/shared/types/models.types"
+import { useRouter } from "next/navigation"
 
 
 
 type Props = {
     book?: IBook
+    archivedOnly?: boolean;
 }
 
-export default function ChaptersTable({ book }: Props) {
+export default function ChaptersTable({ book, archivedOnly }: Props) {
+    const router = useRouter()
     const { toast } = useToast()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IChapter[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +31,15 @@ export default function ChaptersTable({ book }: Props) {
 
     const loadData = async () => {
         setTableData(null)
-        const res = await clientApiHandlers.chapters.get({ page: currentPage, perPage: perPage, include: { book: true }, book: book?.id })
+        const res = await clientApiHandlers.chapters.get({
+            page: currentPage, perPage: perPage,
+            include: { book: true }, book: book?.id,
+            ...(archivedOnly && {
+                where: {
+                    archived: true
+                }
+            })
+        })
         setTableData(res)
     }
 
@@ -67,6 +78,27 @@ export default function ChaptersTable({ book }: Props) {
         }
     }
 
+
+    const handleRestore = async (chapters: IChapter[]) => {
+        const res = await clientApiHandlers.archives.restore({
+            ids: chapters.map((b) => b.id),
+            model: "Chapter"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Chapter(s) restored successfully.",
+            })
+            // window.location.reload()
+            router.push("/dashboard/chapters")
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
     const tableColumns = columns({
         viewAction: (chapter) => (
             <Link href={`/dashboard/chapters/${chapter.id}`}>View</Link>
@@ -74,6 +106,7 @@ export default function ChaptersTable({ book }: Props) {
         editAction: (chapter) => (
             <Link href={`/dashboard/chapters/${chapter.id}/edit`}>Edit</Link>
         ),
+        restoreAction: handleRestore,
         deleteAction: handleDelete
     })
 
@@ -85,6 +118,13 @@ export default function ChaptersTable({ book }: Props) {
                 data={tableData?.data}
                 columns={tableColumns}
                 pagination={pagination}
+                {...(archivedOnly && {
+                    ...{
+                        toolbarActions: {
+                            restore: handleRestore
+                        }
+                    }
+                })}
                 getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
                 setFilterValue={(table, value) => {
                     table.getColumn("name")?.setFilterValue(value)
