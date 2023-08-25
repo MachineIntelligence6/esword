@@ -6,44 +6,61 @@ import { Card, CardContent, } from "@/components/ui/card";
 
 export default function AboutUsPage() {
     return (
-        <div>
+        <div >
             <HeaderComponent />
-            <div className="flex lg:flex-row flex-col max-h-screen pt-[60px]">
+            <div className="flex lg:flex-row flex-col  pt-[60px]">
                 <div>
                     <BooksChapterComponent />
                 </div>
-                <div className="w-full">
+                <div className="w-full ">
                     <h3 className="text-xs font-bold py-3 lg:pl-3 px-[10px] lg:border-0 border-b  w-full bg-silver-light ">
                         About Us
                     </h3>
-                    <div className="flex items-center justify-center p-10">
-                        <Card className="bg-silver-light/20 py-5 ">
-                            <CardContent className="gap-5 flex flex-col">                               
-                                <h1 className="font-extrabold text-5xl text-center">
-                                    Our Story
-                                </h1>
-                                <p>
-                                    An About Us page is a section on a website that provides information about a company, organization, or individual. It is an opportunity to tell your brand’s story, share your vision, history, values, and achievements, and introduce team members. This is where you build trust and credibility with customers.
-                                    In Shopify’s customer trust research, we found shoppers navigate to an About Us page to learn more about the brand and the people behind the products. Your About Page should address those two curiosities shoppers have to help them with decision making.
-                                    Shoppers are also interested in a company’s mission. They’ll use the About Us page to determine if they share core values with the business and to decide if they want to shop with you or not.
-                                </p>
-                                <h1 className="font-extrabold text-3xl text-center">
-                                    Who we are??
-                                </h1>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque nam a accusamus aspernatur alias iste soluta culpa facilis at ratione, sit minus autem dolores molestias aut, in eaque incidunt id labore repudiandae aliquid! Voluptates. Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita impedit officiis, quos consectetur dolor, voluptates similique ipsam voluptatibus doloremque ad atque repudiandae quidem ex molestiae cumque iure a. Commodi, hic ut pariatur vitae odit dolores debitis cupiditate dicta minus aperiam asperiores, suscipit rem porro quasi labore veritatis? Praesentium, officiis quisquam! Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam repellat ullam, velit, itaque laboriosam vel sed accusantium modi sapiente natus aperiam inventore corporis veritatis quae. Amet suscipit a fugiat minus accusamus error dignissimos veritatis.
-                                </p>
-                                <h1 className="font-extrabold text-3xl text-center">
-                                    What we do??
-                                </h1>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque nam a accusamus aspernatur alias iste soluta culpa facilis at ratione, sit minus autem dolores molestias aut, in eaque incidunt id labore repudiandae aliquid! Voluptates. Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita impedit officiis, quos consectetur dolor, voluptates similique ipsam voluptatibus doloremque ad atque repudiandae quidem ex molestiae cumque iure a. Commodi, hic ut pariatur vitae odit dolores debitis cupiditate dicta minus aperiam asperiores, suscipit rem porro quasi labore veritatis? Praesentium, officiis quisquam! Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit, soluta! Nihil est nisi aliquid veritatis amet quibusdam officiis dignissimos possimus reprehenderit hic veniam quis, deserunt voluptas neque placeat ab velit saepe illo dolorum. Voluptatum consequuntur delectus sequi aut incidunt, deleniti cum eveniet aliquid natus asperiores nulla necessitatibus dolor, quas voluptates?Lorem ipsum dolor sit, amet consectetur adipisicing elit. Sed commodi amet eaque repudiandae? Dolore suscipit praesentium voluptatibus vel, rerum a!
-                                </p>                             
+                    <div className="bg-primary flex items-center justify-center p-7 overflow-hidden">
+                        <Card className="bg-white w-full  max-h-[calc(100vh_-_150px)] overflow-auto">
+                            <CardContent className="p-0 h-auto flex flex-col py-4 gap-4 md:gap-16 md:py-10">
+                                <div className="flex flex-col  items-center  gap-3">
+                                    <h1 className="font-roman text-2xl font-bold text-primary-dark text-center">
+                                        About
+                                    </h1>
+                                    <hr className="w-full" />
+                                    <p className="px-2 text-center text-primary-dark text-sm font-normal font-roman md:text-base md:w-[77%]">
+                                        Many people have asked questions regarding the history of e-Sword, this ministry, who I am, etc. This page will hopefully answer some of those questions,
+                                        as well as provide a time line of how GOD has blessed this effort.I (Rick Meyers) was born in 1962 in sunny southern California, saved by the grace of
+                                        GOD in 1980, married my beautiful wife in 1988, and have two wonderful children—a daughter and son, in that order.<br />
+                                        The Holy Spirit chose to give me the gift of teaching, which I have been using since 1991.<br />
+                                        It was this same time that He gave me the desire to program computers (funny how that works).<br />
+                                        Nine years later GOD combined my passion for His Word and my pleasure of programming, and e-Sword was birthed!
+                                    </p>
+                                </div>
+                                <div className="flex flex-col  items-center  gap-3  ">
+                                    <h1 className="font-roman text-2xl font-bold text-primary-dark text-center">
+                                        History of sword
+                                    </h1>
+                                    <hr className="w-full" />
+                                    <div className="px-2  text-primary-dark text-base font-normal flex gap-1 md:gap-2 md:w-[77%]" >
+                                        <p className="text-light-green min-w-[60px] font-roman ">
+                                            jan.2000
+                                        </p>
+                                        <p className="font-roman ">
+                                            The first lines of code for e-Sword are written. e-Sword is birthed with a clear vision of user interface and study approach: keep it simple and do the obvious!
+                                        </p>
+                                    </div>
+                                    <div className="px-2 text-primary-dark text-base font-normal  flex gap-2 md:w-[77%]" >
+                                        <p className="text-light-green min-w-[60px] font-roman ">
+                                            apr, 2000
+                                        </p>
+                                        <p className="font-roman ">
+                                            e-Sword version 1.0 is released, complete with its unique user interface layout, popup ToolTips, Study Notes editor, verse comparison, and synchronized
+                                        </p>
+                                    </div>
+
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

@@ -1,142 +1,80 @@
-import BlogsComponent from "@/components/BlogsComponent";
+import BlogsContent from "@/components/BlogsComponent";
 import BooksChapterComponent from "@/components/BooksChapterComponent";
 import HeaderComponent from "@/components/HeaderComponent";
-import PaginationComponent from "@/components/PaginationComponent";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
 
 
 
 export default function BlogsPage() {
     return (
-        <div className="">
+        <div className="overflow-hidden">
             <HeaderComponent />
-            <div className="flex lg:flex-row flex-col max-h-screen  pt-[60px] ">
+            <div className="flex lg:flex-row flex-col max-h-screen  pt-[60px] w-full ">
                 <div className="">
                     <BooksChapterComponent />
                 </div>
-                <div className="w-full bg-silver-light/50">
-                    <h3 className="text-xs font-bold py-3 lg:pl-3  px-5 lg:px-[10px] lg:border-0 border-b  w-full bg-silver-light">
-                        Manuscript
-                    </h3>
-                    <div className="bg-silver-light/40 max-h-full">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-5  gap-5 lg:max-h-[calc(100vh_-_160px)] overflow-auto">
-                            <BlogsComponent
-                                className="bg-white"
-                                src="./images/login.PNG"
-                                heading={<span >
-                                    {
-                                        `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium sit fugit voluptatem necessitatibus sunt ab recusandae? Tempore incidunt aut illum, quas tenetur distinctio inventore magnam ab asperiores! Vitae, dolore!`.substring(0, 50)
-                                    }
-                                    <a href="/blgdetails" className="cursor-pointer">...</a>
-                                </span>}
-                                date="August 23, 2023 "
-                                footer={
-                                    <span >
-                                        {
-                                            `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium !`.substring(0, 90)
-                                        }
-                                        <span>...</span>
-                                    </span>
-                                } />
-                            <BlogsComponent
-                                className="bg-white"
-                                src="./images/login.PNG"
-                                heading={<span >
-                                    {
-                                        `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium sit fugit voluptatem necessitatibus sunt ab recusandae? Tempore incidunt aut illum, quas tenetur distinctio inventore magnam ab asperiores! Vitae, dolore!`.substring(0, 50)
-                                    }
-                                    <a href="/blgdetails" className="cursor-pointer">...</a>
-                                </span>}
-                                date="August 23, 2023 "
-                                footer={
-                                    <span >
-                                        {
-                                            `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium !`.substring(0, 90)
-                                        }
-                                        <span>...</span>
-                                    </span>
-                                } />
-                            <BlogsComponent
-                                className="bg-white"
-                                src="./images/login.PNG"
-                                heading={<span >
-                                    {
-                                        `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium sit fugit voluptatem necessitatibus sunt ab recusandae? Tempore incidunt aut illum, quas tenetur distinctio inventore magnam ab asperiores! Vitae, dolore!`.substring(0, 50)
-                                    }
-                                    <a href="/blgdetails" className="cursor-pointer">...</a>
-                                </span>}
-                                date="August 23, 2023 "
-                                footer={
-                                    <span >
-                                        {
-                                            `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium !`.substring(0, 90)
-                                        }
-                                        <span>...</span>
-                                    </span>
-                                } />
-                            <BlogsComponent
-                                className="bg-white"
-                                src="./images/login.PNG"
-                                heading={<span >
-                                    {
-                                        `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium sit fugit voluptatem necessitatibus sunt ab recusandae? Tempore incidunt aut illum, quas tenetur distinctio inventore magnam ab asperiores! Vitae, dolore!`.substring(0, 50)
-                                    }
-                                    <a href="/blgdetails" className="cursor-pointer">...</a>
-                                </span>}
-                                date="August 23, 2023 "
-                                footer={
-                                    <span >
-                                        {
-                                            `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium !`.substring(0, 90)
-                                        }
-                                        <span>...</span>
-                                    </span>
-                                } />
-                            <BlogsComponent
-                                className="bg-white"
-                                src="./images/login.PNG"
-                                heading={<span >
-                                    {
-                                        `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium sit fugit voluptatem necessitatibus sunt ab recusandae? Tempore incidunt aut illum, quas tenetur distinctio inventore magnam ab asperiores! Vitae, dolore!`.substring(0, 50)
-                                    }
-                                    <a href="/blgdetails" className="cursor-pointer">...</a>
-                                </span>}
-                                date="August 23, 2023 "
-                                footer={
-                                    <span >
-                                        {
-                                            `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium !`.substring(0, 90)
-                                        }
-                                        <span>...</span>
-                                    </span>
-                                } />
-                            <BlogsComponent
-                                className="bg-white"
-                                src="./images/login.PNG"
-                                heading={<span >
-                                    {
-                                        `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium sit fugit voluptatem necessitatibus sunt ab recusandae? Tempore incidunt aut illum, quas tenetur distinctio inventore magnam ab asperiores! Vitae, dolore!`.substring(0, 50)
-                                    }
-                                    <a href="/blgdetails" className="cursor-pointer">...</a>
-                                </span>}
-                                date="August 23, 2023 "
-                                footer={
-                                    <span >
-                                        {
-                                            `Discover where art and AI collide as visionary artist Hagen Pietsch unveils his inaugural NFT collection, "RoboMetamorphs”, a eamless integration of AI-generated imagery and animation, as delightful little robots gracefully transform into captivating forms, showcasing the ever-evolving nature of AI technology  Lorem ipsum dolor sit amet consectetur adipisicing elit. At impedit esse dignissimos, dolores accusantium !`.substring(0, 90)
-                                        }
-                                        <span>...</span>
-                                    </span>
-                                } />
+                <div className="w-full bg-white">
 
+                    <div className="md:grid grid-cols-11 ">
+                        <div className="block bg-primary lg:hidden">
+                            <Accordion type="single" collapsible >
+                                <AccordionItem value="item-1">
+                                    <AccordionTrigger className=" bg-silver-light py-3 font-inter lg:pl-3 pl-5 pr-[19px] flex justify-between w-full border-b-2">
+                                        <h3 className="text-xs font-bold capitalize">
+                                            MANUSCRIPT
+                                        </h3>
+                                        <ChevronDownIcon className="h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 dark:text-stone-400 " />
+
+                                    </AccordionTrigger>
+                                    <AccordionContent className="p-5  overflow-auto max-h-[calc(100vh_-_100px)]">
+                                        <BlogsContent />
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </div>
+                        <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px]  border-r-2 w-full bg-silver-light col-span-7 capitalize " >
+                            THE CREATION OF WORLD
+                        </h3>
+                        <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px] lg:border-0 border-b w-full bg-silver-light col-span-4 md:block capitalize hidden">
+                            MANUSCRIPT
+                        </h3>
+                    </div>
+                    <div className="md:grid grid-cols-11">
+                        <div className="col-span-7 w-full p-5  text-primary-dark text-base font-normal font-roman  md:max-h-[calc(100vh_-_100px)] overflow-auto">
+                            <div className="space-y-3">
+                                <p>
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                </p>
+                                <p>
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                </p>
+                                <p>
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                </p>
+                                <p>
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                </p>
+                                <p>
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                </p>
+                            </div>
 
                         </div>
-                        <div className="py-3 flex items-center justify-center">
-                            <PaginationComponent />
+                        <div className="col-span-4 bg-primary p-5 space-y-4  md:block hidden overflow-auto max-h-[calc(100vh_-_100px)]">
+                            <div>
+                                <BlogsContent />
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     )
 }
+
+
+
+
+
+
