@@ -13,11 +13,11 @@ export default function AboutUsPage() {
                     <BooksChapterComponent />
                 </div>
                 <div className="w-full">
-                    <h3 className="text-xs font-bold py-3 font-inter lg:pl-3 px-[10px] lg:border-0 border-b  w-full bg-silver-light ">
+                    <h3 className="text-xs font-bold py-3 lg:pl-3 px-[10px] lg:border-0 border-b  w-full bg-silver-light ">
                         About Us
                     </h3>
                     <div className="flex items-center justify-center p-10">
-                        <Card className="bg-silver-light/20 py-5 font-inter">
+                        <Card className="bg-silver-light/20 py-5 ">
                             <CardContent className="gap-5 flex flex-col">                               
                                 <h1 className="font-extrabold text-5xl text-center">
                                     Our Story

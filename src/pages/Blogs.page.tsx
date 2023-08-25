@@ -14,7 +14,7 @@ export default function BlogsPage() {
                     <BooksChapterComponent />
                 </div>
                 <div className="w-full bg-silver-light/50">
-                    <h3 className="text-xs font-bold py-3 font-inter lg:pl-3  px-5 lg:px-[10px] lg:border-0 border-b  w-full bg-silver-light">
+                    <h3 className="text-xs font-bold py-3 lg:pl-3  px-5 lg:px-[10px] lg:border-0 border-b  w-full bg-silver-light">
                         Manuscript
                     </h3>
                     <div className="bg-silver-light/40 max-h-full">
