@@ -11,7 +11,6 @@ const DonatePage = React.lazy(() => import("./pages/Donate.page"))
 const HomePage = React.lazy(() => import("./pages/Home.page"))
 const BlogsPage = React.lazy(() => import("./pages/Blogs.page"))
 const AboutUsPage = React.lazy(() => import("./pages/About.page"))
-const BlogsDetailPage = React.lazy(() => import("./pages/BlogsDetail.page"))
 
 
 const router = createBrowserRouter([
@@ -92,14 +91,7 @@ const router = createBrowserRouter([
       </Suspense>
     )
   },
-  {
-    path: "/blgdetails",
-    element: (
-      <Suspense>
-        <BlogsDetailPage />
-      </Suspense>
-    )
-  },
+
   
 ])
 
