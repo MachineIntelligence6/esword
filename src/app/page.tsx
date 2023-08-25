@@ -7,6 +7,7 @@ import { VersesSection } from "@/components/frontend/verses-section";
 
 
 export default function Page() {
+    
 
     return (
         <div className="w-full" >

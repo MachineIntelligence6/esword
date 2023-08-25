@@ -6,7 +6,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SiteHeader from './header'
 import { cn } from '@/lib/utils'
-import SiteSidebar from './sidebar'
 import SiteInnerLayout from './inner-layout'
 
 const inter = Inter({ subsets: ['latin'] })

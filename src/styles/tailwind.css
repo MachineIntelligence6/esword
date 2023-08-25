@@ -6,7 +6,8 @@
 
 
 button:disabled {
-    opacity: 0.6;
+    @apply text-gray-500;
+    opacity: 0.6 !important;
 }
 
 input:-webkit-autofill,
@@ -15,6 +16,7 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     transition: background-color 9999999s ease-in-out 0s;
 }
+
 input.autofill-text-white:-webkit-autofill,
 input.autofill-text-white:-webkit-autofill:hover,
 input.autofill-text-white:-webkit-autofill:focus,

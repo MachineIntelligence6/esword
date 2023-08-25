@@ -9,7 +9,7 @@ import { useEffect } from "react";
 export default function SiteSidebar() {
     const searchParams = useSearchParams()
     const {
-        booksList, chaptersList, loadInitialData,
+        loadInitialData,
     } = useReadBookStore()
 
 
@@ -75,8 +75,8 @@ function SidebarBooksComponent() {
                                     key={book.id} type="button"
                                     onClick={() => setActiveBook(book.id)}
                                     className={cn(
-                                        "px-5 py-2 transition-all w-full text-start block max-w-full text-sm overflow-hidden text-ellipsis whitespace-nowrap",
-                                        activeBook.id === book.id ? "bg-secondary font-bold text-primary-dark " : "hover:font-bold hover:text-primary-dark hover:bg-secondary hover:scale-110 transition-all"
+                                        "px-5 py-2 transition-all w-full text-start block max-w-full text-sm overflow-hidden text-ellipsis whitespace-nowrap hover:scale-110",
+                                        activeBook.id === book.id ? "bg-secondary font-bold text-primary-dark " : "hover:font-bold hover:text-primary-dark hover:bg-secondary"
                                     )}>
                                     {book.name}
                                 </button>
@@ -129,8 +129,8 @@ function SidebarChaptersComponent() {
                                     key={chapter.id}
                                     onClick={() => setActiveChapter(chapter.id)}
                                     className={cn(
-                                        "px-3 py-2 transition-all text-sm",
-                                        activeChapter.id === chapter.id ? "font-bold text-primary-dark bg-secondary" : "hover:font-bold hover:text-primary-dark hover:bg-secondary hover:scale-110 transition-all"
+                                        "px-3 py-2 transition-all text-sm hover:scale-110",
+                                        activeChapter.id === chapter.id ? "font-bold text-primary-dark bg-secondary" : "hover:font-bold hover:text-primary-dark hover:bg-secondary"
                                     )}>
                                     {chapter.name}
                                 </button>

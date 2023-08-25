@@ -135,6 +135,7 @@ export const useReadBookStore = create<ReadBookStoreType>()(persist(
                 },
             }))
             const chapter = chapterNum ? get().chaptersList?.find((ch) => ch.name === chapterNum) : get().chaptersList?.[0]
+            console.log("chapter found = ", chapter)
             if (chapter) await get().setActiveChapter(chapter.id, verseNum)
         },
         setActiveChapter: async (chapterId, verseNum) => {
@@ -151,6 +152,7 @@ export const useReadBookStore = create<ReadBookStoreType>()(persist(
                 commentaries: {}
             }))
             const chapter = get().chaptersList?.find((ch) => ch.id === chapterId)
+            console.log("chapter dound = ", chapter)
             const { data: topics } = await clientApiHandlers.topics.get({
                 page: 1, perPage: -1,
                 chapter: chapterId,

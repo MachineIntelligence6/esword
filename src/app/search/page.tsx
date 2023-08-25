@@ -16,13 +16,11 @@ const placeholderItems = [1, 2, 3, 4]
 
 export default function Page() {
     const searchParams = useSearchParams()
-    // const [keyword, setKeyword] = useState(() => searchParams.get("q") ?? "")
     const query = searchParams.get("q") ?? "";
     const { data: searchResult, isLoading } = useSwr<PaginatedApiResponse<IVerse[]>>(
         `/api/search?query=${query}`,
         async () => {
             const res = await clientApiHandlers.search.findAll({ query })
-            console.log(res)
             return res
         }
     )
@@ -35,7 +33,7 @@ export default function Page() {
                     Search Results for ( {query} )
                 </h3>
             </div>
-            <div className="w-full h-full bg-primary p-3">
+            <div className="w-full h-full bg-primary min-h-screen p-3">
                 <Card>
                     <CardContent className="p-5">
                         {
@@ -63,9 +61,9 @@ export default function Page() {
                                                             textToHighlight={verse.text}
                                                         />
                                                         <div className="flex items-center gap-5 mt-2">
-                                                            <span className="text-xs">Book: <Link href={`/?book=${verse.topic?.chapter?.book?.slug}`} className="text-primary">{verse.topic?.chapter?.book?.name}</Link></span>
-                                                            <span className="text-xs">Chapter: <Link href={`/?book=${verse.topic?.chapter?.book?.slug}&chapter=${verse.topic?.chapter?.name}`} className="text-primary">{verse.topic?.chapter?.name}</Link></span>
-                                                            <span className="text-xs">Verse: <Link href={`/?book=${verse.topic?.chapter?.book?.slug}&chapter=${verse.topic?.chapter?.name}&verse=${verse.number}`} className="text-primary">{verse.number}</Link></span>
+                                                            <span className="text-xs">Book: <a href={`/?book=${verse.topic?.chapter?.book?.slug}`} className="text-primary">{verse.topic?.chapter?.book?.name}</a></span>
+                                                            <span className="text-xs">Chapter: <a href={`/?book=${verse.topic?.chapter?.book?.slug}&chapter=${verse.topic?.chapter?.name}`} className="text-primary">{verse.topic?.chapter?.name}</a></span>
+                                                            <span className="text-xs">Verse: <a href={`/?book=${verse.topic?.chapter?.book?.slug}&chapter=${verse.topic?.chapter?.name}&verse=${verse.number}`} className="text-primary">{verse.number}</a></span>
                                                         </div>
                                                     </div>
                                                 ))

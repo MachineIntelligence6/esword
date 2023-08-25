@@ -1,5 +1,5 @@
 'use client'
-import { ComponentType, RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { IBookmark, IChapter, IHighlight, IVerse } from "@/shared/types/models.types";
@@ -14,7 +14,7 @@ import { useToast } from "../ui/use-toast";
 import definedMessages from "@/shared/constants/messages";
 import Spinner from "../spinner";
 import Highlighter from "react-highlight-words";
-
+import { Separator } from "../ui/separator";
 
 
 
@@ -111,15 +111,16 @@ function VersesSectionContent() {
                 {/* buttons tab */}
                 <div className="lg:flex block justify-between lg:border-b min-h-[39px] max-h-[39px]">
                     <div className="flex xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 border-b lg:px-1 px-5 xl:px-6 justify-between items-center py-2">
-                        <button disabled className="hover:scale-110 transition-all disabled:hover:!scale-100">
-                            
-                            <PlayIcon width={22} height={22} />
+                        <button
+                            disabled
+                            className="hover:scale-110 transition-all disabled:hover:!scale-100">
+                            <PlayIcon className="w-5 h-5" />
                         </button>
-                        <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
+                        <Separator orientation="vertical" className="h-5" />
                         <button
                             type="button"
-                            className="highlighter hover:scale-110 transition-all disabled:hover:!scale-100"
-                            // disabled={(!topicsList || topicsList.length <= 0)}
+                            className="hover:scale-110 transition-all disabled:hover:!scale-100"
+                            disabled={(!topicsList || topicsList.length <= 0)}
                             onClick={toggleHighlight}>
                             <Image width={18} height={18} src="./images/ph_text-aa-fill.svg" alt="Highlight" />
                         </button>
@@ -127,36 +128,36 @@ function VersesSectionContent() {
                             type="button" className="hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={(!topicsList || topicsList.length <= 0) || !activeVerse.data}
                             onClick={() => createNewBookmark(activeVerse.data ?? undefined)}>
-                            <BookmarkIcon className="w-5 h-5 text-gray-500" />
+                            <BookmarkIcon className="w-5 h-5" />
                         </button>
-                        <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
+                        <Separator orientation="vertical" className="h-5" />
                         <button
                             type="button"
                             className="zoom-in hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={(!topicsList || topicsList.length <= 0 || scale >= 2)}
                             onClick={handleZoomIn}>
-                            <ZoomInIcon width={22} height={22} />
+                            <ZoomInIcon className="w-5 h-5" />
                         </button>
                         <button
                             type="button"
                             className="zoom-out disabled:opacity-60 hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={(scale <= 1) || (!topicsList || topicsList.length <= 0)} onClick={handleZoomOut}>
-                            <ZoomOutIcon width={22} height={22} />
+                            <ZoomOutIcon className="w-5 h-5" />
                         </button>
-                        <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
+                        <Separator orientation="vertical" className="h-5" />
                         <button
                             type="button"
-                            className="hover:scale-110 transition-all disabled:hover:!scale-100"
+                            className="hover:scale-110 transition-transform disabled:hover:!scale-100"
                             disabled={!previousChapter}
                             onClick={goToPrevChapter}>
-                            <ChevronLeftIcon width={22} height={22} className="" />
+                            <ChevronLeftIcon className="w-5 h-5" />
                         </button>
                         <button
                             type="button"
-                            className="hover:scale-110 transition-all disabled:hover:!scale-100"
+                            className="hover:scale-110 transition-transform disabled:hover:!scale-100"
                             disabled={!nextChapter}
                             onClick={goToNextChapter}>
-                            <ChevronRightIcon width={22} height={22} />
+                            <ChevronRightIcon className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
