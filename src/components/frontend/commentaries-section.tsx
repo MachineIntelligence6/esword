@@ -55,7 +55,7 @@ export default function CommentariesContentComponent() {
                                     type="button"
                                     onClick={() => setActiveAuthor(author.id)}
                                     className={cn(
-                                        "text-xs font-medium  px-3 py-2 transition-all rounded-[]",
+                                        "text-xs font-medium  px-3 py-2 transition-all rounded-[4px]",
                                         activeAuthor?.id === author.id ? "bg-secondary text-primary-dark font-bold" : "hover:bg-secondary hover:text-primary-dark hover:font-bold"
                                     )}>
                                     {author.name}
