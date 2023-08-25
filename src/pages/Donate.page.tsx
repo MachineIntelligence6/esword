@@ -12,34 +12,34 @@ export default function DonatePage() {
 
 
     return (
-        <>
-            {/* Header Compponent */}
+        <div>
             <HeaderComponent />
-            <div className="flex lg:flex-row flex-col border-none items-center bg-silver-light">
+            <div className="flex lg:flex-row flex-col max-h-screen  pt-[60px]  overflow-hidden">
+
                 <div className="">
-                    {/* Books and chapter components */}
-                    <BooksChapterComponent   />
+                    <BooksChapterComponent />
                 </div>
-                {/* content */}
-                <div className="bg-primary min-h-screen flex flex-col items-center justify-center border-t-2 border-silver-light lg:mt-[60px]  mt-4 w-full">
-                    <div>
+                <div className="w-full  justify-center  bg-primary">
+                    <h3 className="text-xs font-bold py-3 lg:pl-3 px-[20px] lg:border-0 border-b  w-full bg-silver-light ">
+                            Donate
+                    </h3>
+                    <div className="flex min-h-[calc(100vh_-_100px)] items-center justify-center border-t-2 border-silver-light w-full ">
                         <div
-                            className="md:w-[446px] w-auto md h-auto flex flex-col items-center justify-center bg-white pt-10 rounded-lg mx-4">
-           
+                            className="md:w-[446px] w-auto  h-auto flex flex-col items-center justify-center bg-white pt-10 rounded-lg mx-4">
                             <div>
-                                <p className="font-inter font-bold text-2xl text-primary-dark">
+                                <p className="font-bold text-2xl text-primary-dark">
                                     Donate to
                                 </p>
                             </div>
 
                             <div className="pb-3">
-                                <p className="font-inter font-normal text-base text-primary-dark">
+                                <p className="font-normal text-base text-primary-dark">
                                     Hidden Sword
                                 </p>
                             </div>
                             <hr className=" w-full border border-solid" />
                             <div className="py-2 md:px-0 px-4 text-center">
-                                <p className="font-inter font-normal text-sm text-primary-dark">
+                                <p className="font-normal text-sm text-primary-dark">
                                     Thank you for supporting [org. name]. Lorem ipsum dolor imit
                                 </p>
                             </div>
@@ -69,10 +69,11 @@ export default function DonatePage() {
                             </div>
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
-        </>
+
+        </div>
 
     )
 }
