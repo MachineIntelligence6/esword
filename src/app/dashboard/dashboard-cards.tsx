@@ -306,7 +306,7 @@ export function DActivitiesCard() {
                                                 <p className="line-clamp-1 max-w-full w-full col-span-5 text-sm">
                                                     {activity.description}
                                                 </p>
-                                                <p className="col-span-3 w-full max-w-full text-sm" suppressHydrationWarning>
+                                                <p className="col-span-4 w-full max-w-full text-sm" suppressHydrationWarning>
                                                     {new Date(activity.timestamp).toLocaleString()}
                                                 </p>
                                                 <div className="col-span-2 flex justify-end">
