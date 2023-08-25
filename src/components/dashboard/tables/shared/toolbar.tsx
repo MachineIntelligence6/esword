@@ -9,19 +9,25 @@ import { Cross2Icon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { DataTableViewOptions } from "./table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TableActionPopup, TableActionPopupProps } from "./row-actions";
+import { TableActionProps } from "./types";
 
 
 export interface ToolbarProps<TData> {
     getFilterValue: (table: TTable<TData>) => string;
     setFilterValue: (table: TTable<TData>, value: string) => void;
-    toolbarActions?: {
-        restore?: (rows: any[]) => Promise<void>;
-        delete?: () => Promise<void>;
-    }
+    toolbarActions?: TableActionProps
 }
 interface DataTableToolbarProps<TData> extends ToolbarProps<TData> {
     table: TTable<TData>;
 }
+
+type TableActionPopupState = {
+    state: boolean;
+    type: "DELETE" | "RESTORE" | "PERMANENT_DELETE"
+}
+const RESTORE_DESCRIPTION = "This action will restore the selected rows and all data linked with them."
+const PERMANENT_DELETE_DESCRIPTION = "This action will delete permanentaly the selected rows and all data linked with them."
+const DELETE_DESCRIPTION = "This action will delete the selected rows and all data linked with them."
 
 export function DataTableToolbar<TData>({
     table,
@@ -30,19 +36,27 @@ export function DataTableToolbar<TData>({
     toolbarActions
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0
-    const [alertOpen, setAlertOpen] = React.useState(false);
+    const [alertOpen, setAlertOpen] = React.useState<TableActionPopupState>({ state: false, type: "RESTORE" });
 
     const selectedRows = table.getSelectedRowModel().rows.map((r) => r.original);
 
 
     const restoreAllPopupProps: TableActionPopupProps = {
         title: "Are you sure to restore?",
-        description: "This action will restore all selected rows and all data linked with them.",
-        actionBtn: { text: "Restore", variant: "default" },
-        open: alertOpen, setOpen: setAlertOpen,
+        description: alertOpen.type === "RESTORE" ? RESTORE_DESCRIPTION : (alertOpen.type === "PERMANENT_DELETE" ? PERMANENT_DELETE_DESCRIPTION : DELETE_DESCRIPTION),
+        actionBtn: { text: (alertOpen.type === "RESTORE" ? "Restore" : "Delete"), variant: (alertOpen.type === "RESTORE" ? "default" : "destructive") },
+        open: alertOpen.state, setOpen: (value) => setAlertOpen({ state: value, type: "RESTORE" }),
         action: async () => {
             if (selectedRows.length <= 0) return;
-            await toolbarActions?.restore?.(selectedRows)
+            if (alertOpen.type === "RESTORE") {
+                await toolbarActions?.restoreAction?.(selectedRows)
+            }
+            else if (alertOpen.type === "PERMANENT_DELETE") {
+                await toolbarActions?.deleteAction?.(selectedRows)
+            }
+            else if (alertOpen.type === "DELETE") {
+                // await toolbarActions?.deletePermanently?.(selectedRows)
+            }
         }
     }
 
@@ -70,7 +84,7 @@ export function DataTableToolbar<TData>({
             </div>
             <div className="flex items-center gap-3">
                 {
-                    (toolbarActions?.restore || toolbarActions?.delete) &&
+                    (toolbarActions?.restoreAction || toolbarActions?.deleteAction || toolbarActions?.archiveAction) &&
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
@@ -80,13 +94,22 @@ export function DataTableToolbar<TData>({
                                 <DotsHorizontalIcon className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[160px]">
+                        <DropdownMenuContent align="end" className="w-[180px]">
                             {
-                                toolbarActions.restore &&
+                                toolbarActions.restoreAction &&
                                 <DropdownMenuItem
                                     disabled={selectedRows.length <= 0}
-                                    onClick={() => setAlertOpen(true)}>
-                                    Restore Selected
+                                    onClick={() => setAlertOpen({ state: true, type: "RESTORE" })}>
+                                    Restore
+                                </DropdownMenuItem>
+
+                            }
+                            {
+                                toolbarActions.deleteAction &&
+                                <DropdownMenuItem
+                                    disabled={selectedRows.length <= 0}
+                                    onClick={() => setAlertOpen({ state: true, type: "PERMANENT_DELETE" })}>
+                                    Delete Permanentaly
                                 </DropdownMenuItem>
 
                             }

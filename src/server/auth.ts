@@ -3,7 +3,6 @@ import { AuthOptions, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import db from "@/server/db"
 import bcrypt from 'bcryptjs'
-import { User } from "@prisma/client"
 import { SessionUser } from "@/shared/types/models.types"
 
 

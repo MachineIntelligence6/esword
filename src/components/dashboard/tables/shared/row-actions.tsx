@@ -23,21 +23,21 @@ export function DataTableRowActions<TData>({
     row,
     editAction,
     viewAction,
-    deleteAction,
+    archiveAction,
     deleteMessage,
-    restoreAction
+    restoreAction,
 }: DataTableRowActionsProps<TData>) {
     const { data: session } = useSession()
     const [alertOpen, setAlertOpen] = useState(false);
     const archived = (row.original as any).archived
-    const deleteEnabled = session?.user && session.user.role === "ADMIN" && deleteAction && !archived
+    const deleteEnabled = session?.user && session.user.role === "ADMIN" && archiveAction
 
     const deletePopupProps: TableActionPopupProps = {
         title: "Are you sure to delete?",
         description: deleteMessage ?? "This action will delete the current row and all data linked with it.",
         actionBtn: { text: "Delete", variant: "destructive" },
         open: alertOpen, setOpen: setAlertOpen,
-        action: async () => await deleteAction?.(row.original)
+        action: async () => await archiveAction?.(row.original)
     }
     const restorePopupProps: TableActionPopupProps = {
         title: "Are you sure to restore?",
@@ -76,16 +76,16 @@ export function DataTableRowActions<TData>({
                         <DropdownMenuSeparator />
                     }
                     {
-                        (deleteEnabled) &&
-                        <DropdownMenuItem onClick={() => setAlertOpen(true)}>
-                            Delete
-                        </DropdownMenuItem>
-                    }
-                    {
-                        (archived && restoreAction) &&
-                        <DropdownMenuItem onClick={() => setAlertOpen(true)}>
-                            Restore
-                        </DropdownMenuItem>
+                        archived ?
+                            restoreAction &&
+                            <DropdownMenuItem onClick={() => setAlertOpen(true)}>
+                                Restore
+                            </DropdownMenuItem>
+                            :
+                            (deleteEnabled) &&
+                            <DropdownMenuItem onClick={() => setAlertOpen(true)}>
+                                Delete
+                            </DropdownMenuItem>
                     }
                 </DropdownMenuContent>
             </DropdownMenu>

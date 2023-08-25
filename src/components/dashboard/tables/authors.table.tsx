@@ -77,6 +77,26 @@ export default function AuthorsTable({ showPagination, showToolbar, archivedOnly
         }
     }
 
+    const handlePermanentDelete = async (authors: IAuthor[]) => {
+        const res = await clientApiHandlers.archives.deletePermanantly({
+            ids: authors.map((a) => a.id),
+            model: "Author"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Author(s) deleted successfully.",
+            })
+            window.location.reload()
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
+
 
 
     const handleRestore = async (authors: IAuthor[]) => {
@@ -100,25 +120,26 @@ export default function AuthorsTable({ showPagination, showToolbar, archivedOnly
     }
 
 
+    const tableActionProps: TableActionProps = {
+        ...props,
+        viewAction: (author: IAuthor) => (
+            <Link href={`/dashboard/authors/${author.id}`}>View</Link>
+        ),
+        archiveAction: handleDelete,
+        deleteMessage: "This action will delete the author and all data (commentaries) linked with it.",
+        ...(archivedOnly && {
+            restoreAction: handleRestore,
+            deleteAction: handlePermanentDelete,
+        }),
+    }
+
+
+
     return (
         <BaseTable
             data={tableData?.data}
-            columns={columns({
-                ...props,
-                viewAction: (author: IAuthor) => (
-                    <Link href={`/dashboard/authors/${author.id}`}>View</Link>
-                ),
-                deleteAction: handleDelete,
-                restoreAction: handleRestore,
-                deleteMessage: "This action will delete the author and all data (commentaries) linked with it.",
-            })}
-            {...(archivedOnly && {
-                ...{
-                    toolbarActions: {
-                        restore: handleRestore
-                    }
-                }
-            })}
+            columns={columns(tableActionProps)}
+            toolbarActions={tableActionProps}
             pagination={pagination}
             showPagination={showPagination}
             showToolbar={showToolbar}

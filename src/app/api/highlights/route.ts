@@ -22,7 +22,7 @@ export const GET = async (req: Request) => {
     } catch (error) {
     }
     const orderByStr = params.get("orderBy")
-    let orderBy: Prisma.HighlightOrderByWithRelationInput | undefined;
+    let orderBy: Prisma.HighlightOrderByWithRelationAndSearchRelevanceInput | undefined;
     try {
         orderBy = JSON.parse(orderByStr ?? "")
     } catch (error) {

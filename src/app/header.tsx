@@ -1,7 +1,7 @@
 'use client'
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LogoutButton } from "@/components/dashboard/buttons"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,8 +12,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDownIcon, PersonIcon } from "@radix-ui/react-icons"
+import { ChevronDownIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons"
 import { Session } from "next-auth";
+import { Form, FormField, FormItem } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
 
 
 
@@ -45,12 +49,7 @@ export default function SiteHeader({ session }: Props) {
                                     <Link href="/donate">Donate</Link>
                                 </div>
                             </div>
-                            <button className="flex gap-x-3 lg:border rounded-[42px] border-white border-opacity-70 items-center">
-                                <i className="fa-solid fa-magnifying-glass pl-3"></i>
-                                <p className="pr-[140px] font-normal lg:block hidden">
-                                    Search
-                                </p>
-                            </button>
+                            <SearchComponent />
                         </div>
                     }
                     <div>
@@ -63,6 +62,52 @@ export default function SiteHeader({ session }: Props) {
 }
 
 
+
+
+const searchFormSchema = z.object({
+    query: z.string()
+})
+type SearchFormSchema = z.infer<typeof searchFormSchema>
+
+function SearchComponent() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const form = useForm<SearchFormSchema>({
+        mode: "all",
+        resolver: zodResolver(searchFormSchema),
+        defaultValues: {
+            query: searchParams.get("q") ?? ""
+        }
+    })
+
+    const handleFormSubmit = ({ query }: SearchFormSchema) => {
+        router.push(`/search?q=${query}`)
+    }
+
+    return (
+        <div className="flex gap-x-3 lg:border rounded-[42px] border-white border-opacity-70 items-center">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+                    <FormField
+                        control={form.control}
+                        name="query"
+                        render={({ field, fieldState }) => (
+                            <FormItem>
+                                <div className="flex items-center gap-3 px-3">
+                                    <MagnifyingGlassIcon className="w-5 h-5" />
+                                    <input
+                                        {...field}
+                                        type="text"
+                                        className="bg-transparent outline-none border-none py-2 autofill-text-white" />
+                                </div>
+                            </FormItem>
+                        )}
+                    />
+                </form>
+            </Form>
+        </div>
+    )
+}
 
 
 

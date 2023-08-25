@@ -48,6 +48,26 @@ export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) 
         }
     }
 
+
+    const handlePermanentDelete = async (topics: ITopic[]) => {
+        const res = await clientApiHandlers.archives.deletePermanantly({
+            ids: topics.map((b) => b.id),
+            model: "Topic"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Topic(s) deleted successfully.",
+            })
+            window.location.reload()
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
     const handleRestore = async (topics: ITopic[]) => {
         const res = await clientApiHandlers.archives.restore({
             ids: topics.map((b) => b.id),
@@ -94,25 +114,26 @@ export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) 
         totalPages: tableData?.pagination?.totalPages ?? 1
     }
 
+
+    const tableActionProps: TableActionProps = {
+        ...props,
+        viewAction: (topic: ITopic) => (
+            <Link href={`/dashboard/topics/${topic.id}`}>View</Link>
+        ),
+        archiveAction: handleDelete,
+        deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it.",
+        ...(archivedOnly && {
+            restoreAction: handleRestore,
+            deleteAction: handlePermanentDelete,
+        }),
+    }
+
     return (
         <BaseTable
             data={tableData?.data}
-            columns={columns({
-                ...props,
-                viewAction: (topic: ITopic) => (
-                    <Link href={`/dashboard/topics/${topic.id}`}>View</Link>
-                ),
-                restoreAction: handleRestore,
-                deleteAction: handleDelete
-            })}
+            columns={columns(tableActionProps)}
             pagination={pagination}
-            {...(archivedOnly && {
-                ...{
-                    toolbarActions: {
-                        restore: handleRestore
-                    }
-                }
-            })}
+            toolbarActions={tableActionProps}
             getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
             setFilterValue={(table, value) => {
                 table.getColumn("name")?.setFilterValue(value)

@@ -9,6 +9,7 @@ import * as topicsHandler from './topics.handler'
 import * as bookmarksHandler from './bookmarks.handler'
 import * as activitiesHandler from './activities.handler'
 import * as archivesHandler from './archives.handler'
+import * as searchHandler from './search.handler'
 
 
 const clientApiHandlers = {
@@ -22,7 +23,8 @@ const clientApiHandlers = {
     topics: topicsHandler,
     bookmarks: bookmarksHandler,
     activities: activitiesHandler,
-    archives: archivesHandler
+    archives: archivesHandler,
+    search: searchHandler
 }
 
 export default clientApiHandlers;

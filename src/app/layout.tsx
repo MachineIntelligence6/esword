@@ -6,6 +6,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SiteHeader from './header'
 import { cn } from '@/lib/utils'
+import SiteSidebar from './sidebar'
+import SiteInnerLayout from './inner-layout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,7 +34,9 @@ export default async function RootLayout({
         <AuthProvider session={session}>
           <SiteHeader session={session} />
           <div className='pt-[70px]'>
-            {children}
+            <SiteInnerLayout>
+              {children}
+            </SiteInnerLayout>
           </div>
           <Toaster />
         </AuthProvider>

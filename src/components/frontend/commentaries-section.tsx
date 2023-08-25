@@ -1,11 +1,9 @@
 'use client'
-
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { useEffect, useRef, useState } from "react";
 import { AuthorsLoadingPlaceholder, CommentaryLoadingPlaceholder } from "../loading-placeholders";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { Button } from "../ui/button";
 
@@ -83,7 +81,7 @@ export default function CommentariesContentComponent() {
                             </div>
                             <TabsContent value="chapter">
                                 {
-                                    !activeChapter.data || activeChapter.loading ?
+                                    !chaptersList || activeChapter.loading ?
                                         <CommentaryLoadingPlaceholder />
                                         :
                                         (

@@ -10,6 +10,7 @@ import * as bookmarksApiHandlers from '@/server/handlers/bookmarks.api'
 import * as highlightsApiHandlers from '@/server/handlers/highlights.api'
 import * as activitiesApiHandlers from '@/server/handlers/activities.api'
 import * as archivesApiHandlers from '@/server/handlers/archives.api'
+import * as searchApiHandlers from '@/server/handlers/search.api'
 
 
 const serverApiHandlers = {
@@ -24,7 +25,8 @@ const serverApiHandlers = {
     bookmarks: bookmarksApiHandlers,
     activities: activitiesApiHandlers,
     highlights: highlightsApiHandlers,
-    archives: archivesApiHandlers
+    archives: archivesApiHandlers,
+    search: searchApiHandlers
 }
 
 export default serverApiHandlers;

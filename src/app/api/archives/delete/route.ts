@@ -7,6 +7,6 @@ import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
     const body = (await req.json()) as ArchivesActionReq
-    const res = await serverApiHandlers.archives.dump(body)
+    const res = await serverApiHandlers.archives.permanentDelete(body)
     return NextResponse.json(res)
 }

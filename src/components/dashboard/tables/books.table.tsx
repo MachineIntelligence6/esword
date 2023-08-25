@@ -60,6 +60,24 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
             })
         }
     }
+    const handlePermanentDelete = async (books: IBook[]) => {
+        const res = await clientApiHandlers.archives.deletePermanantly({
+            ids: books.map((b) => b.id),
+            model: "Book"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Book(s) deleted successfully.",
+            })
+            window.location.reload()
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
     const handleRestore = async (books: IBook[]) => {
         const res = await clientApiHandlers.archives.restore({
             ids: books.map((b) => b.id),
@@ -70,7 +88,6 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
             toast({
                 title: "Book(s) restored successfully.",
             })
-            // window.location.reload()
             router.push("/dashboard/books")
         } else {
             toast({
@@ -95,24 +112,24 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
         totalPages: tableData?.pagination?.totalPages ?? 1
     }
 
+
+    const tableActionProps: TableActionProps = {
+        ...props,
+        viewAction: (book) => (
+            <Link href={`/dashboard/books/${book.id}`}>View</Link>
+        ),
+        archiveAction: handleDelete,
+        ...(archivedOnly && {
+            restoreAction: handleRestore,
+            deleteAction: handlePermanentDelete,
+        }),
+    }
+
     return (
         <BaseTable
             data={tableData?.data}
-            columns={columns({
-                ...props,
-                deleteAction: handleDelete,
-                viewAction: (book) => (
-                    <Link href={`/dashboard/books/${book.id}`}>View</Link>
-                ),
-                restoreAction: handleRestore
-            })}
-            {...(archivedOnly && {
-                ...{
-                    toolbarActions: {
-                        restore: handleRestore
-                    }
-                }
-            })}
+            columns={columns(tableActionProps)}
+            toolbarActions={tableActionProps}
             pagination={pagination}
             showPagination={showPagination}
             showToolbar={showToolbar}

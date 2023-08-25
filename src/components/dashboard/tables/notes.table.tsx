@@ -82,6 +82,8 @@ export default function NotesTable({ user, verse }: Props) {
         }
     }
 
+    
+
     const tableColumns = columns({
         viewAction: (note: INote) => (
             <Link href={`/dashboard/notes/${note.id}`}>View</Link>

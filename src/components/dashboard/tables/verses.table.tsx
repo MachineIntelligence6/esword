@@ -63,6 +63,26 @@ export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, a
     }
 
 
+    const handlePermanentDelete = async (verses: IVerse[]) => {
+        const res = await clientApiHandlers.archives.deletePermanantly({
+            ids: verses.map((b) => b.id),
+            model: "Verse"
+        })
+        if (res.succeed) {
+            toast({
+                title: "Verse(s) deleted successfully.",
+            })
+            window.location.reload()
+        } else {
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: definedMessages.UNKNOWN_ERROR
+            })
+        }
+    }
+
+
     const handleRestore = async (verses: IVerse[]) => {
         const res = await clientApiHandlers.archives.restore({
             ids: verses.map((b) => b.id),
@@ -83,17 +103,21 @@ export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, a
         }
     }
 
-    const tableColumns = columns({
+    const tableActionProps: TableActionProps = {
         viewAction: (verse: IVerse) => (
             <Link href={`/dashboard/verses/${verse.id}`}>View</Link>
         ),
         editAction: (verse: IVerse) => (
             <Link href={`/dashboard/verses/${verse.id}/edit`}>Edit</Link>
         ),
-        deleteAction: handleDelete,
-        restoreAction: handleRestore,
-        deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it."
-    })
+        archiveAction: handleDelete,
+        deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it.",
+        ...(archivedOnly && {
+            restoreAction: handleRestore,
+            deleteAction: handlePermanentDelete,
+        }),
+    }
+
 
 
     return (
@@ -101,14 +125,8 @@ export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, a
             <BaseTable
                 data={tableData?.data}
                 pagination={pagination}
-                columns={tableColumns}
-                {...(archivedOnly && {
-                    ...{
-                        toolbarActions: {
-                            restore: handleRestore
-                        }
-                    }
-                })}
+                columns={columns(tableActionProps)}
+                toolbarActions={tableActionProps}
                 getFilterValue={(table) => (table.getColumn("number")?.getFilterValue() as string ?? "")}
                 setFilterValue={(table, value) => table.getColumn("number")?.setFilterValue(value)}
             />

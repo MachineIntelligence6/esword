@@ -1,11 +1,40 @@
 'use client'
-
 import { BooksLoadingPlaceholder, ChaptersLoadingPlaceholder } from "@/components/loading-placeholders";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 
 export default function SiteSidebar() {
+    const searchParams = useSearchParams()
+    const {
+        booksList, chaptersList, loadInitialData,
+    } = useReadBookStore()
+
+
+    const doInitialLoadWork = async () => {
+        const book = searchParams.get("book") ?? undefined
+        const chapter = parseInt(searchParams.get("chapter") ?? "-1")
+        const verse = parseInt(searchParams.get("verse") ?? "-1")
+        await loadInitialData(
+            book,
+            chapter === -1 ? undefined : chapter,
+            verse === -1 ? undefined : verse,
+        )
+    }
+
+    useEffect(() => {
+        doInitialLoadWork()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams])
+
+    // useEffect(() => {
+    //     if (booksList && chaptersList) return;
+    //     doInitialLoadWork()
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [])
+
     return (
         <div className="flex lg:mx-0 mx-[10px] lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white lg:max-w-[186px] lg:min-w-[186px] w-full  lg:px-0 px-3">
             <SidebarBooksComponent />

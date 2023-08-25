@@ -194,3 +194,24 @@ export function AuthorsLoadingPlaceholder() {
         </ContentLoader>
     )
 }
+export function SearchLoadingPlaceholder() {
+    return (
+        <ContentLoader
+            speed={3}
+            width={500}
+            height={35}
+            viewBox="0 0 500 35"
+            backgroundColor="#f3f3f3"
+            foregroundColor="#ecebeb"
+            className="w-full overflow-x-hidden h-auto max-h-full"
+        >
+            <rect x="0" y="0" rx="0" ry="0" width="500" height="5" />
+            <rect x="0" y="8" rx="0" ry="0" width="300" height="5" />
+            {/* <rect x="0" y="16" rx="0" ry="0" width="300" height="5" /> */}
+            <rect x="0" y="16" rx="0" ry="0" width="50" height="5" />
+            <rect x="60" y="16" rx="0" ry="0" width="50" height="5" />
+            <rect x="120" y="16" rx="0" ry="0" width="50" height="5" />
+
+        </ContentLoader>
+    )
+}
