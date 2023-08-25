@@ -36,7 +36,7 @@ export default function Page() {
 
     return (
         <div className="">
-            <div className="flex lg:flex-row flex-col max-h-screen lg:overflow-hidden ">
+            <div className="flex lg:flex-row flex-col max-h-screen lg:overflow-hidden">
                 {/* Books and chapter component */}
                 <SiteSidebar />
                 <div className="w-full" >
@@ -52,7 +52,7 @@ export default function Page() {
                                 <div className="block lg:hidden">
                                     <Accordion type="single" collapsible>
                                         <AccordionItem value="item-1">
-                                            <AccordionTrigger className="toggle-btn bg-silver-light py-3 font-inter lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b flex justify-between lg:hidden">
+                                            <AccordionTrigger className="toggle-btn bg-silver-light py-3 lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b flex justify-between lg:hidden">
                                                 <h3 className="text-xs font-bold">
                                                     COMMENTARIES
                                                 </h3>

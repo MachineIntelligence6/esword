@@ -37,7 +37,7 @@ export default function CommentariesContentComponent() {
         <div className="lg:min-h-[300px] max-h-[40vh] overflow-hidden h-full flex flex-col ">
             {/* title */}
             <div
-                className="toggle-btn bg-silver-light py-3 font-inter lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b lg:flex justify-between hidden">
+                className="toggle-btn bg-silver-light py-3  lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b lg:flex justify-between hidden">
                 <h3 className="text-xs font-bold">
                     COMMENTARIES
                 </h3>
@@ -55,7 +55,7 @@ export default function CommentariesContentComponent() {
                                     type="button"
                                     onClick={() => setActiveAuthor(author.id)}
                                     className={cn(
-                                        "text-xs font-medium px-3 py-2 transition-all rounded-lg",
+                                        "text-xs font-medium  px-3 py-2 transition-all rounded-lg",
                                         activeAuthor?.id === author.id ? "bg-primary/30 text-primary-dark font-bold" : "hover:bg-primary/30 hover:text-primary-dark hover:font-bold"
                                     )}>
                                     {author.name}
@@ -118,13 +118,13 @@ export default function CommentariesContentComponent() {
                                                 (
                                                     activeAuthor.commentaries.active &&
                                                     <div>
-                                                        <h1 className="font-bold text-light-green text-xl flex items-center justify-center pt-[10px]">
+                                                        <h1 className="font-bold text-light-green text-base flex items-center justify-center pt-[10px] font-roman md:text-xl">
                                                             {`${activeBook.data?.name} ${activeChapter.data?.name}:${activeVerse.data?.number}`}
                                                         </h1>
-                                                        <h3 className="font-bold text-base text-primary-dark flex justify-center items-center py-[10px]">
+                                                        <h3 className="font-bold text-sm text-primary-dark flex justify-center items-center py-[10px] font-roman md:text-base">
                                                             {activeAuthor.commentaries.active?.name}
                                                         </h3>
-                                                        <p className="lg:pl-4 lg:pr-2 px-[10px] text-primary-dark font-normal text-sm">
+                                                        <p className="lg:pl-4 lg:pr-2 px-[10px] text-primary-dark font-normal text-sm font-roman">
                                                             {activeAuthor.commentaries.active?.text}
                                                         </p>
                                                     </div>
@@ -167,7 +167,7 @@ function NextPrevCommentaryComp() {
                     "aspect-square p-1 w-auto h-auto rounded-full",
                     !previous && "opacity-60 pointer-events-none"
                 )}>
-                <ChevronLeftIcon className="w-6 h-6" />
+                <ChevronLeftIcon className="w-6 h-6 hover:scale-110 transition-all" />
             </Button>
             <Button variant="ghost"
                 disabled={!next}
@@ -176,7 +176,7 @@ function NextPrevCommentaryComp() {
                     "aspect-square p-1 w-auto h-auto rounded-full",
                     !next && "opacity-60 pointer-events-none"
                 )}>
-                <ChevronRightIcon className="w-6 h-6" />
+                <ChevronRightIcon className="w-6 h-6 hover:scale-110 transition-all" />
             </Button>
         </div>
     )

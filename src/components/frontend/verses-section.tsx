@@ -32,7 +32,7 @@ export function VersesSection() {
                 <div className="block lg:hidden">
                     <Accordion type="single" collapsible>
                         <AccordionItem value="item-1">
-                            <AccordionTrigger className="toggle-btn bg-silver-light py-3 font-inter lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b flex justify-between">
+                            <AccordionTrigger className="toggle-btn bg-silver-light py-3  lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b flex justify-between">
                                 <h3 className="text-xs font-bold">
                                     VERSES
                                 </h3>
@@ -102,7 +102,7 @@ function VersesSectionContent() {
     return (
         <>
             {/* title */}
-            <div className="toggle-btn bg-silver-light py-3 font-inter lg:pl-3 px-[10px] lg:border-0 border-b  justify-between  hidden lg:flex">
+            <div className="toggle-btn bg-silver-light py-3 lg:pl-3 px-[10px] lg:border-0 border-b  justify-between  hidden lg:flex">
                 <h3 className="text-xs font-bold">
                     VERSES
                 </h3>
@@ -112,12 +112,12 @@ function VersesSectionContent() {
                 <div className="lg:flex block justify-between lg:border-b min-h-[39px] max-h-[39px]">
                     <div className="flex xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 border-b lg:px-1 px-5 xl:px-6 justify-between items-center py-2">
                         <button disabled>
-                            <PlayIcon width={22} height={22} />
+                            <PlayIcon width={22} height={22} className="hover:scale-110 transition-all cursor-pointer" />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button
                             type="button"
-                            className="highlighter"
+                            className="highlighter hover:scale-110 hover:transition-all"
                             // disabled={(!topicsList || topicsList.length <= 0)}
                             onClick={toggleHighlight}>
                             <Image width={18} height={18} src="./images/ph_text-aa-fill.svg" alt="Highlight" />
@@ -126,19 +126,19 @@ function VersesSectionContent() {
                             type="button"
                             disabled={(!topicsList || topicsList.length <= 0) || !activeVerse.data}
                             onClick={() => createNewBookmark(activeVerse.data ?? undefined)}>
-                            <BookmarkIcon className="w-5 h-5 text-gray-500" />
+                            <BookmarkIcon className="w-5 h-5 text-gray-500 cursor-pointer hover:scale-110 transition-all" />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button
                             type="button"
-                            className="zoom-in"
+                            className="zoom-in cursor-pointer hover:scale-110 transition-all"
                             disabled={(!topicsList || topicsList.length <= 0 || scale >= 2)}
                             onClick={handleZoomIn}>
                             <ZoomInIcon width={22} height={22} />
                         </button>
                         <button
                             type="button"
-                            className="zoom-out disabled:opacity-60"
+                            className="zoom-out disabled:opacity-60 cursor-pointer hover:scale-110 transition-all"
                             disabled={(scale <= 1) || (!topicsList || topicsList.length <= 0)} onClick={handleZoomOut}>
                             <ZoomOutIcon width={22} height={22} />
                         </button>
@@ -148,14 +148,14 @@ function VersesSectionContent() {
                             className=""
                             disabled={!previousChapter}
                             onClick={goToPrevChapter}>
-                            <ChevronLeftIcon width={22} height={22} />
+                            <ChevronLeftIcon width={22} height={22} className="cursor-pointer hover:scale-110 transition-all" />
                         </button>
                         <button
                             type="button"
                             className=""
                             disabled={!nextChapter}
                             onClick={goToNextChapter}>
-                            <ChevronRightIcon width={22} height={22} />
+                            <ChevronRightIcon width={22} height={22} className="cursor-pointer hover:scale-110 transition-all" />
                         </button>
                     </div>
                 </div>
@@ -181,13 +181,13 @@ function VersesSectionContent() {
                                             topicsList?.map((topic) => (
                                                 <div key={topic.id}>
                                                     <div className="flex items-center justify-center py-[10px]">
-                                                        <h1 className="font-bold text-center text-xl text-primary-dark">
+                                                        <h1 className="font-bold text-center text-base text-primary-dark font-roman md:text-xl">
                                                             {topic.name}
                                                         </h1>
                                                     </div>
                                                     <div className="flex flex-col gap-y-[10px]">
                                                         <div className="flex">
-                                                            <div className="flex flex-col gap-y-[10px] px-5">
+                                                            <div className="flex flex-col gap-y-[10px] px-5 font-roman">
                                                                 {
                                                                     topic.verses?.map((verse) => (
                                                                         <VerseComponent
@@ -384,7 +384,7 @@ function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseCom
                 active ? "font-bold" : "select-none"
             )}
             onClick={onClick}>
-            <p className={"text-base text-light-green min-w-max"}>
+            <p className={"text-sm text-light-green min-w-max md:text-base"}>
                 {`${verse.topic?.chapter?.book?.abbreviation} ${verse.topic?.chapter?.name}:${verse.number}`}
             </p>
             <Highlighter
@@ -393,7 +393,7 @@ function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseCom
                 textToHighlight={verse.text}
                 // highlightTag={Highlight}
                 activeClassName=""
-                className="text-base text-primary-dark"
+                className="text-sm text-primary-dark md:text-base"
             // findChunks={() => allChunks}
             />
             {/* <p className={""}>
