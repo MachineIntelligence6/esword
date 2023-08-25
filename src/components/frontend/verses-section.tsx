@@ -32,7 +32,7 @@ export function VersesSection() {
                 <div className="block lg:hidden">
                     <Accordion type="single" collapsible>
                         <AccordionItem value="item-1">
-                            <AccordionTrigger className="toggle-btn bg-silver-light py-3  lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b flex justify-between">
+                            <AccordionTrigger className="toggle-btn bg-silver-light py-3  lg:pl-3 pl-[20px] pr-[19px] lg:border-0 border-b flex justify-between">
                                 <h3 className="text-xs font-bold">
                                     VERSES
                                 </h3>
@@ -103,7 +103,7 @@ function VersesSectionContent() {
         <>
             {/* title */}
             <div className="toggle-btn bg-silver-light py-3 lg:pl-3 px-[10px] lg:border-0 border-b  justify-between  hidden lg:flex">
-                <h3 className="text-xs font-bold">
+                <h3 className="text-xs font-bold hover:scale-110 transition-all">
                     VERSES
                 </h3>
             </div>
@@ -111,51 +111,52 @@ function VersesSectionContent() {
                 {/* buttons tab */}
                 <div className="lg:flex block justify-between lg:border-b min-h-[39px] max-h-[39px]">
                     <div className="flex xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 border-b lg:px-1 px-5 xl:px-6 justify-between items-center py-2">
-                        <button disabled>
-                            <PlayIcon width={22} height={22} className="hover:scale-110 transition-all cursor-pointer" />
+                        <button disabled className="hover:scale-110 transition-all disabled:hover:!scale-100">
+                            
+                            <PlayIcon width={22} height={22} />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button
                             type="button"
-                            className="highlighter hover:scale-110 hover:transition-all"
+                            className="highlighter hover:scale-110 transition-all disabled:hover:!scale-100"
                             // disabled={(!topicsList || topicsList.length <= 0)}
                             onClick={toggleHighlight}>
                             <Image width={18} height={18} src="./images/ph_text-aa-fill.svg" alt="Highlight" />
                         </button>
                         <button
-                            type="button"
+                            type="button" className="hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={(!topicsList || topicsList.length <= 0) || !activeVerse.data}
                             onClick={() => createNewBookmark(activeVerse.data ?? undefined)}>
-                            <BookmarkIcon className="w-5 h-5 text-gray-500 cursor-pointer hover:scale-110 transition-all" />
+                            <BookmarkIcon className="w-5 h-5 text-gray-500" />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button
                             type="button"
-                            className="zoom-in cursor-pointer hover:scale-110 transition-all"
+                            className="zoom-in hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={(!topicsList || topicsList.length <= 0 || scale >= 2)}
                             onClick={handleZoomIn}>
                             <ZoomInIcon width={22} height={22} />
                         </button>
                         <button
                             type="button"
-                            className="zoom-out disabled:opacity-60 cursor-pointer hover:scale-110 transition-all"
+                            className="zoom-out disabled:opacity-60 hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={(scale <= 1) || (!topicsList || topicsList.length <= 0)} onClick={handleZoomOut}>
                             <ZoomOutIcon width={22} height={22} />
                         </button>
                         <div data-orientation="vertical" role="none" className="shrink-0 bg-slate-200 w-[1px] h-5" />
                         <button
                             type="button"
-                            className=""
+                            className="hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={!previousChapter}
                             onClick={goToPrevChapter}>
-                            <ChevronLeftIcon width={22} height={22} className="cursor-pointer hover:scale-110 transition-all" />
+                            <ChevronLeftIcon width={22} height={22} className="" />
                         </button>
                         <button
                             type="button"
-                            className=""
+                            className="hover:scale-110 transition-all disabled:hover:!scale-100"
                             disabled={!nextChapter}
                             onClick={goToNextChapter}>
-                            <ChevronRightIcon width={22} height={22} className="cursor-pointer hover:scale-110 transition-all" />
+                            <ChevronRightIcon width={22} height={22} />
                         </button>
                     </div>
                 </div>

@@ -38,7 +38,7 @@ export default function CommentariesContentComponent() {
             {/* title */}
             <div
                 className="toggle-btn bg-silver-light py-3  lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b lg:flex justify-between hidden">
-                <h3 className="text-xs font-bold">
+                <h3 className="text-xs font-bold hover:scale-110 transition-all">
                     COMMENTARIES
                 </h3>
             </div>
@@ -55,8 +55,8 @@ export default function CommentariesContentComponent() {
                                     type="button"
                                     onClick={() => setActiveAuthor(author.id)}
                                     className={cn(
-                                        "text-xs font-medium  px-3 py-2 transition-all rounded-lg",
-                                        activeAuthor?.id === author.id ? "bg-primary/30 text-primary-dark font-bold" : "hover:bg-primary/30 hover:text-primary-dark hover:font-bold"
+                                        "text-xs font-medium  px-3 py-2 transition-all rounded-[]",
+                                        activeAuthor?.id === author.id ? "bg-secondary text-primary-dark font-bold" : "hover:bg-secondary hover:text-primary-dark hover:font-bold"
                                     )}>
                                     {author.name}
                                 </button>

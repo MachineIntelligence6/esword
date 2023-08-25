@@ -11,7 +11,8 @@ module.exports = {
         "primary": "#71B9EA",
         "primary-dark": "rgb(27 63 87)",
         "silver-light": " rgb(232 236 238)",
-        "light-green": " rgb(76 130 130)"
+        "light-green": " rgb(76 130 130)",
+        "secondary":"#D4EAF9"
       },
       keyframes: {
         "accordion-down": {
