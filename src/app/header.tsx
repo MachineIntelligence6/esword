@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDownIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons"
+import { ChevronDownIcon, MagnifyingGlassIcon, PersonIcon, ZoomInIcon } from "@radix-ui/react-icons"
 import { Session } from "next-auth";
 import { Form, FormField, FormItem } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,11 +45,17 @@ export default function SiteHeader({ session }: Props) {
                                 <Dropdown />
                             </div>
                             <div>
-                                <div className="font-normal py-3 lg:block hidden">
+                                <div className="font-normal py-3 lg:block hidden hover:scale-110 transition-all">
                                     <Link href="/donate">Donate</Link>
                                 </div>
                             </div>
                             <SearchComponent />
+                            {/* <button className="flex gap-x-3 lg:border rounded-[42px] border-white border-opacity-70 items-center pl-3 ">
+                                <MagnifyingGlassIcon className="w-5 h-5 hover:scale-110 transition-all disabled:hover:!scale-100 "/>
+                                <p className="pr-[140px] font-normal lg:block hidden">
+                                    Search
+                                </p>
+                            </button> */}
                         </div>
                     }
                     <div>
@@ -117,18 +123,18 @@ function Dropdown() {
         <DropdownMenu>
             <DropdownMenuTrigger>
                 <div className="font-bold flex gap-1  items-center py-3">
-                    <Link href="/">Home</Link>
+                    <Link href="/" className="hover:scale-110 transition-all">Home</Link>
                     <ChevronDownIcon className="h-4 w-4 shrink-0 text-white transition-transform lg:hidden" />
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="lg:hidden ">
                 <DropdownMenuItem>
-                    <a href="/" className="text-black hover:bg-primary/30 hover:text-primary-dark hover:font-bold">
+                    <a href="/" className="text-primary-dark hover:bg-secondary hover:text-primary-dark hover:font-bold">
                         Home
                     </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                    <a href="/donate" className="text-black">
+                    <a href="/donate" className="text-primary-dark hover:bg-secondary hover:text-primary-dark hover:font-bold">
                         Donation
                     </a>
                 </DropdownMenuItem>

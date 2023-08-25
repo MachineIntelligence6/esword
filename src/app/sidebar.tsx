@@ -47,11 +47,10 @@ export default function SiteSidebar() {
 
 function SidebarBooksComponent() {
     const { booksList, activeBook, setActiveBook } = useReadBookStore()
-
     return (
-        <div className="lg:min-w-[130px] lg:max-w-[130px] w-full font-inter lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
+        <div className="lg:min-w-[130px] lg:max-w-[130px] w-full lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
             <div className="lg:bg-silver-light bg-white py-3 flex lg:border-0 border-b flex-col">
-                <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5">
+                <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 hover:scale-110 transition-all">
                     BIBLE BOOKS
                 </h3>
                 <select
@@ -76,8 +75,8 @@ function SidebarBooksComponent() {
                                     key={book.id} type="button"
                                     onClick={() => setActiveBook(book.id)}
                                     className={cn(
-                                        "px-5 py-2 transition-all w-full text-start block max-w-full overflow-hidden text-ellipsis whitespace-nowrap",
-                                        activeBook.id === book.id ? "bg-primary/30 font-bold text-primary-dark" : "hover:font-bold hover:text-primary-dark hover:bg-primary/30"
+                                        "px-5 py-2 transition-all w-full text-start block max-w-full text-sm overflow-hidden text-ellipsis whitespace-nowrap",
+                                        activeBook.id === book.id ? "bg-secondary font-bold text-primary-dark " : "hover:font-bold hover:text-primary-dark hover:bg-secondary hover:scale-110 transition-all"
                                     )}>
                                     {book.name}
                                 </button>
@@ -97,8 +96,8 @@ function SidebarChaptersComponent() {
 
     return (
         <div className="lg:min-w-[56px] lg:max-w-[56px] w-full lg:border-r-2 lg:border-0 border text-primary-dark border-solid rounded-lg lg:rounded-none">
-            <div className="lg:bg-silver-light bg-white py-3 font-inter lg:border-0 border-b flex flex-col">
-                <h3 className="lg:text-xs lg:font-bold font-normal text-[10px] lg:block hidden  px-3">
+            <div className="lg:bg-silver-light bg-white py-3  lg:border-0 border-b flex flex-col">
+                <h3 className="lg:text-xs lg:font-bold font-normal text-[10px] lg:block hidden px-3 hover:scale-110 transition-all">
                     CH.
                 </h3>
                 <h3 className="font-normal text-[10px] uppercase lg:hidden px-4">
@@ -130,8 +129,8 @@ function SidebarChaptersComponent() {
                                     key={chapter.id}
                                     onClick={() => setActiveChapter(chapter.id)}
                                     className={cn(
-                                        "px-3 py-2 transition-all",
-                                        activeChapter.id === chapter.id ? "font-bold text-primary-dark bg-primary/30" : "hover:font-bold hover:text-primary-dark hover:bg-primary/30"
+                                        "px-3 py-2 transition-all text-sm",
+                                        activeChapter.id === chapter.id ? "font-bold text-primary-dark bg-secondary" : "hover:font-bold hover:text-primary-dark hover:bg-secondary hover:scale-110 transition-all"
                                     )}>
                                     {chapter.name}
                                 </button>

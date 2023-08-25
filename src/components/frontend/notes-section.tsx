@@ -64,7 +64,7 @@ export default function NotesContentComponent() {
         ">
             <div
                 className="toggle-btn bg-silver-light py-3 font-inter lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b lg:flex justify-between hidden">
-                <h3 className="text-xs font-bold">
+                <h3 className="text-xs font-bold hover:scale-110 transition-all">
                     NOTES
                 </h3>
             </div>
@@ -73,7 +73,7 @@ export default function NotesContentComponent() {
                     <div className="flex items-center justify-between mx-3 my-1 gap-3">
                         {
                             activeBook.data && activeChapter.data ?
-                                <Button variant={"secondary"} className="text-sm" type="button">
+                                <Button variant={"secondary"} className="text-xs bg-secondary hover:scale-110 transition-all" type="button">
                                     {activeBook.data?.name} {activeChapter.data?.name}:{activeVerse.data?.number}
                                 </Button>
                                 :
