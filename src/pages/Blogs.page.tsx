@@ -25,9 +25,8 @@ export default function BlogsPage() {
                                             MANUSCRIPT
                                         </h3>
                                         <ChevronDownIcon className="h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 dark:text-stone-400 " />
-
                                     </AccordionTrigger>
-                                    <AccordionContent className="p-5  overflow-auto max-h-[calc(100vh_-_100px)]">
+                                    <AccordionContent className="p-5  overflow-auto max-h-[calc(100vh_-_600px)]">
                                         <BlogsContent />
                                     </AccordionContent>
                                 </AccordionItem>
@@ -40,23 +39,23 @@ export default function BlogsPage() {
                             MANUSCRIPT
                         </h3>
                     </div>
-                    <div className="md:grid grid-cols-11">
-                        <div className="col-span-7 w-full p-5  text-primary-dark text-base font-normal font-roman  md:max-h-[calc(100vh_-_100px)] overflow-auto">
+                    <div className="md:grid grid-cols-11 ">
+                        <div className="col-span-7 w-full p-5  text-primary-dark text-base font-normal font-roman   max-h-[calc(100vh_-_100px)] overflow-auto">
                             <div className="space-y-3">
                                 <p>
-                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation,  and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you,  amid the darkness, and presently His Light will shine through. 
                                 </p>
                                 <p>
-                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation,  and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you,  amid the darkness, and presently His Light will shine through. 
                                 </p>
                                 <p>
-                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation,  and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you,  amid the darkness, and presently His Light will shine through. 
                                 </p>
                                 <p>
-                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation,  and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you,  amid the darkness, and presently His Light will shine through. 
                                 </p>
                                 <p>
-                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation, your heart and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you, brooding amid the darkness, and presently His Light will shine through. It is the blessed presence of the Lord
+                                    All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation,  and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you,  amid the darkness, and presently His Light will shine through. 
                                 </p>
                             </div>
 
