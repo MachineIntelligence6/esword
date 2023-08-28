@@ -8,15 +8,14 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 
 export default function BlogsPage() {
     return (
-        <div className="overflow-hidden">
+        <div className="">
             <HeaderComponent />
-            <div className="flex lg:flex-row flex-col max-h-screen  pt-[60px] w-full ">
+            <div className="flex lg:flex-row flex-col max-h-screen  pt-[60px] w-full  ">
                 <div className="">
                     <BooksChapterComponent />
                 </div>
                 <div className="w-full bg-white">
-
-                    <div className="lg:grid grid-cols-11 ">
+                   <div className="lg:grid grid-cols-11 ">
                         <div className="block bg-primary lg:hidden">
                             <Accordion type="single" collapsible >
                                 <AccordionItem value="item-1">
@@ -26,7 +25,7 @@ export default function BlogsPage() {
                                         </h3>
                                         <ChevronDownIcon className="h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 dark:text-stone-400 " />
                                     </AccordionTrigger>
-                                    <AccordionContent className="p-5  overflow-auto max-h-[calc(100vh_-_600px)]">
+                                    <AccordionContent className="p-5 overflow-auto max-h-[calc(100vh_-_500px)]">
                                         <BlogsContent />
                                     </AccordionContent>
                                 </AccordionItem>
@@ -60,10 +59,8 @@ export default function BlogsPage() {
                             </div>
 
                         </div>
-                        <div className="col-span-4 bg-primary p-5 space-y-4  lg:block hidden overflow-auto max-h-[calc(100vh_-_100px)]">
-                            <div>
+                        <div className="col-span-4 bg-primary p-5 space-y-4  lg:block hidden overflow-auto  min-h-[calc(100vh_-_100px)] max-h-[calc(100vh_-_100px)]">
                                 <BlogsContent />
-                            </div>
                         </div>
                     </div>
                 </div>
