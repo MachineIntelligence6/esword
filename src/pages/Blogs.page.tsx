@@ -16,7 +16,7 @@ export default function BlogsPage() {
                 </div>
                 <div className="w-full bg-white">
 
-                    <div className="md:grid grid-cols-11 ">
+                    <div className="lg:grid grid-cols-11 ">
                         <div className="block bg-primary lg:hidden">
                             <Accordion type="single" collapsible >
                                 <AccordionItem value="item-1">
@@ -35,11 +35,11 @@ export default function BlogsPage() {
                         <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px]  border-r-2 w-full bg-silver-light col-span-7 capitalize " >
                             THE CREATION OF WORLD
                         </h3>
-                        <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px] lg:border-0 border-b w-full bg-silver-light col-span-4 md:block capitalize hidden">
+                        <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px] lg:border-0 border-b w-full bg-silver-light col-span-4 lg:block capitalize hidden">
                             MANUSCRIPT
                         </h3>
                     </div>
-                    <div className="md:grid grid-cols-11 ">
+                    <div className="lg:grid grid-cols-11 ">
                         <div className="col-span-7 w-full p-5  text-primary-dark text-base font-normal font-roman   max-h-[calc(100vh_-_100px)] overflow-auto">
                             <div className="space-y-3">
                                 <p>
@@ -60,7 +60,7 @@ export default function BlogsPage() {
                             </div>
 
                         </div>
-                        <div className="col-span-4 bg-primary p-5 space-y-4  md:block hidden overflow-auto max-h-[calc(100vh_-_100px)]">
+                        <div className="col-span-4 bg-primary p-5 space-y-4  lg:block hidden overflow-auto max-h-[calc(100vh_-_100px)]">
                             <div>
                                 <BlogsContent />
                             </div>

@@ -62,10 +62,10 @@ export function BlogsComponent({ heading, date, footer }: Props) {
             <CardContent>
                 <div className="md:space-y-1">
                     <div className="flex gap-1 items-center">
-                        <h1 className="font-bold text-xs  font-roman text-primary-dark/80 lg:text-lg" >
+                        <h1 className="font-bold text-xs  font-roman text-primary-dark/80 xl:text-lg" >
                             {heading}
                         </h1>
-                        <p className="font-normal text-[7px] text-primary-dark lg:text-[9px]">
+                        <p className="font-normal text-[7px] text-primary-dark xl:text-[9px]">
                             {date}
                         </p>
                     </div>
