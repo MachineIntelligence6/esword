@@ -1,7 +1,6 @@
 
 
 
-
 export default function BlogsContent() {
     return (
         <>
@@ -9,37 +8,47 @@ export default function BlogsContent() {
                 <BlogsComponent
                     heading="The Creation of the World"
                     date="(Friday, 25 August 2023)"
-                    footer="And the earth was without form, and void; and  void;"
-
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
                 />
                 <BlogsComponent
                     heading="The Creation of the World"
                     date="(Friday, 25 August 2023)"
-                    footer="And the earth was without form, and void; and  void;"
-
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
                 />
                 <BlogsComponent
                     heading="The Creation of the World"
                     date="(Friday, 25 August 2023)"
-                    footer="And the earth was without form, and void; and  void;"
-
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
                 />
                 <BlogsComponent
                     heading="The Creation of the World"
                     date="(Friday, 25 August 2023)"
-                    footer="And the earth was without form, and void; and  void;"
-
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
                 />
                 <BlogsComponent
                     heading="The Creation of the World"
                     date="(Friday, 25 August 2023)"
-                    footer="And the earth was without form, and void; and  void;"
-
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
                 />
                 <BlogsComponent
                     heading="The Creation of the World"
                     date="(Friday, 25 August 2023)"
-                    footer="And the earth was without form, and void; and  void;"
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
+                />
+                <BlogsComponent
+                    heading="The Creation of the World"
+                    date="(Friday, 25 August 2023)"
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
+                />
+                <BlogsComponent
+                    heading="The Creation of the World"
+                    date="(Friday, 25 August 2023)"
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
+                />
+                <BlogsComponent
+                    heading="The Creation of the World"
+                    date="(Friday, 25 August 2023)"
+                    footer="And the earth was without form, and void; and  void; and darkness  darkness"
                 />
             </div >
         </>
@@ -69,9 +78,10 @@ export function BlogsComponent({ heading, date, footer }: Props) {
                             {date}
                         </p>
                     </div>
-                    <div className="text-sm font-normal font-roman">
+                    <div className="text-sm font-normal font-roman overflow-hidden overflow-ellipsis line-clamp-1" >
                         {footer}
                     </div>
+
                 </div>
             </CardContent>
         </Card >

@@ -14,7 +14,7 @@ export default function AboutUsPage() {
                 </div>
                 <div className="w-full  ">
                     <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:border-0 border-b  w-full bg-silver-light ">
-                        About Us
+                        ABOUT US
                     </h3>
                     <div className="bg-primary flex  justify-center p-7     md:max-h-[calc(100vh_-_100px)] md:min-h-[calc(100vh_-_100px)]">
                         <Card className="bg-white w-full overflow-auto  ">
