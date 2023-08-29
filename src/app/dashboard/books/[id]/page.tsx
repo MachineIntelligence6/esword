@@ -46,7 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
             <div className="flex items-center gap-5 justify-between bg-white rounded-md shadow p-3">
                 <div className="flex items-center gap-5">
                     <BackButton />
@@ -95,11 +95,11 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 function BookDetailsCard({ book }: { book: IBook }) {
     return (
-        <Card className="w-fit">
+        <Card className="w-full lg:w-fit">
             <CardHeader>
                 <CardTitle className="text-xl">Book Details</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-between gap-20">
+            <CardContent className="flex flex-col justify-between gap-20 md:flex-row">
                 <div className="flex items-center gap-5 text-base font-normal">
                     <span>Name:</span>
                     <span className="font-semibold">{book.name}</span>

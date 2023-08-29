@@ -138,11 +138,11 @@ function ContentTabs({ verse }: ContentTabsProps) {
 
 function IVerseDetailsCard({ verse }: { verse: IVerse }) {
     return (
-        <Card className="w-fit">
+        <Card className="w-full lg:w-fit">
             <CardHeader>
                 <CardTitle className="text-xl">Verse Details</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-between gap-20">
+            <CardContent className="flex flex-col md:flex-row justify-between gap-20">
                 <div className="flex items-center gap-5 flex-wrap text-base font-normal">
                     <span>Book:</span>
                     <span className="font-semibold">{verse.topic?.chapter?.book?.name}</span>

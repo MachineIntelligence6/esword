@@ -25,7 +25,7 @@ export function DBooksCard() {
     return (
         <Card className="w-full overflow-hidden h-full min-h-[300px]">
             <CardHeader className="py-4 bg-slate-100 border-b border-slate-300">
-                <div className="w-full flex items-center justify-between">
+                <div className="w-full flex  items-center justify-between">
                     <CardTitle className="text-lg">
                         Books : {apiRes?.pagination?.count}
                     </CardTitle>
@@ -42,7 +42,7 @@ export function DBooksCard() {
                                 <div className="divide-y-2 divide-slate-200 max-h-96 overflow-y-auto px-5">
                                     {
                                         books?.map((book) => (
-                                            <div key={book.id} className="flex items-center justify-between px-2 py-3">
+                                            <div key={book.id} className=" items-center justify-between px-2 py-3">
                                                 <h4 className="font-medium text-base">
                                                     {book.name}
                                                 </h4>

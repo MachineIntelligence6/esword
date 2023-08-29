@@ -39,13 +39,13 @@ interface DataTablePaginationProps<TData> extends TablePagination {
 export function DataTablePagination<TData>({ table, totalPages, onPageChange, currentPage, perPage, setPerPage }: DataTablePaginationProps<TData>) {
 
   return (
-    <div className="flex items-center justify-between px-2">
+    <div className="flex gap-3 flex-col md:gap-0 md:flex-row md:items-center justify-between px-2">
       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} of{" "}
         {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-col  col-span-10 gap-3 md:gap-0  md:items-center md:space-x-6 md:flex-row lg:space-x-8">
+        <div className="flex flex-row  md:items-center space-x-2 col-span-6 gap-10">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
             value={`${perPage}`}
@@ -53,7 +53,7 @@ export function DataTablePagination<TData>({ table, totalPages, onPageChange, cu
               setPerPage(Number(value))
             }}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-[70px] ">
               <SelectValue placeholder={perPage} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -68,49 +68,51 @@ export function DataTablePagination<TData>({ table, totalPages, onPageChange, cu
             </SelectContent>
           </Select>
         </div>
-        {
-          totalPages > 0 &&
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {currentPage} of{" "} {totalPages}
+        <div className="flex gap-10 md:gap-0">
+          {
+            totalPages > 0 &&
+            <div className="flex w-[100px] items-center md:justify-center text-sm font-medium">
+              Page {currentPage} of{" "} {totalPages}
+            </div>
+          }
+          <div className="flex items-center space-x-2 x">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => onPageChange(0)}
+              disabled={currentPage <= 1}
+            >
+              <span className="sr-only">Go to first page</span>
+              <DoubleArrowLeftIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => onPageChange(currentPage > 1 ? currentPage - 1 : currentPage)}
+              disabled={currentPage <= 1}
+            >
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => onPageChange(currentPage < totalPages ? currentPage + 1 : currentPage)}
+              disabled={currentPage >= totalPages}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => onPageChange(totalPages)}
+              disabled={currentPage >= totalPages}
+            >
+              <span className="sr-only">Go to last page</span>
+              <DoubleArrowRightIcon className="h-4 w-4" />
+            </Button>
           </div>
-        }
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => onPageChange(0)}
-            disabled={currentPage <= 1}
-          >
-            <span className="sr-only">Go to first page</span>
-            <DoubleArrowLeftIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => onPageChange(currentPage > 1 ? currentPage - 1 : currentPage)}
-            disabled={currentPage <= 1}
-          >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => onPageChange(currentPage < totalPages ? currentPage + 1 : currentPage)}
-            disabled={currentPage >= totalPages}
-          >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRightIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => onPageChange(totalPages)}
-            disabled={currentPage >= totalPages}
-          >
-            <span className="sr-only">Go to last page</span>
-            <DoubleArrowRightIcon className="h-4 w-4" />
-          </Button>
         </div>
       </div>
     </div>

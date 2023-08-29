@@ -97,11 +97,11 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 function ChapterDetailsCard({ chapter }: { chapter: IChapter }) {
     return (
-        <Card className="w-fit">
+        <Card className="w-full lg:w-fit">
             <CardHeader>
                 <CardTitle className="text-xl">Chapter Details</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-between gap-20">
+            <CardContent className="flex md:flex-row flex-col justify-between gap-20">
                 <div className="flex items-center gap-5 text-base font-normal">
                     <span>Book:</span>
                     <span className="font-semibold">{chapter.book?.name}</span>

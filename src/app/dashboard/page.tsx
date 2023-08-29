@@ -4,7 +4,7 @@ import { DBooksCard, DCommentariesCard, DActivitiesCard, DNotesCard } from "./da
 
 export default function Page() {
     return (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 ">
             <div className="col-span-1">
                 <DBooksCard />
             </div>
