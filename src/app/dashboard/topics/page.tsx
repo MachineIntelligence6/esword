@@ -23,7 +23,7 @@ export default function Page() {
               All Topics
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-5">
+          <CardContent className="px-3 py-5 md:p-5">
             <TopicsTable
               editAction={(topic: ITopic) => (
                 <span onClick={() => setSelectedTopic(topic)}>

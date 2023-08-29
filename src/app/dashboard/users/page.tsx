@@ -26,7 +26,7 @@ export default function Page() {
               Users
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-5">
+          <CardContent className="px-3 py-5 md:p-5">
             <UsersTable
               editAction={(user: IUser) => (
                 <span onClick={() => setSelectedUser(user)}>Edit</span>

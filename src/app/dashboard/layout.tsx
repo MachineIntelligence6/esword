@@ -23,7 +23,7 @@ export default async function DashboardLayout({ children }: { children?: ReactNo
             {/* <DashboardHeader session={session} /> */}
             <div className="flex w-full min-h-full">
                 <DashboardSidebar session={session} className="w-full min-h-screen max-w-[300px]" />
-                <div className="w-full px-5 py-10">
+                <div className="w-full px-2 md:px-5 py-10">
                     {children}
                 </div>
             </div>

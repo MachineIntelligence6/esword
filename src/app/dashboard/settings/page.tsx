@@ -12,9 +12,9 @@ export default function Page() {
                 <CardHeader className="border-b-8 border-silver-light py-4">
                     <CardTitle className="text-2xl">Settings</CardTitle>
                 </CardHeader>
-                <CardContent className="p-5">
-                    <div className="grid grid-cols-2">
-                        <div className="col-span-1">
+                <CardContent className="px-3 py-5 md:p-5">
+                    <div className="md:grid grid-cols-2">
+                        <div className="col-span-1 w-full">
                             <ImportIVersesComponent />
                         </div>
                     </div>
