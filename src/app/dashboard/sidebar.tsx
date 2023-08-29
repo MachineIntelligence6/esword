@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from "next/link";
 import { canUserAccessPath } from "@/lib/roles-manager";
 import { Session } from "next-auth";
+import { Route } from "next";
 
 
 type MenuItem = {
@@ -49,6 +50,10 @@ export const menuItems: Array<MenuItem> = [
     {
         path: "/dashboard/users",
         label: "Users"
+    },
+    {
+        path: "/dashboard/blogs",
+        label: "Blogs"
     },
     {
         path: "/dashboard/activities",

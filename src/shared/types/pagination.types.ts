@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { BlogType, Prisma } from "@prisma/client";
 import { BasePaginationProps } from "./api.types";
 import { IUserRole } from "./models.types";
 
@@ -40,6 +40,10 @@ export type HighlightsPaginationProps = BasePaginationProps<Prisma.HighlightIncl
 
 export type ChaptersPaginationProps = BasePaginationProps<Prisma.ChapterInclude, Prisma.ChapterWhereInput, Prisma.ChapterOrderByWithRelationInput> & {
     book?: number;
+}
+export type BlogsPaginationProps = BasePaginationProps<Prisma.BlogInclude, Prisma.BlogWhereInput, Prisma.BlogOrderByWithRelationInput> & {
+    user?: number;
+    type?: BlogType;
 }
 
 export type UserPaginationProps = BasePaginationProps<Prisma.UserInclude, Prisma.UserWhereInput, Prisma.UserOrderByWithRelationInput> & {

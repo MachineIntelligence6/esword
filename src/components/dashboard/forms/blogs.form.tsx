@@ -2,7 +2,7 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Input } from "@/components/ui/input";
+import { FileInput, Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import clientApiHandlers from "@/client/handlers";
@@ -10,38 +10,39 @@ import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter } from "next/navigation";
-import { ComboBox, SelectEl } from "../../ui/select";
+import { SelectEl } from "../../ui/select";
 import { useEffect, useState } from "react";
-import { IAuthor, IBook, IChapter } from "@/shared/types/models.types";
-import { Textarea } from "@/components/ui/textarea";
+import { IBlog, IBook } from "@/shared/types/models.types";
+import { BlogType } from "@prisma/client";
+import QuillEditor from "@/components/ui/editor";
+import Image from "next/image";
 
 
-export const chapterFormSchema = z.object({
+export const blogsFormSchema = z.object({
     info: z.string().nullable().default(""),
-    name: z.number({ required_error: "This field is required." }).min(0, { message: "This field is required." }),
-    slug: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
-    book: z.number({ required_error: "This field is required." }).min(0, { message: "This field is required." }),
-    commentaryName: z.string({ required_error: "This field is required." }).optional(),
-    commentaryText: z.string({ required_error: "This field is required." }).optional(),
+    title: z.string({ required_error: "This field is required." }),
+    slug: z.string({ required_error: "This field is required." }),
+    content: z.string({ required_error: "This field is required." }),
+    image: z.instanceof(Blob, { message: "This field is required." }).nullable().default(null),
+    type: z.string({ required_error: "This field is required." }),
 })
 
 
-export type ChapterFormSchema = z.infer<typeof chapterFormSchema>
+export type BlogsFormSchema = z.infer<typeof blogsFormSchema>
 
 
 
-export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
+export default function BlogsForm({ blog }: { blog?: IBlog }) {
     const router = useRouter()
     const [books, setBooks] = useState<IBook[] | null>(null)
-    const form = useForm<ChapterFormSchema>({
-        resolver: zodResolver(chapterFormSchema),
+    const form = useForm<BlogsFormSchema>({
+        resolver: zodResolver(blogsFormSchema),
         mode: "all",
         defaultValues: {
-            name: chapter?.name,
-            slug: chapter?.slug,
-            book: chapter?.bookId,
-            commentaryName: chapter?.commentaryName ?? undefined,
-            commentaryText: chapter?.commentaryText ?? undefined,
+            title: blog?.title,
+            slug: blog?.slug,
+            content: blog?.content,
+            type: blog?.type,
         }
     })
     const { formState } = form
@@ -58,12 +59,9 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
 
 
     const updateSlug = () => {
-        const bookId = form.getValues("book")
-        const nameVal = form.getValues("name")
-        if (!bookId || !nameVal) return;
-        const book = books?.find((book) => book.id === bookId)
-        if (!book) return;
-        const slug = `${book.slug}_${nameVal}`
+        const titleVal = form.getValues("title")
+        if (!titleVal) return;
+        const slug = titleVal.toLowerCase().replaceAll(" ", "_").replaceAll("/", "_")
         form.setValue("slug", slug, { shouldValidate: true })
     }
 
@@ -71,18 +69,19 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
 
     const resetFormValues = () => {
         form.reset({
-            name: undefined,
-            slug: "",
-            book: undefined
+            title: undefined,
+            slug: undefined,
+            type: undefined,
+            content: undefined
         })
     }
 
 
 
 
-    const handleAddNew = async (data: ChapterFormSchema) => {
-        const res = await clientApiHandlers.chapters.create(data)
-        if (res.succeed && res.data) return router.push("/dashboard/chapters")
+    const handleAddNew = async (data: BlogsFormSchema) => {
+        const res = await clientApiHandlers.blogs.create(data)
+        if (res.succeed && res.data) return router.push("/dashboard/blogs")
         if (res.code === "SLUG_MUST_BE_UNIQUE") {
             form.setError("slug", {
                 message: definedMessages.SLUG_MUST_BE_UNIQUE
@@ -95,10 +94,10 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
         }
     }
 
-    const handleUpdate = async (data: ChapterFormSchema) => {
-        if (!chapter) return;
-        const res = await clientApiHandlers.chapters.update(chapter.id, data)
-        if (res.succeed && res.data) return router.push("/dashboard/chapters")
+    const handleUpdate = async (data: BlogsFormSchema) => {
+        if (!blog) return;
+        const res = await clientApiHandlers.blogs.update(blog.id, data)
+        if (res.succeed && res.data) return router.push("/dashboard/blogs")
         if (res.code === "SLUG_MUST_BE_UNIQUE") {
             form.setError("slug", {
                 message: definedMessages.SLUG_MUST_BE_UNIQUE
@@ -116,48 +115,22 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
         <Card className="w-full rounded-md">
             <Form {...form}>
                 <form
-                    onSubmit={form.handleSubmit(chapter ? handleUpdate : handleAddNew)}>
+                    onSubmit={form.handleSubmit(blog ? handleUpdate : handleAddNew)}>
                     <CardContent className="gap-5 pt-5 grid grid-cols-2">
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="title"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-1">
-                                    <FormLabel>Name <span className="text-red-500">*</span></FormLabel>
+                                    <FormLabel>Title <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="number"
+                                        <Input type="text"
                                             required
                                             {...field}
                                             onChange={(e) => {
-                                                field.onChange(e.target.valueAsNumber)
+                                                field.onChange(e.target.value)
                                                 updateSlug()
                                             }} />
-                                    </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="book"
-                            render={({ field, fieldState }) => (
-                                <FormItem>
-                                    <FormLabel>Book <span className="text-red-500">*</span></FormLabel>
-                                    <FormControl>
-                                        <SelectEl
-                                            value={field.value?.toString()}
-                                            placeholder="Select Book"
-                                            onChange={(opt) => {
-                                                field.onChange(opt?.value ? Number(opt.value) : undefined)
-                                                updateSlug()
-                                            }}
-                                            ref={field.ref}
-                                            loading={!books}
-                                            options={books?.map((book) => ({ label: book.name, value: book.id.toString(), rawValue: book }))}
-                                        />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -182,17 +155,54 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                                 </FormItem>
                             )}
                         />
-                        <div className="col-span-full">
-                            <h4 className="font-bold">Commentary <span className="font-normal">(optional)</span></h4>
-                        </div>
                         <FormField
                             control={form.control}
-                            name="commentaryName"
+                            name="type"
+                            render={({ field, fieldState }) => (
+                                <FormItem>
+                                    <FormLabel>Blog Type <span className="text-red-500">*</span></FormLabel>
+                                    <FormControl>
+                                        <SelectEl
+                                            value={field.value}
+                                            placeholder="Select Type"
+                                            onChange={(opt) => field.onChange(opt?.value)}
+                                            ref={field.ref}
+                                            loading={!books}
+                                            options={[BlogType.MANUSCRIPT, BlogType.PROBLEM]?.map((type) => ({ label: type, value: type, rawValue: type }))}
+                                        />
+                                    </FormControl>
+                                    {
+                                        fieldState.error &&
+                                        <FormMessage />
+                                    }
+                                </FormItem>
+                            )}
+                        />
+                        <br />
+                        <FormField
+                            control={form.control}
+                            name="image"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-1">
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Featured Image</FormLabel>
                                     <FormControl>
-                                        <Input type="text"  {...field} />
+                                        <FileInput
+                                            required
+                                            onFileChange={(file) => {
+                                                field.onChange(file as (Blob | null))
+                                            }}>
+                                            <div className="w-full h-40 border-2 border-dashed border-gray-500 rounded-md flex items-center justify-center">
+                                                {
+                                                    field.value ?
+                                                        <Image
+                                                            src={window.URL.createObjectURL(field.value)}
+                                                            width={500} height={300} alt=""
+                                                            className="w-full h-full" />
+                                                        :
+                                                        <p className="text-center">Click here to select featured image for blog.</p>
+                                                }
+                                            </div>
+                                        </FileInput>
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -202,18 +212,15 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                             )}
                         />
                         <FormField
+                            name="content"
                             control={form.control}
-                            name="commentaryText"
                             render={({ field, fieldState }) => (
                                 <FormItem className="col-span-full">
-                                    <FormLabel>Text</FormLabel>
+                                    <FormLabel>Content</FormLabel>
                                     <FormControl>
-                                        <Textarea rows={4}  {...field} />
+                                        <QuillEditor {...field} />
                                     </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
+                                    {fieldState.error && <FormMessage />}
                                 </FormItem>
                             )}
                         />
@@ -232,7 +239,11 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
 
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                        <Button variant="outline" onClick={() => window.history.back()}>Cancel</Button>
+                        <Button variant="outline"
+                            onClick={() => formState.isDirty ? resetFormValues() : window.history.back()}
+                        >
+                            Cancel
+                        </Button>
                         <Button
                             type="submit"
                             disabled={!formState.isDirty || formState.isSubmitting}>
@@ -240,7 +251,7 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                                 formState.isSubmitting ?
                                     <Spinner className="border-white" />
                                     :
-                                    chapter ? "Update" : "Add"
+                                    blog ? "Update" : "Add"
                             }
                         </Button>
                     </CardFooter>

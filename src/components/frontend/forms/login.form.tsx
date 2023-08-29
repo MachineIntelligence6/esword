@@ -59,9 +59,11 @@ export default function LoginForm() {
         if (sesssion?.user?.role === "ADMIN" || sesssion?.user?.role === "EDITOR") {
             // router.push(params.get("callbackUrl") ?? "/dashboard")
             router.push(callbackUrl.startsWith("/dashboard") ? callbackUrl : "/dashboard")
+            window.location.reload()
         }
         else {
             router.push(callbackUrl)
+            window.location.reload()
         }
     }
 

@@ -31,7 +31,7 @@ export default async function RootLayout({
         // "max-h-screen overflow-hidden"
       )}>
         <AuthProvider session={session}>
-          <SiteHeader session={session} />
+          <SiteHeader/>
           <div className='pt-[70px]'>
             <SiteInnerLayout>
               {children}

@@ -18,6 +18,7 @@ import { Form, FormField, FormItem } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
+import { useSession } from "next-auth/react";
 
 
 
@@ -25,7 +26,8 @@ type Props = {
     session: Session | null
 }
 
-export default function SiteHeader({ session }: Props) {
+export default function SiteHeader() {
+    const { data: session } = useSession()
     const pathname = usePathname()
     // if (pathname.startsWith("/dashboard")) return null
     return (
@@ -33,12 +35,12 @@ export default function SiteHeader({ session }: Props) {
             <nav className="flex justify-between px-6 items-center h-[70px] w-full bg-primary">
                 <div>
                     <Link href="/">
-                        <Image width={250} height={100} alt="" src="/images/logo.png" className="object-contain bg-cover h-auto w-[250px]" />
+                        <Image width={250} height={100} alt="" src="/images/logo.png" className="object-contain bg-cover min-h-[60px] min-w-[200px] w-[250px]" />
                     </Link>
                 </div>
                 <div className="flex items-center gap-x-6">
                     {
-                        !pathname.startsWith("/dashboard") &&
+                        !pathname.startsWith("/dashboard") && !pathname.startsWith("/login") &&
                         <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm">
                             <div className="flex lg:gap-x-0">
                                 {/* use of dropdown function */}
@@ -91,7 +93,7 @@ function SearchComponent() {
     }
 
     return (
-        <div className="flex gap-x-3 lg:border rounded-[42px] border-white border-opacity-70 items-center">
+        <div className="flex gap-x-3 border rounded-[42px] border-white border-opacity-70 items-center">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                     <FormField

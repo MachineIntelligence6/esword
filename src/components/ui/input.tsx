@@ -23,6 +23,56 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input"
 
 
+type FileInputProps = InputProps & {
+  onFileChange?: (file: File | null) => void;
+  file?: File
+}
+
+const FileInput = ({ className, type, onFileChange, file, children, required, readOnly, disabled }: FileInputProps) => {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  return (
+    <div
+      role="button"
+      className={cn(
+        "w-full h-full cursor-pointer",
+        className
+      )}
+      onClick={() => {
+        const input = document.createElement("input");
+        input.type = "file"
+        input.accept = "image/*";
+        input.click()
+        input.onchange = (e) => {
+          // const files = e.target?.;
+          // if (files && files.length > 0) {
+          //   onFileChange?.(files.item(0))
+          // }
+        }
+      }}
+    >
+      {/* <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        hidden
+        required
+        readOnly
+        disabled
+        onChange={(e) => {
+          const files = e.target.files;
+          if (files && files.length > 0) {
+            onFileChange?.(files.item(0))
+          }
+        }}
+      /> */}
+      {children}
+    </div>
+  )
+}
+
+
+
 
 type InputElProps = InputProps & {
   leading?: React.ReactNode;
@@ -55,4 +105,4 @@ const InputEl = React.forwardRef<HTMLInputElement, InputElProps>(
 )
 InputEl.displayName = "InputEl"
 
-export { Input, InputEl }
+export { Input, InputEl, FileInput }

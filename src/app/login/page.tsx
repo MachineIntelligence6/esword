@@ -12,7 +12,7 @@ export default async function Page() {
 
     return (
         <div className="overflow-hidden overflow-y-auto">
-            <div className="bg-primary min-h-screen flex items-center justify-center  pt-5">
+            <div className="bg-primary min-h-[calc(100vh_-_70px)] flex items-center justify-center  pt-5">
                 <div className="">
                     <div
                         className="md:w-[446px] w-auto md h-auto flex flex-col items-center justify-center bg-white mx-4 md:mx-0 pt-10 rounded-lg">

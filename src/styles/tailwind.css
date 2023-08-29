@@ -42,3 +42,8 @@ input.autofill-text-white:-webkit-autofill:active {
     max-height: 600px !important;
     overflow-y: auto !important;
 }
+
+
+.ql-disabled {
+    border: none !important;
+}

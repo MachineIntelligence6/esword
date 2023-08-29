@@ -12,7 +12,7 @@ module.exports = {
         "primary-dark": "rgb(27 63 87)",
         "silver-light": " rgb(232 236 238)",
         "light-green": " rgb(76 130 130)",
-        "secondary":"#D4EAF9"
+        "secondary": "#D4EAF9"
       },
       keyframes: {
         "accordion-down": {
@@ -33,5 +33,8 @@ module.exports = {
       }
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography")
+  ],
 }

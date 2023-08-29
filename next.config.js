@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    distDir: "build",
+    // distDir: "build",
+    // experimental: {
+    //     typedRoutes: true
+    // }
     // async redirects() {
     //     return [
     //         {
