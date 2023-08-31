@@ -54,14 +54,12 @@ function SidebarBooksComponent() {
                 <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 ">
                     BIBLE BOOKS
                 </h3>
-                <div className="lg:hidden">
+                <div className="lg:hidden text-primary-dark">
                     <SelectEl
                         value={activeBook !== undefined ? activeBook.toString() : ''}
-                        placeholder="Select Book"
                         onChange={(opt) => {
                             setActiveBook(opt?.value ? Number(opt.value) : undefined);
                         }}
-                        loading={!booksList}
                         options={booksList?.map((book) => ({
                             label: book.name,
                             value: book.id.toString(),
