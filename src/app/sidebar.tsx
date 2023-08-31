@@ -1,5 +1,6 @@
 'use client'
 import { BooksLoadingPlaceholder, ChaptersLoadingPlaceholder } from "@/components/loading-placeholders";
+import { SelectEl } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { useSearchParams } from "next/navigation";
@@ -54,15 +55,19 @@ function SidebarBooksComponent() {
                     BIBLE BOOKS
                 </h3>
                 <SelectEl
-                    value={booksList.values.toString()}
+                    value={activeBook !== undefined ? activeBook.toString() : ''}
                     placeholder="Select Book"
                     onChange={(opt) => {
-                        setActiveBook(opt?.value ? Number(opt.value) : undefined)
+                        setActiveBook(opt?.value ? Number(opt.value) : undefined);
                     }}
-                    ref={booksList.ref}
                     loading={!booksList}
-                    options={booksList?.map((book) => ({ label: book.name, value: book.id.toString(), rawValue: book }))}
+                    options={booksList?.map((book) => ({
+                        label: book.name,
+                        value: book.id.toString(),
+                        rawValue: book,
+                    }))}
                 />
+
                 {/* <select
                     name="book"
                     onChange={(e) => setActiveBook(Number(e.target.value))}
