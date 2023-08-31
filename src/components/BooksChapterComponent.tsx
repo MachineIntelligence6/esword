@@ -7,15 +7,15 @@ export default function  BooksChapterComponent () {
       <div className="flex lg:mx-0 mx-[10px] lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white lg:max-w-[186px] lg:min-w-[186px] w-full  lg:px-0 px-3">
             <div
                 className="lg:min-w-[130px] lg:max-w-[130px] w-full font-inter lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
-                <div className="lg:bg-silver-light bg-white py-3 flex lg:border-0 border-b flex-col">
+                <div className="lg:bg-silver-light bg-white py-3 flex lg:border-0 border-b flex-col rounded-lg lg:rounded-none">
                     <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5">
                         BIBLE BOOKS
                     </h3>
                     <select name="" id="Books" className="lg:hidden mx-4 pt-1">
-                        <option value="Books">
+                        <option value="Books" className="hover:bg-black"> 
                             Genesis
                         </option>
-                        <option value="Books">
+                        <option value="Books" className="hover:bg-black"> 
                             Exodus
                         </option>
                         <option value="Books">
@@ -129,7 +129,7 @@ export default function  BooksChapterComponent () {
             </div>
             <div
                 className="lg:min-w-[56px] lg:max-w-[56px] w-full lg:border-r-2 lg:border-0 border text-primary-dark border-solid rounded-lg lg:rounded-none">
-                <div className="lg:bg-silver-light bg-white py-3 font-inter lg:border-0 border-b flex flex-col">
+                <div className="lg:bg-silver-light bg-white py-3 font-inter lg:border-0 border-b flex flex-col rounded-lg lg:rounded-none">
                     <h3 className="lg:text-xs lg:font-bold font-normal text-[10px] lg:block hidden  px-3">
                         CH.
                     </h3>
