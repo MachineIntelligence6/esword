@@ -47,11 +47,14 @@ export default function SiteHeader() {
                                 <Dropdown />
                             </div>
                             <div>
-                                <div className="font-normal py-3 lg:block hidden hover:scale-110 transition-all">
+                                <div className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
                                     <Link href="/donate">Donate</Link>
                                 </div>
                             </div>
-                            <SearchComponent />
+                            <div className="md:block hidden">
+                                <SearchComponent />
+
+                            </div>
                             {/* <button className="flex gap-x-3 lg:border rounded-[42px] border-white border-opacity-70 items-center pl-3 ">
                                 <MagnifyingGlassIcon className="w-5 h-5 hover:scale-110 transition-all disabled:hover:!scale-100 "/>
                                 <p className="pr-[140px] font-normal lg:block hidden">
@@ -93,7 +96,7 @@ function SearchComponent() {
     }
 
     return (
-        <div className="flex gap-x-3 border rounded-[42px] border-white border-opacity-70 items-center">
+        <div className="flex gap-x-3  rounded-[42px] border md:border-white b border-opacity-70 items-center">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                     <FormField
@@ -140,6 +143,8 @@ function Dropdown() {
                         Donation
                     </a>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <SearchComponent />
             </DropdownMenuContent>
         </DropdownMenu>
 

@@ -103,7 +103,7 @@ function VersesSectionContent() {
         <>
             {/* title */}
             <div className="toggle-btn bg-silver-light py-3 lg:pl-3 px-[10px] lg:border-0 border-b  justify-between  hidden lg:flex">
-                <h3 className="text-xs font-bold hover:scale-110 transition-all">
+                <h3 className="text-xs font-bold">
                     VERSES
                 </h3>
             </div>

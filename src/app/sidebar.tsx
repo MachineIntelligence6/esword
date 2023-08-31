@@ -49,14 +49,24 @@ function SidebarBooksComponent() {
     const { booksList, activeBook, setActiveBook } = useReadBookStore()
     return (
         <div className="lg:min-w-[130px] lg:max-w-[130px] w-full lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
-            <div className="lg:bg-silver-light bg-white py-3 flex lg:border-0 border-b flex-col">
-                <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 hover:scale-110 transition-all">
+            <div className="lg:bg-silver-light bg-white py-3 flex lg:border-0 border-b flex-col lg:rounded-none rounded-lg">
+                <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 ">
                     BIBLE BOOKS
                 </h3>
-                <select
+                <SelectEl
+                    value={booksList.values.toString()}
+                    placeholder="Select Book"
+                    onChange={(opt) => {
+                        setActiveBook(opt?.value ? Number(opt.value) : undefined)
+                    }}
+                    ref={booksList.ref}
+                    loading={!booksList}
+                    options={booksList?.map((book) => ({ label: book.name, value: book.id.toString(), rawValue: book }))}
+                />
+                {/* <select
                     name="book"
                     onChange={(e) => setActiveBook(Number(e.target.value))}
-                    className="lg:hidden mx-4 pt-1">
+                    className="lg:hidden mx-4 pt-1 ">
                     {
                         booksList?.map((book) => (
                             <option key={book.id} value={book.id}>
@@ -64,7 +74,9 @@ function SidebarBooksComponent() {
                             </option>
                         ))
                     }
-                </select>
+                </select> 
+                check the above value now comapre and modify selectEl values in below code
+                 */}
             </div>
             <div className="h-[calc(100vh_-_100px)] overflow-y-auto overflow-x-hidden lg:flex hidden">
                 <div className="w-full h-full">
@@ -96,8 +108,8 @@ function SidebarChaptersComponent() {
 
     return (
         <div className="lg:min-w-[56px] lg:max-w-[56px] w-full lg:border-r-2 lg:border-0 border text-primary-dark border-solid rounded-lg lg:rounded-none">
-            <div className="lg:bg-silver-light bg-white py-3  lg:border-0 border-b flex flex-col">
-                <h3 className="lg:text-xs lg:font-bold font-normal text-[10px] lg:block hidden px-3 hover:scale-110 transition-all">
+            <div className="lg:bg-silver-light bg-white py-3  lg:border-0 border-b flex flex-col lg:rounded-none rounded-lg">
+                <h3 className="lg:text-xs lg:font-bold font-normal text-[10px] lg:block hidden px-3 ">
                     CH.
                 </h3>
                 <h3 className="font-normal text-[10px] uppercase lg:hidden px-4">
@@ -116,6 +128,7 @@ function SidebarChaptersComponent() {
                         ))
                     }
                 </select>
+
             </div>
             <div className="lg:h-[calc(100vh_-_100px)]  overflow-y-auto">
                 <ul className="lg:flex flex-col hidden min-h-full">

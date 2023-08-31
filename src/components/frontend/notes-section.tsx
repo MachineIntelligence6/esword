@@ -64,7 +64,7 @@ export default function NotesContentComponent() {
         ">
             <div
                 className="toggle-btn bg-silver-light py-3 font-inter lg:pl-3 pl-[10px] pr-[19px] lg:border-0 border-b lg:flex justify-between hidden">
-                <h3 className="text-xs font-bold hover:scale-110 transition-all">
+                <h3 className="text-xs font-bold ">
                     NOTES
                 </h3>
             </div>

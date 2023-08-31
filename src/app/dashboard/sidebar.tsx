@@ -76,7 +76,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 export default function DashboardSidebar({ session, className }: SidebarProps) {
     const pathname = usePathname()
     return (
-        <div className={cn("py-5 shadow bg-white min-h-full hidden", className)}>
+        <div className={cn("py-5 shadow bg-white min-h-full ", className)}>
             <ScrollArea className="h-full px-1">
                 <div className="space-y-1 p-2">
                     {
