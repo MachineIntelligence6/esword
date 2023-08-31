@@ -40,9 +40,9 @@ export default function BlogsPage() {
                         </h3>
                     </div>
                     <div className="lg:grid grid-cols-11 ">
-                        <div className="col-span-7  w-full p-5  text-primary-dark text-base font-normal font-roman   ">
-                            <div className="flex  gap-3">
-                                <div className="space-y-3 max-h-[calc(100vh_-_100px)] overflow-auto">
+                        <div className="col-span-7  w-full  text-primary-dark text-base font-normal font-roman lg:border-r-[10px]  ">
+                            <div className="flex ">
+                                <div className="space-y-3 max-h-[calc(100vh_-_100px)] overflow-y-auto w-full ">
                                     <p>
                                         All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation,  and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you,  amid the darkness, and presently His Light will shine through.
                                     </p>
@@ -83,107 +83,66 @@ export default function BlogsPage() {
                                         All beginnings must begin with God. Always put I for trotoite teat tons no the has an end first thought every morning, the first aim and 4 purpose of all activity. Bein the took tree year with God, and you will end it with the glory of the New Jerusalem. At first, as in the physical creation,  and life may seem to be "without form and void." Do not be discouraged, the Spirit of God is within you,  amid the darkness, and presently His Light will shine through.
                                     </p>
                                 </div>
-
-                                <div className="max-h-[calc(100vh_-_100px)] overflow-auto min-w-[30px] space-y-1">
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
-                                    <BookmarkFilledIcon />
+                                <div className="flex flex-col gap-4 pt-3 px-2  overflow-y-auto max-h-[calc(100vh_-_100px)] w">
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                    <a href="">
+                                        <img src="/icons/bookfill-icon.png " className="bookmark" />
+                                    </a>
+                                  
+                                  
                                 </div>
                             </div>
-
-
                         </div>
+
                         <div className="col-span-4 bg-primary lg:block hidden relative">
                             <div className="p-5 space-y-4  overflow-auto  min-h-[calc(100vh_-_100px)] max-h-[calc(100vh_-_100px)]">
                                 <BlogsContent />
                             </div>
-                            <div className="absolute bottom-2 w-full overflow-hidden bg-primary px-5">
+                            <div className="absolute bottom-2 w-full overflow-hidden bg-primary px-5 hidden">
                                 <PaginationComponent />
                             </div>
                         </div>
