@@ -37,20 +37,21 @@ const FileInput = ({ className, type, onFileChange, file, children, required, re
         "w-full h-full cursor-pointer",
         className
       )}
-      onClick={() => {
-        const input = document.createElement("input");
-        input.type = "file"
-        input.accept = "image/*";
-        input.click()
-        input.onchange = (e) => {
-          // const files = e.target?.;
-          // if (files && files.length > 0) {
-          //   onFileChange?.(files.item(0))
-          // }
-        }
-      }}
+      onClick={() => inputRef.current?.click()}
+    // onClick={() => {
+    //   const input = document.createElement("input");
+    //   input.type = "file"
+    //   input.accept = "image/*";
+    //   input.click()
+    //   input.onchange = (e) => {
+    //     // const files = e.target?.;
+    //     // if (files && files.length > 0) {
+    //     //   onFileChange?.(files.item(0))
+    //     // }
+    //   }
+    // }}
     >
-      {/* <input
+      <input
         ref={inputRef}
         type="file"
         accept="image/*"
@@ -65,7 +66,7 @@ const FileInput = ({ className, type, onFileChange, file, children, required, re
             onFileChange?.(files.item(0))
           }
         }}
-      /> */}
+      />
       {children}
     </div>
   )

@@ -8,7 +8,10 @@ import SiteHeader from './header'
 import { cn } from '@/lib/utils'
 import SiteInnerLayout from './inner-layout'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  preload: true,
+})
 
 export const metadata: Metadata = {
   title: 'E-Sword',
@@ -31,7 +34,7 @@ export default async function RootLayout({
         // "max-h-screen overflow-hidden"
       )}>
         <AuthProvider session={session}>
-          <SiteHeader/>
+          <SiteHeader />
           <div className='pt-[70px]'>
             <SiteInnerLayout>
               {children}

@@ -191,7 +191,7 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                             onFileChange={(file) => {
                                                 field.onChange(file as (Blob | null))
                                             }}>
-                                            <div className="w-full h-40 border-2 border-dashed border-gray-500 rounded-md flex items-center justify-center">
+                                            <div className="w-full h-80 border-2 border-dashed border-gray-500 rounded-md flex items-center justify-center">
                                                 {
                                                     field.value ?
                                                         <Image
