@@ -39,13 +39,13 @@ interface DataTablePaginationProps<TData> extends TablePagination {
 export function DataTablePagination<TData>({ table, totalPages, onPageChange, currentPage, perPage, setPerPage }: DataTablePaginationProps<TData>) {
 
   return (
-    <div className="flex gap-3 flex-col md:gap-0 md:flex-row items-center justify-between px-2">
+    <div className="flex gap-3 flex-col xl:gap-0 xl:flex-row items-center justify-between px-2">
       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} of{" "}
         {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
-      <div className="flex flex-col  col-span-10 gap-3 md:gap-0  items-center md:space-x-6 md:flex-row lg:space-x-8">
-        <div className="flex flex-row  md:items-center space-x-2 col-span-6 gap-10">
+      <div className="flex flex-col  col-span-10 gap-3 xl:gap-0  items-center xl:space-x-6 xl:flex-row lg:space-x-8">
+        <div className="flex flex-row  xl:items-center space-x-2 col-span-6 gap-10">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
             value={`${perPage}`}
@@ -68,10 +68,10 @@ export function DataTablePagination<TData>({ table, totalPages, onPageChange, cu
             </SelectContent>
           </Select>
         </div>
-        <div className="flex gap-10 md:gap-0">
+        <div className="flex gap-10 xl:gap-0">
           {
             totalPages > 0 &&
-            <div className="flex w-[100px] items-center md:justify-center text-sm font-medium">
+            <div className="flex w-[100px] items-center xl:justify-center text-sm font-medium">
               Page {currentPage} of{" "} {totalPages}
             </div>
           }

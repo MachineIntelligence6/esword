@@ -54,7 +54,7 @@ function SidebarBooksComponent() {
                 <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 ">
                     BIBLE BOOKS
                 </h3>
-                <div className="lg:hidden text-primary-dark">
+                {/* <div className="lg:hidden text-primary-dark">
                     <SelectEl
                         value={activeBook !== undefined ? activeBook.toString() : ''}
                         onChange={(opt) => {
@@ -66,10 +66,10 @@ function SidebarBooksComponent() {
                             rawValue: book,
                         }))}
                     />
-                </div>
+                </div> */}
 
 
-                {/* <select
+                <select
                     name="book"
                     onChange={(e) => setActiveBook(Number(e.target.value))}
                     className="lg:hidden mx-4 pt-1 ">
@@ -81,7 +81,7 @@ function SidebarBooksComponent() {
                         ))
                     }
                 </select> 
-                 */}
+                
             </div>
             <div className="h-[calc(100vh_-_100px)] overflow-y-auto overflow-x-hidden lg:flex hidden">
                 <div className="w-full h-full">

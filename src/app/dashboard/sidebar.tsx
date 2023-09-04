@@ -6,6 +6,9 @@ import Link from "next/link";
 import { canUserAccessPath } from "@/lib/roles-manager";
 import { Session } from "next-auth";
 import { Route } from "next";
+import { BoxIcon, ButtonIcon, Cross1Icon, FaceIcon, FontFamilyIcon, TextAlignJustifyIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 
 type MenuItem = {
@@ -70,14 +73,16 @@ export const menuItems: Array<MenuItem> = [
 ]
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-    session: Session
+    session: Session;
+    
 }
 
 export default function DashboardSidebar({ session, className }: SidebarProps) {
     const pathname = usePathname()
     return (
-        <div className={cn("py-5 shadow bg-white min-h-full ", className)}>
+        <div className={cn("py-5 shadow bg-white min-h-screen  fixed xl:static  ", className)}>
             <ScrollArea className="h-full px-1">
+
                 <div className="space-y-1 p-2">
                     {
                         menuItems.map((menuItem) => (
@@ -85,7 +90,7 @@ export default function DashboardSidebar({ session, className }: SidebarProps) {
                             <Link href={menuItem.path}
                                 key={menuItem.path}
                                 className={cn(
-                                    "w-full justify-start font-medium px-5 py-3 rounded-md block",
+                                    "w-full justify-start font-medium px-5 py-3 rounded-md  block",
                                     pathname === (menuItem.path) ? "bg-primary text-white" : "hover:bg-silver-light/60 hover:text-slate-900"
                                 )}
                             >
@@ -95,6 +100,35 @@ export default function DashboardSidebar({ session, className }: SidebarProps) {
                     }
                 </div>
             </ScrollArea>
+
+
+        </div>
+    )
+}
+
+
+export  function ResponsiveSidebarButtton() {
+    const [showCrossButton, setShowCrossButton] = useState(true);
+    const handleButtonClick = () => {
+        setShowCrossButton(!showCrossButton);
+    };
+    return (
+        <div>
+            {showCrossButton ? (
+                <Button
+                    className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
+                    onClick={handleButtonClick}
+                >
+                    <Cross1Icon />
+                </Button>
+            ) : (
+                <Button
+                    className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
+                    onClick={handleButtonClick}
+                >
+                    <TextAlignJustifyIcon />
+                </Button>
+            )}
         </div>
     )
 }
