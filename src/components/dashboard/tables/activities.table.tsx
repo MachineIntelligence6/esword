@@ -71,7 +71,7 @@ export default function ActivitiesTable({ book }: Props) {
         // editAction: (activity) => (
         //     <Link href={`/dashboard/activities/${activity.id}/edit`}>Edit</Link>
         // ),
-        deleteAction: handleDelete
+        archiveAction: handleDelete
     }, session)
 
 
@@ -95,7 +95,7 @@ export default function ActivitiesTable({ book }: Props) {
 
 
 function generateActivityRefUrl(activity: IActivity) {
-    if (activity.action === "DELETE") {
+    if (activity.action === "ARCHIVE") {
         return `/dashboard/archives`
     }
     if (activity.action === "RESTORE" || !activity.ref) {

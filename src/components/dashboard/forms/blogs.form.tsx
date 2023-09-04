@@ -16,6 +16,8 @@ import { IBlog, IBook } from "@/shared/types/models.types";
 import { BlogType } from "@prisma/client";
 import QuillEditor from "@/components/ui/editor";
 import Image from "next/image";
+import { TagsInput } from "react-tag-input-component";
+
 
 
 export const blogsFormSchema = z.object({
@@ -23,8 +25,9 @@ export const blogsFormSchema = z.object({
     title: z.string({ required_error: "This field is required." }),
     slug: z.string({ required_error: "This field is required." }),
     content: z.string({ required_error: "This field is required." }),
-    image: z.instanceof(Blob, { message: "This field is required." }).nullable().default(null),
+    image: z.string().nullable().default(null),
     type: z.string({ required_error: "This field is required." }),
+    tags: z.array(z.string(), { required_error: "This field is required." }).optional().default([]),
 })
 
 
@@ -43,6 +46,8 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
             slug: blog?.slug,
             content: blog?.content,
             type: blog?.type,
+            image: blog?.image,
+            tags: blog?.tags?.split(",")
         }
     })
     const { formState } = form
@@ -109,6 +114,9 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
             })
         }
     }
+
+
+    console.log(blog)
 
 
     return (
@@ -178,7 +186,23 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                 </FormItem>
                             )}
                         />
-                        <br />
+                        <FormField
+                            control={form.control}
+                            name="tags"
+                            render={({ field, fieldState }) => (
+                                <FormItem className="col-span-full">
+                                    <FormLabel>Tags (Optional)</FormLabel>
+                                    <FormControl>
+                                        <TagsInput classNames={{ input: "placeholder:text-slate-500" }}
+                                            placeHolder="Enter tags" {...field} />
+                                    </FormControl>
+                                    {
+                                        fieldState.error &&
+                                        <FormMessage />
+                                    }
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="image"
@@ -188,16 +212,16 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                     <FormControl>
                                         <FileInput
                                             required
-                                            onFileChange={(file) => {
-                                                field.onChange(file as (Blob | null))
+                                            onFileChange={(value) => {
+                                                field.onChange(value)
                                             }}>
                                             <div className="w-full h-80 border-2 border-dashed border-gray-500 rounded-md flex items-center justify-center">
                                                 {
                                                     field.value ?
                                                         <Image
-                                                            src={window.URL.createObjectURL(field.value)}
+                                                            src={field.value}
                                                             width={500} height={300} alt=""
-                                                            className="w-full h-full" />
+                                                            className="w-auto h-full object-contain object-center" />
                                                         :
                                                         <p className="text-center">Click here to select featured image for blog.</p>
                                                 }

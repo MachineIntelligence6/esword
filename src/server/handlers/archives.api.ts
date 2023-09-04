@@ -156,6 +156,20 @@ async function restoreCommentaries(ids: number[]) {
     })
     return res.count
 }
+async function restoreBlogs(ids: number[]) {
+    const res = await db.blog.updateMany({
+        where: {
+            id: {
+                in: ids,
+            },
+            archived: true
+        },
+        data: {
+            archived: false,
+        },
+    })
+    return res.count
+}
 
 
 
@@ -183,6 +197,9 @@ export async function resetore(req: ArchivesActionReq): Promise<ApiResponse<any>
         }
         if (req.model === "User") {
             succeed = await restoreUsers(req.ids)
+        }
+        if (req.model === "Blog") {
+            succeed = await restoreBlogs(req.ids)
         }
         return {
             succeed: true,
@@ -331,6 +348,17 @@ async function deleteCommentaries(ids: number[]) {
     })
     return res.count
 }
+async function deleteBlogs(ids: number[]) {
+    const res = await db.blog.deleteMany({
+        where: {
+            id: {
+                in: ids,
+            },
+            archived: true
+        },
+    })
+    return res.count
+}
 
 
 
@@ -357,6 +385,9 @@ export async function permanentDelete(req: ArchivesActionReq): Promise<ApiRespon
         }
         if (req.model === "User") {
             succeed = await deleteUsers(req.ids)
+        }
+        if (req.model === "Blog") {
+            succeed = await deleteBlogs(req.ids)
         }
         return {
             succeed: true,
@@ -534,6 +565,20 @@ async function addCommentaries(ids: number[]) {
     })
     return res.count
 }
+async function addBlogs(ids: number[]) {
+    const res = await db.blog.updateMany({
+        where: {
+            id: {
+                in: ids,
+            },
+            archived: false
+        },
+        data: {
+            archived: true
+        }
+    })
+    return res.count
+}
 
 
 
@@ -560,6 +605,9 @@ export async function addToArchive(req: ArchivesActionReq): Promise<ApiResponse<
         }
         if (req.model === "User") {
             succeed = await addUsers(req.ids)
+        }
+        if (req.model === "Blog") {
+            succeed = await addBlogs(req.ids)
         }
         return {
             succeed: true,

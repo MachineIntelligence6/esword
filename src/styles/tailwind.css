@@ -47,3 +47,9 @@ input.autofill-text-white:-webkit-autofill:active {
 .ql-disabled {
     border: none !important;
 }
+
+
+.rti--container {
+    @apply !flex !items-center !min-h-[40px] w-full !rounded-md !border !border-slate-200 !bg-white !px-3 !py-2 !text-sm !shadow-sm;
+    @apply focus-visible:!outline-none focus-visible:!ring-1 focus-visible:!ring-slate-400 disabled:!cursor-not-allowed disabled:!opacity-50;
+}

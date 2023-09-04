@@ -245,6 +245,21 @@ function columns(rowActions: TableActionProps): ColumnDef<IBlog, any>[] {
             },
         },
         {
+            accessorKey: "tags",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Tags" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <div className="flex max-w-[100px] space-x-2">
+                        <span className="max-w-[100px] truncate font-medium">
+                            {row.original.tags}
+                        </span>
+                    </div>
+                )
+            },
+        },
+        {
             accessorKey: "user",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="User" />

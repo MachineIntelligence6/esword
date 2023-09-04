@@ -7,7 +7,7 @@ const activityModels = [
     "Book", "Chapter",
     "Topic", "Verse",
     "Author", "Author",
-    "Note", "User"
+    "Note", "User", "Blog"
 ]
 
 
@@ -47,6 +47,7 @@ function getActivityModel(model: Prisma.ModelName): ActivityModelType | undefine
     if (model === "Note") return "NOTES"
     if (model === "Commentary") return "COMMENTARIES"
     if (model === "Author") return "AUTHORS"
+    if (model === "Blog") return "BLOGS"
     return undefined
 }
 

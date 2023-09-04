@@ -1,4 +1,5 @@
 import AuthorsTable from "@/components/dashboard/tables/authors.table"
+import BlogsTable from "@/components/dashboard/tables/blogs.table"
 import BooksTable from "@/components/dashboard/tables/books.table"
 import ChaptersTable from "@/components/dashboard/tables/chapters.table"
 import CommentariesTable from "@/components/dashboard/tables/commentaries.table"
@@ -104,6 +105,18 @@ export default function Page() {
             </CardContent>
           </Card>
           {/* Users Archived Table End  */}
+          {/* Blogs Archived Table Start  */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardTitle className="font-semibold text-xl">
+                Blogs
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5">
+              <BlogsTable archivedOnly />
+            </CardContent>
+          </Card>
+          {/* Blogs Archived Table End  */}
 
         </CardContent>
       </Card>
