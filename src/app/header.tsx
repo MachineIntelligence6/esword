@@ -162,8 +162,7 @@ function Dropdown() {
             <DropdownMenuTrigger>
                 <div className="flex gap-1 items-center">
                     {menuList.find((m) => m.path === pathname)?.label}
-                    <ChevronDownIcon/>
-                    
+                    <ChevronDownIcon />
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="lg:hidden ">
@@ -186,6 +185,8 @@ function Dropdown() {
 
 
 export function UserDropdownMenu({ session }: { session: Session }) {
+    const pathname = usePathname()
+    const router = useRouter()
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -199,14 +200,19 @@ export function UserDropdownMenu({ session }: { session: Session }) {
                     <span className="block text-sm font-normal">{session?.user.email}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {/* {
-                    session.user.role === "ADMIN" || session.user.role === "EDITOR" && (
-                        <div>
-
-                        </div>
+                {
+                    (session.user.role === "ADMIN" || session.user.role === "EDITOR") && (
+                        <>
+                            {
+                                pathname.startsWith("/dashboard") ?
+                                    <DropdownMenuItem onClick={() => router.push("/")}>Home</DropdownMenuItem>
+                                    :
+                                    <DropdownMenuItem onClick={() => router.push("/dashboard")}>Dashboard</DropdownMenuItem>
+                            }
+                            <DropdownMenuSeparator />
+                        </>
                     )
-                } */}
-                <DropdownMenuSeparator />
+                }
                 <LogoutButton />
             </DropdownMenuContent>
         </DropdownMenu>
