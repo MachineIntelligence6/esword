@@ -59,7 +59,7 @@ export default function SiteHeader() {
                                     ))
                                 }
 
-                              
+
                             </div>
                             <div className="lg:block hidden">
                                 <SearchComponent />
@@ -160,17 +160,17 @@ function Dropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
-                <div className={cn(
-                    menuList.find((m)=> m.path === pathname)?.label
-                )}>
-                {menuList.label}
+                <div className="flex gap-1 items-center">
+                    {menuList.find((m) => m.path === pathname)?.label}
+                    <ChevronDownIcon/>
+                    
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="lg:hidden ">
                 {
                     menuList.map((menuItem, index) => (
                         <div key={index}
-                        className="space-y-2" >
+                            className="space-y-2" >
                             <a href={menuItem.path}>{menuItem.label}</a>
                         </div>
                     ))
@@ -200,7 +200,7 @@ export function UserDropdownMenu({ session }: { session: Session }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {
-                    session.user.role === "ADMIN" || session.user.role=== "EDITOR" && (
+                    session.user.role === "ADMIN" || session.user.role === "EDITOR" && (
                         <Link></Link>
                     )
                 }
