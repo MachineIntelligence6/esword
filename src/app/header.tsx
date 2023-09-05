@@ -65,7 +65,10 @@ export default function SiteHeader() {
                             </div>
                         </div>
                     }
-                    <ResponsiveSidebarButtton />
+                    {
+                        pathname.startsWith("/dashboard") &&
+                        <ResponsiveSidebarButtton />
+                    }
                     <div>
                         {session && <UserDropdownMenu session={session} />}
                     </div>
