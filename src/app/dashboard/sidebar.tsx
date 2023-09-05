@@ -137,14 +137,14 @@ export function ResponsiveSidebarButtton() {
             {
                 sidebarActive ? (
                     <Button
-                        className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
+                        className="bg-white hover:bg-white/90  text-black rounded-lg xl:hidden"
                         onClick={handleButtonClick}
                     >
                         <Cross1Icon />
                     </Button>
                 ) : (
                     <Button
-                        className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
+                        className="bg-white hover:bg-white/90   text-black rounded-lg xl:hidden"
                         onClick={handleButtonClick}
                     >
                         <TextAlignJustifyIcon />
