@@ -80,7 +80,7 @@ export default function QuillEditorBase({ disabled, readOnly, value, onChange }:
                 )}
                 onChange={onChange}
                 modules={modules(disabled)}
-                placeholder="Type..." />
+                placeholder={(disabled || readOnly) ? "" : "Type..."} />
         </div >
     )
 }

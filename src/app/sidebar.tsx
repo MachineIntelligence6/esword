@@ -145,7 +145,7 @@ function SidebarChaptersComponent() {
                             rawValue: chapter,
                         }))}
                     />
-                 
+
                 </div>
 
             </div>
