@@ -3,8 +3,9 @@ import db from '@/server/db'
 import { BlogType, Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBlog } from "@/shared/types/models.types";
-import { BlogsPaginationProps, ChaptersPaginationProps } from "@/shared/types/pagination.types";
+import { BlogsPaginationProps } from "@/shared/types/pagination.types";
 import { getServerAuth } from "../auth";
+import { saveBlogImage } from "../files-handler";
 
 
 
@@ -12,7 +13,7 @@ import { getServerAuth } from "../auth";
 
 export async function getAll({
     page = 1, perPage = defaults.PER_PAGE_ITEMS,
-    user = -1, include, where, orderBy
+    user = -1, include, where, orderBy, type
 }: BlogsPaginationProps): Promise<PaginatedApiResponse<IBlog[]>> {
     try {
         const blogs = await db.blog.findMany({
@@ -26,7 +27,7 @@ export async function getAll({
                 archived: false,
             },
             orderBy: orderBy ? orderBy : {
-                id: "asc"
+                createdAt: "desc"
             },
             ...(perPage !== -1 && {
                 take: perPage,
@@ -142,7 +143,8 @@ type CreateBlogReq = {
     slug: string;
     content: string;
     type: BlogType;
-    tags: string
+    tags: string[];
+    image: string | null
 }
 
 export async function create(req: Request): Promise<ApiResponse<IBlog>> {
@@ -160,6 +162,7 @@ export async function create(req: Request): Promise<ApiResponse<IBlog>> {
                 code: "SLUG_MUST_BE_UNIQUE",
             }
         }
+        const imagePath = (blogReq.image ? await saveBlogImage(blogReq.image) : null)
         const blog = await db.blog.create({
             data: {
                 title: blogReq.title,
@@ -167,6 +170,8 @@ export async function create(req: Request): Promise<ApiResponse<IBlog>> {
                 content: blogReq.content,
                 type: blogReq.type,
                 userId: Number(session.user.id),
+                image: imagePath,
+                tags: blogReq.tags.join(",")
             },
         })
         if (!blog) throw new Error("");
@@ -194,7 +199,8 @@ type UpdateBlogReq = {
     slug?: string;
     content?: string;
     type?: BlogType;
-    tags?: string;
+    tags?: string[];
+    image?: string | null;
 }
 
 
@@ -212,13 +218,15 @@ export async function update(req: Request, id: number): Promise<ApiResponse<IBlo
                 }
             }
         }
+        const imagePath = (blogReq.image ? await saveBlogImage(blogReq.image) : null)
         const blog = await db.blog.update({
             data: {
                 ...(blogReq.title && { title: blogReq.title }),
                 ...(blogReq.slug && { slug: blogReq.slug }),
                 ...(blogReq.content && { content: blogReq.content }),
                 ...(blogReq.type && { type: blogReq.type }),
-                ...(blogReq.tags && { tags: blogReq.tags }),
+                ...(blogReq.tags && { tags: blogReq.tags.join(",") }),
+                ...(blogReq.image && imagePath && { image: imagePath })
             },
             where: {
                 id: id

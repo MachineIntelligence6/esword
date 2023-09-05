@@ -7,7 +7,6 @@ import ContentLoader from "react-content-loader";
 export function BooksLoadingPlaceholder() {
     return (
         <ContentLoader
-            speed={3}
             width={200}
             // height={1000}
             viewBox="0 0 200 1000"
@@ -211,6 +210,61 @@ export function SearchLoadingPlaceholder() {
             <rect x="0" y="16" rx="0" ry="0" width="50" height="5" />
             <rect x="60" y="16" rx="0" ry="0" width="50" height="5" />
             <rect x="120" y="16" rx="0" ry="0" width="50" height="5" />
+
+        </ContentLoader>
+    )
+}
+export function BlogLoadingPlaceholder() {
+    return (
+        <ContentLoader
+            width={500}
+            // height={40}
+            viewBox="0 0 500 45"
+            backgroundColor="#f3f3f3"
+            foregroundColor="#ecebeb"
+            className="w-full overflow-x-hidden h-auto max-h-full"
+        >
+            <rect x="0" y="0" rx="4" ry="4" width="400" height="15" />
+            <rect x="420" y="4" rx="4" ry="4" width="100" height="7" />
+            <rect x="0" y="23" rx="4" ry="4" width="500" height="8" />
+            <rect x="0" y="35" rx="4" ry="4" width="350" height="8" />
+
+        </ContentLoader>
+    )
+}
+export function BlogContentLoadingPlaceholder() {
+    return (
+        <ContentLoader
+            width={800}
+            // height={700}
+            viewBox="0 0 800 600"
+            backgroundColor="#f3f3f3"
+            foregroundColor="#ecebeb"
+            className="w-full overflow-x-hidden h-auto max-h-full"
+        >
+            <rect x="0" y="13" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="26" rx="4" ry="4" width="700" height="10" />
+            <rect x="0" y="39" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="52" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="65" rx="4" ry="4" width="300" height="10" />
+
+            <rect x="0" y="92" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="105" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="118" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="131" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="144" rx="4" ry="4" width="300" height="10" />
+            <rect x="0" y="170" rx="5" ry="5" width="800" height="200" />
+
+            <rect x="0" y="390" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="403" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="416" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="429" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="442" rx="4" ry="4" width="300" height="10" />
+
+            <rect x="0" y="470" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="483" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="496" rx="4" ry="4" width="800" height="10" />
+            <rect x="0" y="509" rx="4" ry="4" width="500" height="10" />
 
         </ContentLoader>
     )

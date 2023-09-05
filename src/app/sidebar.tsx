@@ -56,9 +56,9 @@ function SidebarBooksComponent() {
                 </h3>
                 {/* <div className="lg:hidden text-primary-dark">
                     <SelectEl
-                        value={activeBook !== undefined ? activeBook.toString() : ''}
+                        value={activeBook !== undefined ? activeBook.id?.toString() : ''}
                         onChange={(opt) => {
-                            setActiveBook(opt?.value ? Number(opt.value) : undefined);
+                            if (opt?.value) setActiveBook(Number(opt.value));
                         }}
                         options={booksList?.map((book) => ({
                             label: book.name,

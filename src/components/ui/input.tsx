@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { cn } from "@/lib/utils"
+import { cn, resizeImage } from "@/lib/utils"
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> { }
@@ -24,9 +24,10 @@ Input.displayName = "Input"
 
 
 type FileInputProps = InputProps & {
-  onFileChange?: (file: File | null) => void;
+  onFileChange?: (value: string | null) => void;
   file?: File
 }
+
 
 const FileInput = ({ className, type, onFileChange, file, children, required, readOnly, disabled }: FileInputProps) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -38,18 +39,6 @@ const FileInput = ({ className, type, onFileChange, file, children, required, re
         className
       )}
       onClick={() => inputRef.current?.click()}
-    // onClick={() => {
-    //   const input = document.createElement("input");
-    //   input.type = "file"
-    //   input.accept = "image/*";
-    //   input.click()
-    //   input.onchange = (e) => {
-    //     // const files = e.target?.;
-    //     // if (files && files.length > 0) {
-    //     //   onFileChange?.(files.item(0))
-    //     // }
-    //   }
-    // }}
     >
       <input
         ref={inputRef}
@@ -57,13 +46,15 @@ const FileInput = ({ className, type, onFileChange, file, children, required, re
         accept="image/*"
         className="hidden"
         hidden
-        required
-        readOnly
-        disabled
-        onChange={(e) => {
+        // required={required}
+        readOnly={readOnly}
+        disabled={disabled}
+        onChange={async (e) => {
           const files = e.target.files;
-          if (files && files.length > 0) {
-            onFileChange?.(files.item(0))
+          const file = files?.item(0)
+          if (file) {
+            const imageB64 = await resizeImage(file)
+            onFileChange?.(imageB64)
           }
         }}
       />

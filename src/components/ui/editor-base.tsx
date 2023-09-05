@@ -40,13 +40,14 @@ const modules = (disabled?: boolean) => {
                 ['link', 'image'],
                 ['clean']
             ],
+            blotFormatter: {
+                // see config options below
+            }
         }),
         clipboard: {
             matchVisual: false,
         },
-        blotFormatter: {
-            // see config options below
-        }
+
     }
 }
 

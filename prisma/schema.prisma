@@ -192,6 +192,7 @@ enum ActivityModelType {
   VERSES
   NOTES
   USERS
+  BLOGS
 }
 
 model Settings {
@@ -205,6 +206,8 @@ model Blog {
   slug       String     @unique
   title      String
   content    String     @db.LongText
+  image      String?    @db.Text
+  tags       String?     @db.LongText
   type       BlogType
   status     BlogStatus @default(DRAFT)
   userId     Int        @map("user_id")
