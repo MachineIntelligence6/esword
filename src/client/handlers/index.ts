@@ -11,6 +11,7 @@ import * as activitiesHandler from './activities.handler'
 import * as archivesHandler from './archives.handler'
 import * as searchHandler from './search.handler'
 import * as blogsHandler from './blogs.handler'
+import * as settingsHandler from './settings.handler'
 
 
 const clientApiHandlers = {
@@ -26,7 +27,8 @@ const clientApiHandlers = {
     activities: activitiesHandler,
     archives: archivesHandler,
     search: searchHandler,
-    blogs: blogsHandler
+    blogs: blogsHandler,
+    settings: settingsHandler
 }
 
 export default clientApiHandlers;

@@ -49,6 +49,9 @@ export default function SiteHeader() {
                                 <Link href="/" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
                                     Home
                                 </Link>
+                                <Link href="/about" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
+                                    About
+                                </Link>
                                 <Link href="/donate" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
                                     Donate
                                 </Link>
