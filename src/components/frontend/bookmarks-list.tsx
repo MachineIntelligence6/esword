@@ -1,3 +1,4 @@
+'use client'
 import { useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { IBookmark } from "@/shared/types/models.types";
@@ -10,14 +11,24 @@ import Spinner from "../spinner";
 import { BookmarksLoadingPlaceholder } from "../loading-placeholders";
 import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function BookmarksList() {
-    const { bookmarksList, setActiveBookmark, loadBookmarks, initialLoading, booksList, chaptersList, activeChapter } = useReadBookStore()
+    const pathname = usePathname()
+    const router = useRouter()
+    const {
+        bookmarksList, setActiveBookmark, loadBookmarks,
+        initialLoading, booksList, chaptersList,
+        activeChapter,
+    } = useReadBookStore()
     const [processing, setProcessing] = useState(false);
     const { toast } = useToast();
 
     const handleSetActiveBookmark = (bookmark: IBookmark) => {
         setActiveBookmark(bookmark)
+        if (pathname !== "/" && bookmark.verse?.topic?.chapter?.book) {
+            router.push(`/?book=${bookmark.verse.topic.chapter.book.slug}&chapter=${bookmark.verse.topic.chapter.name}&verse=${bookmark.verse.number}`)
+        }
     }
     const handleDeleteBookmark = async (bookmark: IBookmark) => {
         setProcessing(true);
