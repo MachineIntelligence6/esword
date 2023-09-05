@@ -74,7 +74,7 @@ export function BookmarksLoadingPlaceholder() {
             speed={3}
             width={60}
             // height={600}
-            viewBox="0 0 60 2000"
+            viewBox="0 0 60 600"
             backgroundColor="#f3f3f3"
             foregroundColor="#ecebeb"
             className="w-full overflow-x-hidden p-1 h-full max-h-full"

@@ -1,6 +1,6 @@
 'use client'
 import { BooksLoadingPlaceholder, ChaptersLoadingPlaceholder } from "@/components/loading-placeholders";
-import { SelectEl } from "@/components/ui/select";
+import { SideBarEl } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { useSearchParams } from "next/navigation";
@@ -37,7 +37,7 @@ export default function SiteSidebar() {
     // }, [])
 
     return (
-        <div className="flex lg:mx-0 mx-[10px] lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white lg:max-w-[186px] lg:min-w-[186px] w-full  lg:px-0 px-3">
+        <div className="flex lg:mx-0 mx-[10px] lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white lg:max-w-[186px] lg:min-w-[186px] w-full  lg:px-0 px-3 ">
             <SidebarBooksComponent />
             <SidebarChaptersComponent />
         </div>
@@ -54,8 +54,8 @@ function SidebarBooksComponent() {
                 <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 ">
                     BIBLE BOOKS
                 </h3>
-                <div className="lg:hidden text-primary-dark">
-                    <SelectEl
+                <div className="lg:hidden text-primary-dark ">
+                    <SideBarEl
                         value={activeBook !== undefined ? activeBook.id?.toString() : ''}
                         onChange={(opt) => {
                             if (opt?.value) setActiveBook(Number(opt.value));
@@ -68,8 +68,8 @@ function SidebarBooksComponent() {
                     />
                 </div>
 
-
-                {/* <select
+                {/* 
+                <select
                     name="book"
                     onChange={(e) => setActiveBook(Number(e.target.value))}
                     className="lg:hidden mx-4 pt-1 ">
@@ -80,8 +80,8 @@ function SidebarBooksComponent() {
                             </option>
                         ))
                     }
-                </select> 
-                 */}
+                </select>  */}
+
             </div>
             <div className="h-[calc(100vh_-_100px)] overflow-y-auto overflow-x-hidden lg:flex hidden">
                 <div className="w-full h-full">
@@ -117,11 +117,11 @@ function SidebarChaptersComponent() {
                 <h3 className="lg:text-xs lg:font-bold font-normal text-[10px] lg:block hidden px-3 ">
                     CH.
                 </h3>
-                <h3 className="font-normal text-[10px] uppercase lg:hidden px-4">
+                <h3 className="font-normal text-[10px] uppercase lg:hidden px-4 ">
                     Chapter
                 </h3>
                 {/* For iphone and mobile responses  */}
-                <select
+                {/* <select
                     name="chapter"
                     onChange={(e) => setActiveChapter(Number(e.target.value))}
                     className="lg:hidden pt-1 mx-4">
@@ -132,7 +132,21 @@ function SidebarChaptersComponent() {
                             </option>
                         ))
                     }
-                </select>
+                </select> */}
+                <div className="lg:hidden text-primary-dark">
+                    <SideBarEl
+                        value={activeChapter !== undefined ? activeChapter.id?.toString() : ''}
+                        onChange={(opt) => {
+                            if (opt?.value) setActiveChapter(Number(opt.value));
+                        }}
+                        options={chaptersList?.map((chapter) => ({
+                            label: chapter.name,
+                            value: chapter.id.toString(),
+                            rawValue: chapter,
+                        }))}
+                    />
+                 
+                </div>
 
             </div>
             <div className="lg:h-[calc(100vh_-_100px)]  overflow-y-auto">
