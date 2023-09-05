@@ -140,7 +140,7 @@ function SidebarChaptersComponent() {
                             if (opt?.value) setActiveChapter(Number(opt.value));
                         }}
                         options={chaptersList?.map((chapter) => ({
-                            label: chapter.name,
+                            label: String(chapter.name),
                             value: chapter.id.toString(),
                             rawValue: chapter,
                         }))}
