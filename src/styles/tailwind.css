@@ -1,0 +1,55 @@
+@tailwind base;
+
+
+@tailwind components;
+@tailwind utilities;
+
+
+button:disabled {
+    @apply text-gray-500;
+    opacity: 0.6 !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    transition: background-color 9999999s ease-in-out 0s;
+}
+
+input.autofill-text-white:-webkit-autofill,
+input.autofill-text-white:-webkit-autofill:hover,
+input.autofill-text-white:-webkit-autofill:focus,
+input.autofill-text-white:-webkit-autofill:active {
+    -webkit-text-fill-color: white;
+}
+
+
+*::-webkit-scrollbar {
+    background: lightgray;
+    width: 5px;
+    height: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+    border-radius: 30px;
+    background: gray;
+}
+
+
+.ql-container {
+    min-height: 300px !important;
+    max-height: 600px !important;
+    overflow-y: auto !important;
+}
+
+
+.ql-disabled {
+    border: none !important;
+}
+
+
+.rti--container {
+    @apply !flex !items-center !min-h-[40px] w-full !rounded-md !border !border-slate-200 !bg-white !px-3 !py-2 !text-sm !shadow-sm;
+    @apply focus-visible:!outline-none focus-visible:!ring-1 focus-visible:!ring-slate-400 disabled:!cursor-not-allowed disabled:!opacity-50;
+}
