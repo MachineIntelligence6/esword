@@ -1,5 +1,4 @@
 import ActivitiesTable from "@/components/dashboard/tables/activities.table"
-import ChaptersTable from "@/components/dashboard/tables/chapters.table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 

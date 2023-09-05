@@ -55,14 +55,13 @@ export default function LoginForm() {
             return;
         }
         const sesssion = await getSession();
-        const callbackUrl = searchParams.get("callbackUrl") ?? "/"
+        const callbackUrl = searchParams.get("callbackUrl")
         if (sesssion?.user?.role === "ADMIN" || sesssion?.user?.role === "EDITOR") {
-            // router.push(params.get("callbackUrl") ?? "/dashboard")
-            router.push(callbackUrl.startsWith("/dashboard") ? callbackUrl : "/dashboard")
+            router.push(callbackUrl ?? "/dashboard")
             window.location.reload()
         }
         else {
-            router.push(callbackUrl)
+            router.push(callbackUrl ?? "/")
             window.location.reload()
         }
     }

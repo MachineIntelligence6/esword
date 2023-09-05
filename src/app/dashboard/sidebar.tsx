@@ -67,11 +67,14 @@ export const menuItems: Array<MenuItem> = [
         label: "Archives"
     },
     {
+        path: "/dashboard/about",
+        label: "About Page"
+    },
+    {
         path: "/dashboard/settings",
         label: "Settings"
     },
 ]
-
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
     session: Session;
     

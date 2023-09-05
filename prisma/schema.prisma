@@ -207,7 +207,7 @@ model Blog {
   title      String
   content    String     @db.LongText
   image      String?    @db.Text
-  tags       String?     @db.LongText
+  tags       String?    @db.LongText
   type       BlogType
   status     BlogStatus @default(DRAFT)
   userId     Int        @map("user_id")
@@ -226,4 +226,10 @@ enum BlogStatus {
 enum BlogType {
   PROBLEM
   MANUSCRIPT
+}
+
+model AboutContent {
+  id      Int    @id @default(1)
+  title   String @db.Text
+  content String @db.LongText
 }
