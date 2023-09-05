@@ -59,7 +59,7 @@ export default function SiteHeader() {
                                     ))
                                 }
 
-                              
+
                             </div>
                             <div className="lg:block hidden">
                                 <SearchComponent />
@@ -161,16 +161,16 @@ function Dropdown() {
         <DropdownMenu>
             <DropdownMenuTrigger>
                 <div className={cn(
-                    menuList.find((m)=> m.path === pathname)?.label
+                    menuList.find((m) => m.path === pathname)?.label
                 )}>
-                {menuList.label}
+                    {menuList.label}
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="lg:hidden ">
                 {
                     menuList.map((menuItem, index) => (
                         <div key={index}
-                        className="space-y-2" >
+                            className="space-y-2" >
                             <a href={menuItem.path}>{menuItem.label}</a>
                         </div>
                     ))
@@ -186,6 +186,8 @@ function Dropdown() {
 
 
 export function UserDropdownMenu({ session }: { session: Session }) {
+    const pathname = usePathname()
+    const router = useRouter()
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -200,11 +202,18 @@ export function UserDropdownMenu({ session }: { session: Session }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {
-                    session.user.role === "ADMIN" || session.user.role=== "EDITOR" && (
-                        <Link></Link>
+                    (session.user.role === "ADMIN" || session.user.role === "EDITOR") && (
+                        <>
+                            {
+                                pathname.startsWith("/dashboard") ?
+                                    <DropdownMenuItem onClick={() => router.push("/")}>Home</DropdownMenuItem>
+                                    :
+                                    <DropdownMenuItem onClick={() => router.push("/dashboard")}>Dashboard</DropdownMenuItem>
+                            }
+                            <DropdownMenuSeparator />
+                        </>
                     )
                 }
-                <DropdownMenuSeparator />
                 <LogoutButton />
             </DropdownMenuContent>
         </DropdownMenu>
