@@ -33,14 +33,14 @@ export default function SiteHeader() {
     const pathname = usePathname()
     // if (pathname.startsWith("/dashboard")) return null
     return (
-        <header className="fixed left-0 top-0 z-50 shadow w-full">
-            <nav className="flex justify-between px-6 items-center h-[70px] w-full bg-primary">
+        <header className="fixed left-0 top-0 z-50 shadow w-full max-w-[100vw] overflow-hidden">
+            <nav className="flex justify-between px-3 md:px-6 items-center h-[70px] w-full bg-primary">
                 <div>
                     <Link href="/">
-                        <Image width={250} height={100} quality={100} alt="" src="/images/logo.png" className="object-contain bg-cover min-h-[60px] min-w-[200px] w-[250px]" />
+                        <Image width={250} height={100} quality={100} alt="" src="/images/logo.png" className="object-contain bg-cover md:min-h-[60px] w-[150px] min-w-[150px] md:min-w-[200px] md:w-[250px]" />
                     </Link>
                 </div>
-                <div className="flex items-center gap-x-6">
+                <div className="flex items-center gap-2 md:gap-x-6">
                     {
                         !pathname.startsWith("/dashboard") && !pathname.startsWith("/login") &&
                         <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm">
@@ -70,7 +70,8 @@ export default function SiteHeader() {
                         pathname.startsWith("/dashboard") &&
                         <ResponsiveSidebarButtton />
                     }
-                    <div>
+                    <div className="flex text-white">
+
                         {session && <UserDropdownMenu session={session} />}
                     </div>
                 </div>
@@ -158,8 +159,8 @@ function Dropdown() {
     const pathname = usePathname()
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger>
+        <DropdownMenu >
+            <DropdownMenuTrigger className="p-0">
                 <div className="flex gap-1 items-center">
                     {menuList.find((m) => m.path === pathname)?.label}
                     <ChevronDownIcon />
@@ -169,7 +170,7 @@ function Dropdown() {
                 {
                     menuList.map((menuItem, index) => (
                         <div key={index}
-                            className="space-y-2" >
+                            className="py-1 px-3" >
                             <a href={menuItem.path}>{menuItem.label}</a>
                         </div>
                     ))
