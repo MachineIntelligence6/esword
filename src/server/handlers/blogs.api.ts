@@ -13,7 +13,7 @@ import { saveBlogImage } from "../files-handler";
 
 export async function getAll({
     page = 1, perPage = defaults.PER_PAGE_ITEMS,
-    user = -1, include, where, orderBy
+    user = -1, include, where, orderBy, type
 }: BlogsPaginationProps): Promise<PaginatedApiResponse<IBlog[]>> {
     try {
         const blogs = await db.blog.findMany({
@@ -27,7 +27,7 @@ export async function getAll({
                 archived: false,
             },
             orderBy: orderBy ? orderBy : {
-                id: "asc"
+                createdAt: "desc"
             },
             ...(perPage !== -1 && {
                 take: perPage,

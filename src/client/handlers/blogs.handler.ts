@@ -9,11 +9,11 @@ import { BlogsFormSchema } from "@/components/dashboard/forms/blogs.form";
 
 export async function get({
     page = 1, perPage, user = -1,
-    include, where, orderBy
+    include, where, orderBy, type
 }: BlogsPaginationProps): Promise<PaginatedApiResponse<IBlog[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IBlog[]>>(
-            `/api/blogs?page=${page}&perPage=${perPage}&book=${user}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/blogs?page=${page}&perPage=${perPage}&book=${user}&type=${type}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
         )
         return res.data
     } catch (error) {

@@ -1,7 +1,7 @@
 import defaults from "@/shared/constants/defaults"
 import serverApiHandlers from "@/server/handlers"
 import { NextResponse } from "next/server"
-import { Prisma } from "@prisma/client"
+import { BlogType, Prisma } from "@prisma/client"
 
 
 export const GET = async (req: Request) => {
@@ -9,6 +9,7 @@ export const GET = async (req: Request) => {
     const page = parseInt(params.get("page") ?? "1")
     const perPage = parseInt(params.get("perPage") ?? `${defaults.PER_PAGE_ITEMS}`)
     const user = parseInt(params.get("user") ?? "-1")
+    const type = (params.get("type") as BlogType | undefined)
     const includeStr = params.get("include")
     let include: Prisma.BlogInclude | undefined;
     try {
@@ -28,7 +29,7 @@ export const GET = async (req: Request) => {
     } catch (error) {
     }
 
-    const res = await serverApiHandlers.blogs.getAll({ page, perPage, user, include, where, orderBy })
+    const res = await serverApiHandlers.blogs.getAll({ page, perPage, user, include, where, orderBy, type })
     return NextResponse.json(res)
 }
 
