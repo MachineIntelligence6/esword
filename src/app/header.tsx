@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {  ChevronDownIcon, TextAlignJustifyIcon, Cross1Icon, MagnifyingGlassIcon,  PersonIcon, } from "@radix-ui/react-icons"
+import { ChevronDownIcon, TextAlignJustifyIcon, Cross1Icon, MagnifyingGlassIcon, PersonIcon, } from "@radix-ui/react-icons"
 import { Session } from "next-auth";
 import { Form, FormField, FormItem } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import { ResponsiveSidebarButtton } from "./dashboard/sidebar";
+import { cn } from "@/lib/utils";
 
 
 
@@ -43,27 +44,24 @@ export default function SiteHeader() {
                     {
                         !pathname.startsWith("/dashboard") && !pathname.startsWith("/login") &&
                         <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm">
-                            <div className="flex lg:gap-x-0">
-                                {/* <Dropdown /> */}
+                            <div className="flex lg:hidden">
+                                <Dropdown />
                             </div>
-                            <div className="hidden md:flex items-center md:gap-x-6 ">
-                                <Link href="/" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
-                                    Home
-                                </Link>
-                                <Link href="/about" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
-                                    About
-                                </Link>
-                                <Link href="/donate" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
-                                    Donate
-                                </Link>
-                                <Link href="/manuscripts" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
-                                    Manuscripts
-                                </Link>
-                                <Link href="/problems" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
-                                    Problems
-                                </Link>
+                            <div className="hidden lg:flex items-center md:gap-x-6 ">
+                                {
+                                    menuList.map((menuItem, index) => (
+                                        <div
+                                            key={index}
+                                            className="font-normal py-3 text-white md:block hidden hover:scale-110 transition-all"
+                                        >
+                                            <a href={menuItem.path}>{menuItem.label}</a>
+                                        </div>
+                                    ))
+                                }
+
+                              
                             </div>
-                            <div className="md:block hidden">
+                            <div className="lg:block hidden">
                                 <SearchComponent />
                             </div>
                         </div>
@@ -105,7 +103,7 @@ function SearchComponent() {
     }
 
     return (
-        <div className="flex gap-x-3  rounded-[42px] border md:border-white b border-opacity-70 items-center">
+        <div className="flex gap-x-3  rounded-[42px] border lg:border-white b border-opacity-70 items-center">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                     <FormField
@@ -129,29 +127,54 @@ function SearchComponent() {
     )
 }
 
+type MenuList = {
+    path: string;
+    label: string;
+}
+export const menuList: Array<MenuList> = [
+    {
+        path: "/",
+        label: "Home"
+    },
+    {
+        path: "/donate",
+        label: "Donate"
+    },
+    {
+        path: "/about",
+        label: "About"
+    },
+    {
+        path: "/manuscripts",
+        label: "Manuscripts"
+    },
+    {
+        path: "/problems",
+        label: "Problems"
+    },
 
-
-
+]
 function Dropdown() {
+    const pathname = usePathname()
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
-                <div className="font-bold flex gap-1  items-center py-3">
-                    <Link href="/" className="hover:scale-110 transition-all">Home</Link>
-                    <ChevronDownIcon className="h-4 w-4 shrink-0 text-white transition-transform lg:hidden" />
+                <div className={cn(
+                    menuList.find((m)=> m.path === pathname)?.label
+                )}>
+                {menuList.label}
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="lg:hidden ">
-                <DropdownMenuItem>
-                    <a href="/" className="text-primary-dark hover:bg-secondary hover:text-primary-dark hover:font-bold">
-                        Home
-                    </a>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                    <a href="/donate" className="text-primary-dark hover:bg-secondary hover:text-primary-dark hover:font-bold">
-                        Donation
-                    </a>
-                </DropdownMenuItem>
+                {
+                    menuList.map((menuItem, index) => (
+                        <div key={index}
+                        className="space-y-2" >
+                            <a href={menuItem.path}>{menuItem.label}</a>
+                        </div>
+                    ))
+                }
                 <DropdownMenuSeparator />
                 <SearchComponent />
             </DropdownMenuContent>
@@ -175,6 +198,12 @@ export function UserDropdownMenu({ session }: { session: Session }) {
                     <span className="block">{session?.user.name}</span>
                     <span className="block text-sm font-normal">{session?.user.email}</span>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {
+                    session.user.role === "ADMIN" || session.user.role=== "EDITOR" && (
+                        <Link></Link>
+                    )
+                }
                 <DropdownMenuSeparator />
                 <LogoutButton />
             </DropdownMenuContent>
