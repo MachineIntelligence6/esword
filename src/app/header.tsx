@@ -36,7 +36,7 @@ export default function SiteHeader() {
             <nav className="flex justify-between px-6 items-center h-[70px] w-full bg-primary">
                 <div>
                     <Link href="/">
-                        <Image width={250} height={100} alt="" src="/images/logo.png" className="object-contain bg-cover min-h-[60px] min-w-[200px] w-[250px]" />
+                        <Image width={250} height={100} quality={100} alt="" src="/images/logo.png" className="object-contain bg-cover min-h-[60px] min-w-[200px] w-[250px]" />
                     </Link>
                 </div>
                 <div className="flex items-center gap-x-6">
