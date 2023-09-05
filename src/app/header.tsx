@@ -20,6 +20,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import { ResponsiveSidebarButtton } from "./dashboard/sidebar";
+import { cn } from "@/lib/utils";
 
 
 
@@ -154,19 +155,22 @@ export const menuList: Array<MenuList> = [
 
 ]
 function Dropdown() {
+    const pathname = usePathname()
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
-                <div className="font-bold flex gap-1  items-center py-3">
-                    <Link href="/" className="hover:scale-110 transition-all">Home</Link>
-                    <ChevronDownIcon className="h-4 w-4 shrink-0 text-white transition-transform lg:hidden" />
+                <div className={cn(
+                    menuList.find((m)=> m.path === pathname)?.label
+                )}>
+                {menuList.label}
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="lg:hidden ">
                 {
                     menuList.map((menuItem, index) => (
-                        <div key={index} >
+                        <div key={index}
+                        className="space-y-2" >
                             <a href={menuItem.path}>{menuItem.label}</a>
                         </div>
                     ))
@@ -194,6 +198,12 @@ export function UserDropdownMenu({ session }: { session: Session }) {
                     <span className="block">{session?.user.name}</span>
                     <span className="block text-sm font-normal">{session?.user.email}</span>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {
+                    session.user.role === "ADMIN" || session.user.role=== "EDITOR" && (
+                        <Link></Link>
+                    )
+                }
                 <DropdownMenuSeparator />
                 <LogoutButton />
             </DropdownMenuContent>
