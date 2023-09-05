@@ -1,5 +1,4 @@
 'use client'
-
 import { ClipboardEvent, ReactNode } from "react"
 import SiteSidebar from "./sidebar"
 import { usePathname } from "next/navigation"

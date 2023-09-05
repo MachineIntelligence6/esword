@@ -9,7 +9,12 @@ import { EditorProps } from './editor';
 
 Quill.register('modules/blotFormatter', BlotFormatter);
 
-
+class PreserveWhiteSpace {
+    constructor(private quill: any, private options: {}) {
+        quill.container.style.whiteSpace = "pre-line";
+    }
+}
+Quill.register('modules/preserveWhiteSpace', PreserveWhiteSpace);
 
 
 const modules = (disabled?: boolean) => {
@@ -44,10 +49,10 @@ const modules = (disabled?: boolean) => {
                 // see config options below
             }
         }),
+        preserveWhiteSpace: true,
         clipboard: {
             matchVisual: false,
         },
-
     }
 }
 
