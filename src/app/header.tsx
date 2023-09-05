@@ -159,8 +159,8 @@ function Dropdown() {
     const pathname = usePathname()
 
     return (
-        <DropdownMenu >
-            <DropdownMenuTrigger className="p-0">
+        <DropdownMenu>
+            <DropdownMenuTrigger>
                 <div className="flex gap-1 items-center">
                     {menuList.find((m) => m.path === pathname)?.label}
                     <ChevronDownIcon />
