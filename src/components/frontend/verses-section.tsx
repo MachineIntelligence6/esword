@@ -31,14 +31,14 @@ export function VersesSection() {
                 </div>
                 {/* verses component for small screen */}
                 <div className="block lg:hidden">
-                    <Accordion type="single" collapsible>
+                    <Accordion type="single" collapsible defaultValue="item-1">
                         <AccordionItem value="item-1">
                             <AccordionTrigger className="toggle-btn bg-silver-light py-3  lg:pl-3 pl-[20px] pr-[19px] lg:border-0 border-b flex justify-between">
                                 <h3 className="text-xs font-bold">
                                     VERSES
                                 </h3>
                             </AccordionTrigger>
-                            <AccordionContent>
+                            <AccordionContent >
                                 <VersesSectionContent />
                             </AccordionContent>
                         </AccordionItem>
@@ -305,3 +305,6 @@ function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseCom
         </div>
     )
 }
+
+
+
