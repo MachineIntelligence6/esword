@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation'
 import Link from "next/link";
 import { canUserAccessPath } from "@/lib/roles-manager";
 import { Session } from "next-auth";
-import { Route } from "next";
-import { BoxIcon, ButtonIcon, Cross1Icon, FaceIcon, FontFamilyIcon, TextAlignJustifyIcon } from "@radix-ui/react-icons";
+import { Cross1Icon, TextAlignJustifyIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSidebarStore } from "@/lib/zustand/sidebarStore";
 
 
 type MenuItem = {
@@ -77,14 +77,26 @@ export const menuItems: Array<MenuItem> = [
 ]
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
     session: Session;
-    
+
 }
 
 export default function DashboardSidebar({ session, className }: SidebarProps) {
     const pathname = usePathname()
+    const { sidebarActive, setSidebarActive } = useSidebarStore()
+
+
+    useEffect(() => {
+        setSidebarActive(false)
+    }, [pathname, setSidebarActive])
+
     return (
-        <div className={cn("py-5 shadow bg-white min-h-screen  fixed xl:static  ", className)}>
-            <ScrollArea className="h-full px-1">
+        <div className={cn(
+            "py-5 shadow bg-white min-h-screen",
+            sidebarActive ? "fixed z-50" : "hidden",
+            "xl:!static",
+            className
+        )}>
+            <ScrollArea className="h-full px-1 max-h-[calc(100vh_-_100px)] overflow-y-auto">
 
                 <div className="space-y-1 p-2">
                     {
@@ -103,35 +115,35 @@ export default function DashboardSidebar({ session, className }: SidebarProps) {
                     }
                 </div>
             </ScrollArea>
-
-
         </div>
     )
 }
 
 
-export  function ResponsiveSidebarButtton() {
-    const [showCrossButton, setShowCrossButton] = useState(true);
+export function ResponsiveSidebarButtton() {
+    const { sidebarActive, setSidebarActive } = useSidebarStore()
+
     const handleButtonClick = () => {
-        setShowCrossButton(!showCrossButton);
+        setSidebarActive(!sidebarActive)
     };
     return (
         <div>
-            {showCrossButton ? (
-                <Button
-                    className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
-                    onClick={handleButtonClick}
-                >
-                    <Cross1Icon />
-                </Button>
-            ) : (
-                <Button
-                    className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
-                    onClick={handleButtonClick}
-                >
-                    <TextAlignJustifyIcon />
-                </Button>
-            )}
+            {
+                sidebarActive ? (
+                    <Button
+                        className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
+                        onClick={handleButtonClick}
+                    >
+                        <Cross1Icon />
+                    </Button>
+                ) : (
+                    <Button
+                        className="bg-white hover:bg-primary hover:text-white  text-black rounded-lg xl:hidden"
+                        onClick={handleButtonClick}
+                    >
+                        <TextAlignJustifyIcon />
+                    </Button>
+                )}
         </div>
     )
 }
