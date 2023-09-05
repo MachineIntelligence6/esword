@@ -162,8 +162,7 @@ function Dropdown() {
             <DropdownMenuTrigger>
                 <div className="flex gap-1 items-center">
                     {menuList.find((m) => m.path === pathname)?.label}
-                    <ChevronDownIcon/>
-                    
+                    <ChevronDownIcon />
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="lg:hidden ">
