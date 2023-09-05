@@ -83,17 +83,23 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 export default function DashboardSidebar({ session, className }: SidebarProps) {
     const pathname = usePathname()
     const { sidebarActive, setSidebarActive } = useSidebarStore()
-
+    const [screenWidth, setScreenWidth] = useState<number>(0);
 
     useEffect(() => {
         setSidebarActive(false)
     }, [pathname, setSidebarActive])
 
+    useEffect(() => {
+        window.onresize = () => {
+            setScreenWidth(window.innerWidth)
+        }
+        setScreenWidth(window.innerWidth)
+    }, [])
+
     return (
         <div className={cn(
             "py-5 shadow bg-white min-h-screen",
-            sidebarActive ? "fixed z-50" : "hidden",
-            "xl:!static",
+            (screenWidth < 1280) && (sidebarActive ? "fixed z-50" : "hidden"),
             className
         )}>
             <ScrollArea className="h-full px-1 max-h-[calc(100vh_-_100px)] overflow-y-auto">
