@@ -21,7 +21,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50",
+      "flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-white disabled:cursor-not-allowed disabled:opacity-50",
       className
     )}
     {...props}
@@ -310,13 +310,13 @@ const SideBarEl = React.forwardRef<HTMLSelectElement, SideBarProps>(({ options, 
         <SelectValue placeholder={placeholder ?? ""} />
       </SelectTrigger>
       <SelectContent className="p-0 border-none hover:border-none ">
-        {
+        {/* {
           options && !loading &&
           <>
             <input className="flex w-full rounded-md bg-transparent py-2 px-3 text-sm outline-none" placeholder="Search..." onChange={(e) => handleFilterChange(e.target.value)} />
             <Separator />
           </>
-        }
+        } */}
         {
           loading ?
             <div className="w-full py-10 flex items-center justify-center">

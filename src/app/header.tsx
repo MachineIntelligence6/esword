@@ -199,11 +199,13 @@ export function UserDropdownMenu({ session }: { session: Session }) {
                     <span className="block text-sm font-normal">{session?.user.email}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {
+                {/* {
                     session.user.role === "ADMIN" || session.user.role === "EDITOR" && (
-                        <Link></Link>
+                        <div>
+
+                        </div>
                     )
-                }
+                } */}
                 <DropdownMenuSeparator />
                 <LogoutButton />
             </DropdownMenuContent>
