@@ -265,5 +265,81 @@ export {
   SelectItem,
   SelectSeparator,
   SelectEl,
+  SideBarEl,
   ComboBox
 }
+
+
+
+
+export type SideBarOption = {
+  label: string;
+  value: string;
+  rawValue: any;
+}
+
+type SideBarProps = {
+  options?: Array<SideBarOption>;
+  loading?: boolean;
+  value?: string;
+  onChange?: (opt?: SideBarOption | null) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+const SideBarEl = React.forwardRef<HTMLSelectElement, SideBarProps>(({ options, placeholder, disabled, loading, onChange, value }, ref) => {
+  const [filteredOpts, setFilteredOpts] = React.useState(options)
+  const handleChange = (value: string) => {
+    const option = options?.find((opt) => opt.value === value)
+    // if (!option || !onChange) return;
+    onChange?.(option)
+  }
+
+
+  React.useEffect(() => {
+    setFilteredOpts(options)
+  }, [options])
+
+  const handleFilterChange = (val: string) => {
+    setFilteredOpts(options?.filter((opt) => opt.label.toLowerCase().includes(val.toLowerCase())))
+  }
+
+  return (
+    <Select onValueChange={handleChange} value={value} required>
+      <SelectTrigger className="w-full pl-5 h-10 border-none shadow-none py-0" disabled={disabled}>
+        <SelectValue placeholder={placeholder ?? ""} />
+      </SelectTrigger>
+      <SelectContent className="p-0 border-none hover:border-none ">
+        {
+          options && !loading &&
+          <>
+            <input className="flex w-full rounded-md bg-transparent py-2 px-3 text-sm outline-none" placeholder="Search..." onChange={(e) => handleFilterChange(e.target.value)} />
+            <Separator />
+          </>
+        }
+        {
+          loading ?
+            <div className="w-full py-10 flex items-center justify-center">
+              <Spinner className="w-10 h-10 border-4" />
+            </div>
+            :
+            !filteredOpts || filteredOpts?.length <= 0 ?
+              <div className="w-full py-10 flex items-center justify-center">
+                <p>No data.</p>
+              </div>
+              :
+              <div className="mt-2 max-h-96 overflow-y-auto ">
+                {
+                  filteredOpts?.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))
+                }
+              </div>
+        }
+      </SelectContent>
+    </Select>
+  )
+})
+SideBarEl.displayName = "SideBarEl"

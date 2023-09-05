@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { LogoutButton } from "@/components/dashboard/buttons"
+import { BackButton, LogoutButton } from "@/components/dashboard/buttons"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -12,13 +12,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDownIcon, MagnifyingGlassIcon, PersonIcon, ZoomInIcon } from "@radix-ui/react-icons"
+import {  ChevronDownIcon, TextAlignJustifyIcon, Cross1Icon, MagnifyingGlassIcon,  PersonIcon, } from "@radix-ui/react-icons"
 import { Session } from "next-auth";
 import { Form, FormField, FormItem } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useSession } from "next-auth/react";
+import { ResponsiveSidebarButtton } from "./dashboard/sidebar";
 
 
 
@@ -49,6 +50,9 @@ export default function SiteHeader() {
                                 <Link href="/" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
                                     Home
                                 </Link>
+                                <Link href="/about" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
+                                    About
+                                </Link>
                                 <Link href="/donate" className="font-normal py-3 md:block hidden hover:scale-110 transition-all">
                                     Donate
                                 </Link>
@@ -63,6 +67,10 @@ export default function SiteHeader() {
                                 <SearchComponent />
                             </div>
                         </div>
+                    }
+                    {
+                        pathname.startsWith("/dashboard") &&
+                        <ResponsiveSidebarButtton />
                     }
                     <div>
                         {session && <UserDropdownMenu session={session} />}
@@ -173,3 +181,6 @@ export function UserDropdownMenu({ session }: { session: Session }) {
         </DropdownMenu>
     )
 }
+
+
+

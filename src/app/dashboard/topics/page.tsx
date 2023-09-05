@@ -15,7 +15,7 @@ export default function Page() {
   const [selectedTopic, setSelectedTopic] = useState<ITopic | null>(null);
 
   return (
-    <div className="grid grid-cols-12 gap-5">
+    <div className="xl:grid grid-cols-12 gap-5">
       <div className="col-span-8 w-full">
         <Card className="min-h-[600px]">
           <CardHeader className="border-b-8 border-silver-light py-4">

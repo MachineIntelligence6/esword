@@ -31,7 +31,7 @@ export default function BlogsPageComponent({ variant }: Props) {
 
     return (
         <div className="w-full bg-white">
-            <div className="lg:grid grid-cols-11 ">
+            <div className="lg:grid grid-cols-11  ">
                 <div className="block bg-primary lg:hidden">
                     <Accordion type="single" collapsible>
                         <AccordionItem value="item-1">
@@ -44,6 +44,9 @@ export default function BlogsPageComponent({ variant }: Props) {
                             <AccordionContent className="p-5 overflow-auto max-h-[calc(100vh_-_200px)]">
                                 <BlogsContent />
                             </AccordionContent>
+                            <div className=" z-[2] flex items-center justify-center w-full overflow-hidden bg-primary px-5 pb-2">
+                                <BlogsPagination variant={variant} />
+                            </div>
                         </AccordionItem>
                     </Accordion>
                 </div>
@@ -54,7 +57,7 @@ export default function BlogsPageComponent({ variant }: Props) {
                     {variant}S
                 </h3>
             </div>
-            <div className="lg:grid grid-cols-11">
+            <div className="lg:grid grid-cols-11 ">
                 <div className="col-span-7 w-full text-primary-dark text-base font-normal font-roman lg:border-r-[10px]  ">
                     <div className="flex">
                         <div className="space-y-3 max-h-[calc(100vh_-_100px)] overflow-y-auto w-full p-4">
@@ -70,7 +73,7 @@ export default function BlogsPageComponent({ variant }: Props) {
                     </div>
                 </div>
                 <div className="col-span-4 bg-primary lg:block hidden overflow-hidden relative h-screen max-h-[calc(100vh_-_100px)]">
-                    <div className="p-5 space-y-4 overflow-auto min-h-full max-h-full">
+                    <div className="p-5 space-y-4 overflow-y-auto min-h-full ">
                         <BlogsContent />
                     </div>
                     <div className="absolute z-[2] bottom-5 w-full overflow-hidden bg-primary px-5">
@@ -109,7 +112,7 @@ function BlogsContent() {
                             </div>
                     )
                     :
-                    <div className="space-y-2 md:space-y-5">
+                    <div className="space-y-2  md:space-y-5">
                         {
                             [1, 2, 3, 4, 5, 6].map((num) => (
                                 <Card key={num} className="bg-white w-full">
@@ -202,7 +205,7 @@ export function BlogsPagination({ variant }: BlogsPaginationProps) {
             <div className="flex gap-10 md:gap-2 justify-between">
                 {
                     totalPages > 0 && blogsList && blogsList.length > 0 ?
-                        <div className="flex w-[100px] items-center md:justify-center text-sm font-medium">
+                        <div className="flex w-[100px] items-center md:justify-center text-xs md:text-sm font-medium">
                             Page {currentPage} of{" "} {totalPages}
                         </div>
                         : <span />
