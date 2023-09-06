@@ -3,7 +3,6 @@ import { IBook, IBookmark, IChapter, ICommentary, IHighlight, ITopic, IVerse } f
 import { Author } from "@prisma/client";
 import { getSession } from "next-auth/react";
 import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
 
 
 
@@ -97,7 +96,7 @@ const checkAndSaveNote = (state: ReadBookStoreType) => {
 
 
 
-export const useReadBookStore = create<ReadBookStoreType>()(persist(
+export const useReadBookStore = create<ReadBookStoreType>()(
     (set, get) => ({
         activeBook: {},
         activeChapter: {},
@@ -135,7 +134,6 @@ export const useReadBookStore = create<ReadBookStoreType>()(persist(
                 },
             }))
             const chapter = chapterNum ? get().chaptersList?.find((ch) => ch.name === chapterNum) : get().chaptersList?.[0]
-            console.log("chapter found = ", chapter)
             if (chapter) await get().setActiveChapter(chapter.id, verseNum)
         },
         setActiveChapter: async (chapterId, verseNum) => {
@@ -400,20 +398,15 @@ export const useReadBookStore = create<ReadBookStoreType>()(persist(
         loadInitialData: async (bookSlug, chapterNum, verseNum) => {
             set({ initialLoading: true })
             const { data: books } = await clientApiHandlers.books.get({ page: 1, perPage: -1 })
-            set((state) => ({ ...state, booksList: books }))
+            set((state) => ({ ...state, booksList: books, initialLoading: false }))
             await get().loadBookmarks()
             const book = bookSlug ? books?.find((b) => b.slug === bookSlug) : books?.[0]
             if (book) {
                 await get().setActiveBook(book.id, chapterNum, verseNum)
             }
-            set((state) => ({ ...state, initialLoading: false }))
+            // set((state) => ({ ...state, initialLoading: false }))
         }
-    }),
-    {
-        name: "read-book-storage",
-        storage: createJSONStorage(() => sessionStorage),
-        skipHydration: true
-    }
-))
+    })
+)
 
 

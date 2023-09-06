@@ -51,7 +51,7 @@ model Chapter {
   id             Int       @id @default(autoincrement())
   name           Int
   commentaryName String?   @map("commentary_name")
-  commentaryText String?   @map("commentary_text")
+  commentaryText String?   @map("commentary_text") @db.LongText
   slug           String    @unique
   bookId         Int       @map("book_id")
   book           Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
