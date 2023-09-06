@@ -46,7 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 
     return (
-        <div className="space-y-4 w-full">
+        <div className="space-y-4 w-full ">
             <div className="flex items-center gap-5 justify-between bg-white rounded-md shadow p-3">
                 <div className="flex items-center gap-5">
                     <BackButton />
