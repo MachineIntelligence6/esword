@@ -7,19 +7,15 @@ import { VersesSection } from "@/components/frontend/verses-section";
 
 
 export default function Page() {
-    
-
     return (
         <div className="w-full" >
             <div className="lg:flex block w-full">
                 <VersesSection />
                 <div className="xl:max-w-[30%] xl:min-w-[30%] lg:max-w-[40%] lg:min-w-[40%] max-h-full min-h-full lg:flex lg:flex-col" >
-                    {/* Commentaries */}
                     <div className="w-full h-1/2">
                         <div className="hidden lg:block">
                             <CommentariesContentComponent />
                         </div>
-                        {/* commentaries component for small screen */}
                         <div className="block lg:hidden">
                             <Accordion type="single" collapsible>
                                 <AccordionItem value="item-1">
@@ -49,7 +45,7 @@ export default function Page() {
                                         </h3>
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <NotesContentComponent />
+                                        {/* <NotesContentComponent /> */}
                                     </AccordionContent>
                                 </AccordionItem>
                             </Accordion>

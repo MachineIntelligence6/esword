@@ -32,7 +32,7 @@ export const useBlogsStore = create<BlogsStoreType>()(
             set({ loadingBlogs: true, blogsList: null, currentPage: page })
             const { data: blogs, pagination } = await clientApiHandlers.blogs.get({
                 page: page,
-                perPage: defaults.PER_PAGE_ITEMS,
+                perPage: 10,
                 where: { type: blogType }
             })
             const firstBlog = blogs?.[0]

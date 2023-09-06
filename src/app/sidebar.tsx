@@ -3,7 +3,8 @@ import { BooksLoadingPlaceholder, ChaptersLoadingPlaceholder } from "@/component
 import { SideBarEl } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
-import { useSearchParams } from "next/navigation";
+import { IBook } from "@/shared/types/models.types";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 
@@ -48,6 +49,12 @@ export default function SiteSidebar() {
 
 function SidebarBooksComponent() {
     const { booksList, activeBook, setActiveBook } = useReadBookStore()
+    const router = useRouter()
+
+    const changeBook = (book: IBook) => {
+        window.location.replace(`/?book=${book.slug}`)
+        // window.location.reload()
+    }
     return (
         <div className="lg:min-w-[130px] lg:max-w-[130px] w-full lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
             <div className="lg:bg-silver-light bg-white py-3 flex lg:border-0 border-b flex-col lg:rounded-none rounded-lg">
@@ -58,7 +65,7 @@ function SidebarBooksComponent() {
                     <SideBarEl
                         value={activeBook !== undefined ? activeBook.id?.toString() : ''}
                         onChange={(opt) => {
-                            if (opt?.value) setActiveBook(Number(opt.value));
+                            if (opt?.value) changeBook(opt.rawValue as IBook)
                         }}
                         options={booksList?.map((book) => ({
                             label: book.name,
@@ -90,7 +97,7 @@ function SidebarBooksComponent() {
                             booksList?.map((book) => (
                                 <button
                                     key={book.id} type="button"
-                                    onClick={() => setActiveBook(book.id)}
+                                    onClick={() => changeBook(book)}
                                     className={cn(
                                         "px-5 py-2 transition-all w-full text-start block max-w-full text-sm overflow-hidden text-ellipsis whitespace-nowrap hover:scale-110",
                                         activeBook.id === book.id ? "bg-secondary font-bold text-primary-dark " : "hover:font-bold hover:text-primary-dark hover:bg-secondary"
