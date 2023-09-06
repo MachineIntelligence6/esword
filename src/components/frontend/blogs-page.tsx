@@ -41,7 +41,7 @@ export default function BlogsPageComponent({ variant }: Props) {
                                 </h3>
                                 <ChevronDownIcon className="h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 dark:text-stone-400 " />
                             </AccordionTrigger>
-                            <AccordionContent className="p-0 overflow-auto max-h-[calc(100vh_-_200px)]">
+                            <AccordionContent className="p-0 overflow-auto ">
                                 <BlogsContent variant={variant} />
                             </AccordionContent>
                         </AccordionItem>
@@ -69,7 +69,7 @@ export default function BlogsPageComponent({ variant }: Props) {
                         <BookmarksList />
                     </div>
                 </div>
-                <div className="col-span-4 bg-primary lg:block hidden overflow-hidden w-full h-screen max-h-[calc(100vh_-_100px)]">
+                <div className="col-span-4 bg-primary lg:block hidden overflow-auto w-full h-screen ">
                     <BlogsContent variant={variant} />
                 </div>
             </div>
@@ -87,7 +87,7 @@ function BlogsContent({ variant }: BlogsContentProps) {
 
     return (
         <div className="overflow-y-auto min-h-full relative">
-            <div className="p-5 space-y-4">
+            <div className="p-5  space-y-4 pb-20 lg:pb-0 lg:max-h-[calc(100vh_-_100px)] overflow-auto">
                 {
                     (!loadingBlogs && blogsList) ?
                         (
@@ -120,7 +120,7 @@ function BlogsContent({ variant }: BlogsContentProps) {
                         </div>
                 }
             </div>
-            <div className="absolute z-[2] bottom-5 w-full overflow-hidden bg-primary px-5">
+            <div className="absolute z-[2] bottom-5 lg:bottom-12   w-full overflow-hidden bg-primary px-5">
                 <BlogsPagination variant={variant} />
             </div>
         </div>
@@ -200,7 +200,7 @@ export function BlogsPagination({ variant }: BlogsPaginationProps) {
     const visiblePages = getVisiblePages();
 
     return (
-        <div className="bg-white px-3 py-2 rounded-lg  w-full max-w-[700px]">
+        <div className="bg-white px-3 py-1 rounded-lg  w-full max-w-[800px]">
             <div className="flex gap-10 md:gap-2 justify-between">
                 {
                     totalPages > 0 && blogsList && blogsList.length > 0 ?

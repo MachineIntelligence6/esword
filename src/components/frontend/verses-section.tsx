@@ -6,7 +6,7 @@ import { IBookmark, IChapter, IHighlight, IVerse } from "@/shared/types/models.t
 import { cn } from "@/lib/utils";
 import { BookmarksLoadingPlaceholder, TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
-import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, EyeOpenIcon, PlayIcon, TrashIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
+import { BookmarkIcon, CheckCircledIcon, ChevronLeftIcon, ChevronRightIcon, EyeOpenIcon, PlayIcon, TrashIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
 import { Button } from "../ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import clientApiHandlers from "@/client/handlers";
@@ -98,7 +98,11 @@ function VersesSectionContent() {
         setActiveChapter(previousChapter.id)
     }
 
+    const [showBookmarks, setShowBookmarks] = useState(false);
 
+    const toggleBookmarks = () => {
+        setShowBookmarks((prevShowBookmarks) => !prevShowBookmarks);
+    };
     const showPlaceholder = initialLoading || activeBook.loading || activeChapter.loading || !booksList || !chaptersList;
     return (
         <>
@@ -215,7 +219,28 @@ function VersesSectionContent() {
                         </div>
                     </div>
                     {/* bookmark icons section */}
-                    <BookmarksList />
+                    <div className="hidden lg:block">
+                        <BookmarksList />
+                    </div>
+                    <div className="lg:hidden">
+                        {showBookmarks ? (
+                            <ChevronRightIcon
+                                onClick={toggleBookmarks}
+                                className="cursor-pointer"
+                            />
+                        ) : (
+                            <ChevronLeftIcon
+                                onClick={toggleBookmarks}
+                                className="cursor-pointer"
+                            />
+                        )}
+
+                        <div className={showBookmarks ? 'w-full' : 'hidden'}>
+                            {showBookmarks && <BookmarksList />}
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
         </>
