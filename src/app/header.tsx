@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import { ResponsiveSidebarButtton } from "./dashboard/sidebar";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 
 
@@ -153,13 +154,22 @@ export const menuList: Array<MenuList> = [
         path: "/problems",
         label: "Problems"
     },
+    {
+        path: "/search",
+        label: "Search"
+    },
 
 ]
 function Dropdown() {
     const pathname = usePathname()
+    const [open, setOpen] = useState(false)
+
+    useEffect(() => {
+        setOpen(false)
+    }, [pathname])
 
     return (
-        <DropdownMenu>
+        <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger>
                 <div className="flex gap-1 items-center">
                     {menuList.find((m) => m.path === pathname)?.label}
@@ -169,10 +179,10 @@ function Dropdown() {
             <DropdownMenuContent className="lg:hidden ">
                 {
                     menuList.map((menuItem, index) => (
-                        <div key={index}
-                            className="py-1 px-3" >
-                            <a href={menuItem.path}>{menuItem.label}</a>
-                        </div>
+                        menuItem.path !== "/search" &&
+                        <Link key={index} href={menuItem.path} className="w-full block px-3 py-1">
+                            {menuItem.label}
+                        </Link>
                     ))
                 }
                 <DropdownMenuSeparator />

@@ -31,6 +31,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={cn(
         inter.className,
+        "max-w-full !overflow-x-hidden"
         // "max-h-screen overflow-hidden"
       )}>
         <AuthProvider session={session}>

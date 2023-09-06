@@ -41,12 +41,9 @@ export default function BlogsPageComponent({ variant }: Props) {
                                 </h3>
                                 <ChevronDownIcon className="h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 dark:text-stone-400 " />
                             </AccordionTrigger>
-                            <AccordionContent className="p-5 overflow-auto max-h-[calc(100vh_-_200px)]">
-                                <BlogsContent />
+                            <AccordionContent className="p-0 overflow-auto max-h-[calc(100vh_-_200px)]">
+                                <BlogsContent variant={variant} />
                             </AccordionContent>
-                            <div className=" z-[2] flex items-center justify-center w-full overflow-hidden bg-primary px-5 pb-2">
-                                <BlogsPagination variant={variant} />
-                            </div>
                         </AccordionItem>
                     </Accordion>
                 </div>
@@ -72,13 +69,8 @@ export default function BlogsPageComponent({ variant }: Props) {
                         <BookmarksList />
                     </div>
                 </div>
-                <div className="col-span-4 bg-primary lg:block hidden overflow-hidden relative h-screen max-h-[calc(100vh_-_100px)]">
-                    <div className="p-5 space-y-4 overflow-y-auto min-h-full ">
-                        <BlogsContent />
-                    </div>
-                    <div className="absolute z-[2] bottom-5 w-full overflow-hidden bg-primary px-5">
-                        <BlogsPagination variant={variant} />
-                    </div>
+                <div className="col-span-4 bg-primary lg:block hidden overflow-hidden w-full h-screen max-h-[calc(100vh_-_100px)]">
+                    <BlogsContent variant={variant} />
                 </div>
             </div>
         </div>
@@ -86,45 +78,52 @@ export default function BlogsPageComponent({ variant }: Props) {
 }
 
 
+type BlogsContentProps = {
+    variant: BlogType
+}
 
-
-function BlogsContent() {
+function BlogsContent({ variant }: BlogsContentProps) {
     const { blogsList, loadingBlogs, setActiveBlog } = useBlogsStore()
 
     return (
-        <>
-            {
-                (!loadingBlogs && blogsList) ?
-                    (
-                        blogsList.length > 0 ?
-                            <div className="space-y-2 md:space-y-5">
-                                {
-                                    blogsList?.map((blog) => (
-                                        <BlogListItem
-                                            key={blog.id} blog={blog}
-                                            onClick={() => setActiveBlog(blog)} />
-                                    ))
-                                }
-                            </div>
-                            :
-                            <div className="h-80 flex items-center justify-center">
-                                <p className="text-white">No data found.</p>
-                            </div>
-                    )
-                    :
-                    <div className="space-y-2  md:space-y-5">
-                        {
-                            [1, 2, 3, 4, 5, 6].map((num) => (
-                                <Card key={num} className="bg-white w-full">
-                                    <CardContent className="p-4 py-2">
-                                        <BlogLoadingPlaceholder />
-                                    </CardContent>
-                                </Card>
-                            ))
-                        }
-                    </div>
-            }
-        </>
+        <div className="overflow-y-auto min-h-full relative">
+            <div className="p-5 space-y-4">
+                {
+                    (!loadingBlogs && blogsList) ?
+                        (
+                            blogsList.length > 0 ?
+                                <div className="space-y-2 md:space-y-5">
+                                    {
+                                        blogsList?.map((blog) => (
+                                            <BlogListItem
+                                                key={blog.id} blog={blog}
+                                                onClick={() => setActiveBlog(blog)} />
+                                        ))
+                                    }
+                                </div>
+                                :
+                                <div className="h-80 flex items-center justify-center">
+                                    <p className="text-white">No data found.</p>
+                                </div>
+                        )
+                        :
+                        <div className="space-y-2 md:space-y-5">
+                            {
+                                [1, 2, 3, 4, 5, 6].map((num) => (
+                                    <Card key={num} className="bg-white w-full">
+                                        <CardContent className="p-4 py-2">
+                                            <BlogLoadingPlaceholder />
+                                        </CardContent>
+                                    </Card>
+                                ))
+                            }
+                        </div>
+                }
+            </div>
+            <div className="absolute z-[2] bottom-5 w-full overflow-hidden bg-primary px-5">
+                <BlogsPagination variant={variant} />
+            </div>
+        </div>
     )
 }
 

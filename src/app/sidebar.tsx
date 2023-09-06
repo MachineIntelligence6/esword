@@ -37,7 +37,7 @@ export default function SiteSidebar() {
     // }, [])
 
     return (
-        <div className="flex lg:mx-0 mx-[10px] lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white lg:max-w-[186px] lg:min-w-[186px] w-full  lg:px-0 px-3 ">
+        <div className="flex lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white lg:max-w-[186px] lg:min-w-[186px] w-full lg:px-0 px-3">
             <SidebarBooksComponent />
             <SidebarChaptersComponent />
         </div>
