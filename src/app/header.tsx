@@ -45,10 +45,10 @@ export default function SiteHeader() {
                     {
                         !pathname.startsWith("/dashboard") && !pathname.startsWith("/login") &&
                         <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm">
-                            <div className="flex lg:hidden">
+                            <div className="flex xl:hidden">
                                 <Dropdown />
                             </div>
-                            <div className="hidden lg:flex items-center md:gap-x-6 ">
+                            <div className="hidden xl:flex items-center md:gap-x-6 ">
                                 {
                                     menuList.map((menuItem, index) => (
                                         <div
@@ -62,7 +62,7 @@ export default function SiteHeader() {
 
 
                             </div>
-                            <div className="lg:block hidden">
+                            <div className="xl:block hidden">
                                 <SearchComponent />
                             </div>
                         </div>
@@ -176,7 +176,7 @@ function Dropdown() {
                     <ChevronDownIcon />
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="lg:hidden ">
+            <DropdownMenuContent className="xl:hidden ">
                 {
                     menuList.map((menuItem, index) => (
                         menuItem.path !== "/search" &&
