@@ -89,11 +89,11 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 function ICommentaryDetailsCard({ commentary }: { commentary: ICommentary }) {
     return (
-        <Card className="w-fit">
+        <Card className="lg:w-fit">
             <CardHeader>
                 <CardTitle className="text-xl">Commentary Details</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-between gap-20">
+            <CardContent className="flex lg:flex-row flex-col justify-between gap-20">
                 <div className="flex items-center gap-5 flex-wrap text-base font-normal">
                     <span>Book:</span>
                     <span className="font-semibold">{commentary.verse?.topic?.chapter?.book?.name}</span>

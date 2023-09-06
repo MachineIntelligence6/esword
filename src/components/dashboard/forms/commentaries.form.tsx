@@ -174,7 +174,7 @@ export default function CommentariesForm({ commentary }: { commentary?: IComment
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(commentary ? handleUpdate : handleAddNew)}>
-                    <CardContent className="gap-5 pt-5 grid grid-cols-2">
+                    <CardContent className="gap-5 pt-5 flex flex-col md:grid grid-cols-2">
                         <FormField
                             control={form.control}
                             name="name"

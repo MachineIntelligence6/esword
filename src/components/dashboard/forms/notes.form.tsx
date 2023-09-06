@@ -67,7 +67,7 @@ export default function NotesEditorForm({ note, readonly }: Props) {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleUpdate)}>
                     <CardContent className="gap-5 p-5 grid grid-cols-2">
-                        <div className="col-span-full grid grid-cols-2 gap-5">
+                        <div className="col-span-full flex flex-col md:grid grid-cols-2 gap-5">
                             <Card className="w-full p-5">
                                 <CardTitle>User Details</CardTitle>
                                 <CardContent className="px-0 pt-5">

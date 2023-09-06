@@ -6,7 +6,7 @@ import { IBookmark, IChapter, IHighlight, IVerse } from "@/shared/types/models.t
 import { cn } from "@/lib/utils";
 import { BookmarksLoadingPlaceholder, TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
-import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, EyeOpenIcon, PlayIcon, TrashIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
+import { BookmarkIcon, CheckCircledIcon, ChevronLeftIcon, ChevronRightIcon, EyeOpenIcon, PlayIcon, TrashIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
 import { Button } from "../ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import clientApiHandlers from "@/client/handlers";
@@ -23,7 +23,7 @@ import BookmarksList from "./bookmarks-list";
 
 export function VersesSection() {
     return (
-        <div className="flex flex-col xl:max-w-[70%] xl:min-w-[70%] lg:min-w-[60%] lg:max-w-[60%] w-full lg:border-r-[10px]">
+        <div className="flex flex-col xl:max-w-[70%] xl:min-w-[70%] lg:min-w-[60%] lg:max-w-[60%] w-full lg:h-screen  lg:border-r-[10px]">
             <div className="flex mainDiv flex-col lg:h-auto w-auto">
                 {/* verses component for lg screen */}
                 <div className="hidden lg:block">
@@ -98,7 +98,11 @@ function VersesSectionContent() {
         setActiveChapter(previousChapter.id)
     }
 
+    const [showBookmarks, setShowBookmarks] = useState(false);
 
+    const toggleBookmarks = () => {
+        setShowBookmarks((prevShowBookmarks) => !prevShowBookmarks);
+    };
     const showPlaceholder = initialLoading || activeBook.loading || activeChapter.loading || !booksList || !chaptersList;
     return (
         <>
@@ -163,7 +167,7 @@ function VersesSectionContent() {
                     </div>
                 </div>
                 {/* content */}
-                <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)]">
+                <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)] ">
                     <div ref={versesContainerRef} className=" pb-10 pt-2 max-h-[100vh] w-full max-w-full overflow-auto">
                         <div className="min-h-full bg-white space-y-5" style={{ transform: `scale(${scale}) `, transformOrigin: "top left" }}>
                             {
@@ -215,7 +219,28 @@ function VersesSectionContent() {
                         </div>
                     </div>
                     {/* bookmark icons section */}
-                    <BookmarksList />
+                    <div className="hidden lg:block">
+                        <BookmarksList />
+                    </div>
+                    <div className="lg:hidden">
+                        {showBookmarks ? (
+                            <ChevronRightIcon
+                                onClick={toggleBookmarks}
+                                className="cursor-pointer"
+                            />
+                        ) : (
+                            <ChevronLeftIcon
+                                onClick={toggleBookmarks}
+                                className="cursor-pointer"
+                            />
+                        )}
+
+                        <div className={showBookmarks ? 'w-full' : 'hidden'}>
+                            {showBookmarks && <BookmarksList />}
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
         </>

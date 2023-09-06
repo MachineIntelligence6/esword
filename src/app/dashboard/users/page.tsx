@@ -18,7 +18,7 @@ export default function Page() {
 
 
   return (
-    <div className="grid grid-cols-12 gap-5">
+    <div className="md:grid grid-cols-12 flex flex-col gap-5">
       <div className="col-span-8 w-full">
         <Card className="min-h-[600px]">
           <CardHeader className="border-b-8 border-silver-light py-4">
