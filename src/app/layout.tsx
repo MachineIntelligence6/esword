@@ -31,21 +31,18 @@ export default async function RootLayout({
     <html lang="en">
       <body className={cn(
         inter.className,
-        "max-w-full !overflow-x-hidden overflow-hidden"
-        // "max-h-screen overflow-hidden"
+        "max-w-full !overflow-x-hidden overflow-hidden "
+        // "max-h-screen overflow-hidden "
       )}>
-        <div className='overflow-auto max-h-screen'>
           <AuthProvider session={session}>
             <SiteHeader />
-            <div className='pt-[70px]'>
+            <div className='pt-[70px] overflow-y-auto'>
               <SiteInnerLayout>
                 {children}
               </SiteInnerLayout>
             </div>
             <Toaster />
           </AuthProvider>
-        </div>
-
       </body>
     </html>
   )

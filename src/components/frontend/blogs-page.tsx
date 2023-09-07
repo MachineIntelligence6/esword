@@ -54,10 +54,10 @@ export default function BlogsPageComponent({ variant }: Props) {
                     {variant}S
                 </h3>
             </div>
-            <div className="lg:grid grid-cols-11 ">
+            <div className="lg:grid grid-cols-11 max-h-[calc(100vh_-_100px)] overflow-y-auto  ">
                 <div className="col-span-7 w-full text-primary-dark text-base font-normal font-roman lg:border-r-[10px]  ">
                     <div className="flex">
-                        <div className="space-y-3 max-h-[calc(100vh_-_100px)] overflow-y-auto w-full p-4">
+                        <div className="space-y-3  overflow-y-auto w-full p-4">
                             {/* Active Blog Content  */}
                             {
                                 (!loadingBlogs && blogsList) ?
@@ -86,8 +86,8 @@ function BlogsContent({ variant }: BlogsContentProps) {
     const { blogsList, loadingBlogs, setActiveBlog } = useBlogsStore()
 
     return (
-        <div className="overflow-y-auto min-h-full relative">
-            <div className="p-5  space-y-4 pb-20 lg:pb-0 lg:max-h-[calc(100vh_-_100px)] overflow-auto">
+        <div className="overflow-y-auto overflow-hidden min-h-full relative">
+            <div className="p-5  space-y-4 pb-20 lg:pb-0 lg:max-h-[calc(100vh_-_100px)] overflow-y-auto overflow-hidden">
                 {
                     (!loadingBlogs && blogsList) ?
                         (

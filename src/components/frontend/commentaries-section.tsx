@@ -41,7 +41,7 @@ export default function CommentariesContentComponent() {
                 </h3>
             </div>
             <div className="h-full">
-                <div className="flex border-b min-h-[39px] max-h-[39px] items-center px-2 gap-2 max-w-full overflow-x-auto">
+                <div className="flex border-b min-h-[39px] max-h-[39px] items-center px-2 gap-2 max-w-full overflow-x-auto overflow-hidden">
                     {
                         showPlaceholder ?
                             <AuthorsLoadingPlaceholder />

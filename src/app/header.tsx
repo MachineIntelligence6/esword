@@ -51,12 +51,10 @@ export default function SiteHeader() {
                             <div className="hidden xl:flex items-center md:gap-x-6 ">
                                 {
                                     menuList.map((menuItem, index) => (
-                                        <div
-                                            key={index}
-                                            className="font-normal py-3 text-white md:block hidden hover:scale-110 transition-all"
-                                        >
-                                            <a href={menuItem.path}>{menuItem.label}</a>
-                                        </div>
+                                        menuItem.path !== "/search" &&
+                                        <Link className="font-normal py-3 text-white md:block hidden hover:scale-110 transition-all" href={menuItem.path} key={index}>
+                                            {menuItem.label}
+                                        </Link>
                                     ))
                                 }
 
