@@ -2,21 +2,13 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
-import { IBookmark, IChapter, IHighlight, IVerse } from "@/shared/types/models.types";
+import {  IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
-import { BookmarksLoadingPlaceholder, TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
+import { TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
-import { BookmarkIcon, CheckCircledIcon, ChevronLeftIcon, ChevronRightIcon, EyeOpenIcon, PlayIcon, TrashIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
-import { Button } from "../ui/button";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
-import clientApiHandlers from "@/client/handlers";
-import { useToast } from "../ui/use-toast";
-import definedMessages from "@/shared/constants/messages";
-import Spinner from "../spinner";
-import Highlighter from "react-highlight-words";
+import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
 import { Separator } from "../ui/separator";
 import BookmarksList from "./bookmarks-list";
-
 
 
 
@@ -50,12 +42,26 @@ export function VersesSection() {
 }
 
 
+function countOccurrences(verseText: string, selectedText: string, focusOffset: number) {
+    const words = verseText.split(' ');
+
+    // Get the position of the selected text within the verse text
+    const startPosition = words.slice(0, focusOffset).join(' ').length;
+
+    // Count the occurrences of the selected text before the current selection
+    const substringBeforeSelection = verseText.slice(0, startPosition);
+    const occurrenceIndex = (substringBeforeSelection.match(new RegExp(selectedText, 'g')) || []).length;
+
+    return occurrenceIndex;
+}
+
+
 function VersesSectionContent() {
     const {
         topicsList, setActiveVerse, activeChapter,
         activeBook, initialLoading,
         booksList, chaptersList, createNewBookmark,
-        setActiveChapter, activeVerse, saveHighlight
+        setActiveChapter, activeVerse, saveHighlight, removeHighlight
     } = useReadBookStore()
     const versesContainerRef = useRef<HTMLDivElement>(null)
 
@@ -69,13 +75,26 @@ function VersesSectionContent() {
 
     const toggleHighlight = () => {
         const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) {
-            return;
-        }
-        const selectionEl = selection?.anchorNode?.parentElement?.parentElement?.parentElement
-        const elId = selectionEl?.id
+        if (!selection || selection.rangeCount === 0) return
+        const selectionEl = selection.anchorNode?.parentElement
+        const isHighlighted = selectionEl?.tagName === "MARK"
+        let selectionContainer = selection?.anchorNode?.parentElement?.parentElement?.parentElement
+        if (isHighlighted) selectionContainer = selectionContainer?.parentElement
+        const elId = selectionContainer?.id
         const verseId = elId && elId.startsWith("verse_") ? Number(elId.split("_")[1]) : -1
-        if (verseId !== -1 && verseId === activeVerse.id) saveHighlight(verseId, selection.toString())
+        const occurenceIndex = countOccurrences(
+            (selectionEl?.parentElement?.textContent) ?? "",
+            selection.toString(),
+            selection.focusOffset,
+        )
+        if (verseId !== -1 && verseId === activeVerse.id) {
+            if (isHighlighted) {
+                // Text is already highlighted
+                removeHighlight(verseId, selection.toString(), occurenceIndex)
+            } else {
+                saveHighlight(verseId, selection.toString(), occurenceIndex)
+            }
+        }
 
         selection.removeAllRanges();
     };
@@ -259,6 +278,29 @@ const generateRegexPattern = (text: string, index: number) => {
 };
 
 
+
+
+function generateHighlightedText(verse: IVerse) {
+    let highlightedText = verse.text
+
+    verse.highlights?.forEach((h) => {
+        const regexPattern = new RegExp(`\\b${h.text}\\b`, 'gi');
+        let matchCount = 0;
+        function replaceNthOccurrence(match: string, offset: number, input: string) {
+            matchCount++;
+            return matchCount === h.index ? `<mark>${match}</mark>` : match;
+        }
+        highlightedText = highlightedText.replace(regexPattern, replaceNthOccurrence);
+    })
+
+
+    return highlightedText;
+}
+
+
+
+
+
 type VerseComponentProps = {
     onClick?: () => void;
     verse: IVerse;
@@ -268,6 +310,7 @@ type VerseComponentProps = {
 
 function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseComponentProps) {
     const ref = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLSpanElement>(null);
     const { activeBookmark } = useReadBookStore()
 
     const scrollToItem = () => {
@@ -280,29 +323,13 @@ function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseCom
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active, activeBookmark])
 
+    const verseText = generateHighlightedText(verse)
 
 
-    const findChunksForHighlight = (textToHighlight: string, highlight: IHighlight) => {
-        const { text, index } = highlight;
-        const regex = new RegExp(generateRegexPattern(text, index), 'g');
-        const matches = textToHighlight.match(regex);
-
-        if (matches) {
-            return matches.map((match) => {
-                const startIndex = textToHighlight.indexOf(match);
-                return { start: startIndex, end: startIndex + text.length };
-            });
-        }
-
-        return [];
-    };
-
-    const allChunks: { start: number, end: number }[] = [];
-
-    verse.highlights?.forEach((highlight) => {
-        const chunks = findChunksForHighlight(verse.text, highlight);
-        allChunks.push(...chunks);
-    });
+    useEffect(() => {
+        if (!textRef.current) return;
+        textRef.current.innerHTML = verseText
+    }, [verseText])
 
 
     return (
@@ -315,18 +342,10 @@ function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseCom
             <p className={"text-sm text-light-green min-w-max md:text-base"}>
                 {`${verse.topic?.chapter?.book?.abbreviation} ${verse.topic?.chapter?.name}:${verse.number}`}
             </p>
-            <Highlighter
-                searchWords={verse.highlights?.map((h) => h.text) ?? []}
-                autoEscape caseSensitive
-                textToHighlight={verse.text}
-                // highlightTag={Highlight}
-                activeClassName=""
-                className="text-sm text-primary-dark md:text-base"
-            // findChunks={() => allChunks}
-            />
-            {/* <p className={""}>
-                 {verse.text}
-             </p> */}
+            <p className="text-sm text-primary-dark md:text-base [&>mark]:bg-yellow-500 [&>mark]:text-white">
+                <span ref={textRef} dangerouslySetInnerHTML={{ __html: verseText }} suppressHydrationWarning />
+                {/* <span>{parseHtmlFromStr(verseText)}</span> */}
+            </p>
         </div>
     )
 }
