@@ -48,7 +48,7 @@ export function VersesSection() {
 function countOccurrences(verseText: string, selection: Selection) {
     var regexPattern = new RegExp(selection.toString(), "g")
     const matches = Array.from(verseText.matchAll(regexPattern))
-  
+
 
     const index = matches.findIndex((m) => {
         console.log(`${m.index} === `, selection.anchorOffset)
@@ -98,8 +98,7 @@ function VersesSectionContent() {
                     (selectionEl?.textContent) ?? "",
                     selection
                 )
-                if (occurenceIndex === -1) return;
-                saveHighlight(verseId, selection.toString(), occurenceIndex)
+                if (occurenceIndex !== -1) saveHighlight(verseId, selection.toString(), occurenceIndex)
             }
         }
 

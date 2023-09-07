@@ -95,6 +95,11 @@ const checkAndSaveNote = (state: ReadBookStoreType) => {
     }
 }
 
+const syncHighlightsWithDB = (verse: IVerse) => {
+    if (!verse.highlights) return;
+    clientApiHandlers.verses.updateHighlights(verse.id, verse.highlights)
+}
+
 
 
 export const useReadBookStore = create<ReadBookStoreType>()(

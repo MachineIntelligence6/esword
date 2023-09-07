@@ -2,7 +2,7 @@ import axios from "axios";
 import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
 import { Prisma } from "@prisma/client";
 import { VerseFormSchema } from "@/components/dashboard/forms/verses.form";
-import { IVerse } from "@/shared/types/models.types";
+import { IHighlight, IVerse } from "@/shared/types/models.types";
 import { VersesPaginationProps } from "@/shared/types/pagination.types";
 
 
@@ -61,6 +61,19 @@ export async function create(data: VerseFormSchema): Promise<ApiResponse<IVerse>
 export async function update(id: number, update: VerseFormSchema): Promise<ApiResponse<IVerse>> {
     try {
         const res = await axios.put<ApiResponse<IVerse>>(`/api/verses/${id}`, update)
+        if (res.status !== 200) throw new Error()
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR"
+        }
+    }
+}
+
+export async function updateHighlights(id: number, highilights: Array<IHighlight>): Promise<ApiResponse<IVerse>> {
+    try {
+        const res = await axios.put<ApiResponse<IVerse>>(`/api/verses/${id}`, { highilights })
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {
