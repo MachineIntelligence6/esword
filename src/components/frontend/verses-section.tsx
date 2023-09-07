@@ -2,7 +2,7 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
-import {  IChapter, IVerse } from "@/shared/types/models.types";
+import { IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
 import { TopicLoadingPlaceholder, VersesLoadingPlaceholder } from "../loading-placeholders";
 import Image from "next/image";
@@ -42,17 +42,23 @@ export function VersesSection() {
 }
 
 
-function countOccurrences(verseText: string, selectedText: string, focusOffset: number) {
-    const words = verseText.split(' ');
 
-    // Get the position of the selected text within the verse text
-    const startPosition = words.slice(0, focusOffset).join(' ').length;
 
-    // Count the occurrences of the selected text before the current selection
-    const substringBeforeSelection = verseText.slice(0, startPosition);
-    const occurrenceIndex = (substringBeforeSelection.match(new RegExp(selectedText, 'g')) || []).length;
 
-    return occurrenceIndex;
+function countOccurrences(verseText: string, selection: Selection) {
+    var regexPattern = new RegExp(selection.toString(), "g")
+    const matches = Array.from(verseText.matchAll(regexPattern))
+  
+
+    const index = matches.findIndex((m) => {
+        console.log(`${m.index} === `, selection.anchorOffset)
+        return (m.index === selection.focusOffset || m.index === selection.anchorOffset);
+    })
+    if (matches.length === 1) return 1
+
+    console.log("index = ", (index))
+
+    return ((index === -1) ? index : (index + 1));
 }
 
 
@@ -82,16 +88,17 @@ function VersesSectionContent() {
         if (isHighlighted) selectionContainer = selectionContainer?.parentElement
         const elId = selectionContainer?.id
         const verseId = elId && elId.startsWith("verse_") ? Number(elId.split("_")[1]) : -1
-        const occurenceIndex = countOccurrences(
-            (selectionEl?.parentElement?.textContent) ?? "",
-            selection.toString(),
-            selection.focusOffset,
-        )
         if (verseId !== -1 && verseId === activeVerse.id) {
             if (isHighlighted) {
                 // Text is already highlighted
-                removeHighlight(verseId, selection.toString(), occurenceIndex)
+                const index = Number(selectionEl.id)
+                removeHighlight(verseId, selection.toString(), isNaN(index) ? -1 : index)
             } else {
+                const occurenceIndex = countOccurrences(
+                    (selectionEl?.textContent) ?? "",
+                    selection
+                )
+                if (occurenceIndex === -1) return;
                 saveHighlight(verseId, selection.toString(), occurenceIndex)
             }
         }
@@ -284,11 +291,12 @@ function generateHighlightedText(verse: IVerse) {
     let highlightedText = verse.text
 
     verse.highlights?.forEach((h) => {
-        const regexPattern = new RegExp(`\\b${h.text}\\b`, 'gi');
+        const regexPattern = new RegExp(h.text, 'gi');
+        // const regexPattern = new RegExp(`\\b${h.text}\\b`, 'gi');
         let matchCount = 0;
         function replaceNthOccurrence(match: string, offset: number, input: string) {
             matchCount++;
-            return matchCount === h.index ? `<mark>${match}</mark>` : match;
+            return matchCount === h.index ? `<mark id='${h.index}'>${match}</mark>` : match;
         }
         highlightedText = highlightedText.replace(regexPattern, replaceNthOccurrence);
     })
