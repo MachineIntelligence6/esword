@@ -65,7 +65,8 @@ type ReadBookStoreType = {
         noteId?: number;
         changed?: boolean;
     };
-    saveHighlight: (verse: number, text: string) => void,
+    saveHighlight: (verse: number, text: string, index: number) => void,
+    removeHighlight: (verse: number, text: string, index: number) => void,
     setActiveBookmark: (value: IBookmark) => void;
     createNewBookmark: (verse?: IVerse) => Promise<void>;
     loadBookmarks: () => Promise<void>;
@@ -150,7 +151,6 @@ export const useReadBookStore = create<ReadBookStoreType>()(
                 commentaries: {}
             }))
             const chapter = get().chaptersList?.find((ch) => ch.id === chapterId)
-            console.log("chapter dound = ", chapter)
             const { data: topics } = await clientApiHandlers.topics.get({
                 page: 1, perPage: -1,
                 chapter: chapterId,
@@ -291,9 +291,7 @@ export const useReadBookStore = create<ReadBookStoreType>()(
             const activeVerse = get().activeVerse;
             const activeAuthor = get().activeVerse.authors?.active;
             if (!activeVerse || !activeAuthor) return;
-            console.log("head")
             const activeCommentary = activeAuthor.commentaries?.list?.find((c) => c.id === commentaryId)
-            console.log(activeCommentary)
             set((state) => ({
                 ...state,
                 activeVerse: {
@@ -342,30 +340,10 @@ export const useReadBookStore = create<ReadBookStoreType>()(
             const { data: bookmarks } = await clientApiHandlers.bookmarks.get({ page: 1, perPage: -1 })
             set((state) => ({ ...state, bookmarksList: bookmarks }))
         },
-        saveHighlight: async (verseId, text) => {
+        saveHighlight: async (verseId, text, index) => {
             const session = await getSession()
             const activeVerse = get().activeVerse.data
             if (!session || !activeVerse) return;
-            // console.log("added highligh")
-            // set((state) => ({
-            //     ...state,
-            //     activeVerse: {
-            //         id: activeVerse.id,
-            //         data: {
-            //             ...activeVerse,
-            //             highlights: [
-            //                 ...(activeVerse.highlights ?? []),
-            //                 {
-            //                     id: (new Date().getTime() + Math.random() * 9999),
-            //                     index: activeVerse.text.indexOf(text),
-            //                     text: text,
-            //                     userId: Number(session?.user.id),
-            //                     verseId: activeVerse.id
-            //                 }
-            //             ]
-            //         }
-            //     }
-            // }))
             const updatedTopicsList = get().topicsList?.map(topic => {
                 if (topic.verses) {
                     const verses = topic.verses.map((verse) => {
@@ -376,7 +354,7 @@ export const useReadBookStore = create<ReadBookStoreType>()(
                                     ...(verse.highlights ?? []),
                                     {
                                         id: (new Date().getTime() + Math.random() * 9999),
-                                        index: verse.text.indexOf(text),
+                                        index: index,
                                         text: text,
                                         userId: Number(session?.user.id),
                                         verseId: verse.id
@@ -395,16 +373,44 @@ export const useReadBookStore = create<ReadBookStoreType>()(
             })
             set((state) => ({ ...state, topicsList: updatedTopicsList }))
         },
+        removeHighlight: async (verseId, text, index) => {
+            const session = await getSession()
+            const activeVerse = get().activeVerse.data
+            if (!session || !activeVerse) return;
+            const updatedTopicsList = get().topicsList?.map(topic => {
+                if (topic.verses) {
+                    const verses = topic.verses.map((verse) => {
+                        if (verse.id === verseId) {
+                            const updatedHighlights = verse.highlights?.filter((h) => {
+                                if ((h.text.includes(text.trim()) && h.index === index)) return false;
+                                return true;
+                            })
+                            return {
+                                ...verse,
+                                highlights: (updatedHighlights ?? [])
+                            }
+                        }
+                        return verse
+                    })
+                    return {
+                        ...topic,
+                        verses: verses
+                    }
+                }
+                return topic;
+            })
+            set((state) => ({ ...state, topicsList: updatedTopicsList }))
+        },
         loadInitialData: async (bookSlug, chapterNum, verseNum) => {
             set({ initialLoading: true })
             const { data: books } = await clientApiHandlers.books.get({ page: 1, perPage: -1 })
-            set((state) => ({ ...state, booksList: books, initialLoading: false }))
+            set((state) => ({ ...state, booksList: books }))
             await get().loadBookmarks()
             const book = bookSlug ? books?.find((b) => b.slug === bookSlug) : books?.[0]
             if (book) {
                 await get().setActiveBook(book.id, chapterNum, verseNum)
             }
-            // set((state) => ({ ...state, initialLoading: false }))
+            set((state) => ({ ...state, initialLoading: false }))
         }
     })
 )
