@@ -95,9 +95,8 @@ const checkAndSaveNote = (state: ReadBookStoreType) => {
     }
 }
 
-const syncHighlightsWithDB = (verse: IVerse) => {
-    if (!verse.highlights) return;
-    clientApiHandlers.verses.updateHighlights(verse.id, verse.highlights)
+const syncHighlightsWithDB = async (verseId: number, highlights: IHighlight[]) => {
+    await clientApiHandlers.verses.updateHighlights(verseId, highlights)
 }
 
 
@@ -353,18 +352,24 @@ export const useReadBookStore = create<ReadBookStoreType>()(
                 if (topic.verses) {
                     const verses = topic.verses.map((verse) => {
                         if (verse.id === verseId) {
+                            const highlightExist = verse.highlights?.find((h) => {
+                                return ((h.text.includes(text) || text.includes(h.text)) && index === h.index)
+                            })
+                            const newHighlight: IHighlight = {
+                                id: (new Date().getTime() + Math.random() * 9999),
+                                index: (highlightExist ? (index + 1) : index),
+                                text: text,
+                                userId: Number(session?.user.id),
+                                verseId: verse.id
+                            }
+                            const updatedHighlights = [
+                                ...(verse.highlights ?? []),
+                                newHighlight,
+                            ]
+                            syncHighlightsWithDB(verse.id, updatedHighlights)
                             return {
                                 ...verse,
-                                highlights: [
-                                    ...(verse.highlights ?? []),
-                                    {
-                                        id: (new Date().getTime() + Math.random() * 9999),
-                                        index: index,
-                                        text: text,
-                                        userId: Number(session?.user.id),
-                                        verseId: verse.id
-                                    }
-                                ]
+                                highlights: updatedHighlights
                             }
                         }
                         return verse
@@ -387,12 +392,13 @@ export const useReadBookStore = create<ReadBookStoreType>()(
                     const verses = topic.verses.map((verse) => {
                         if (verse.id === verseId) {
                             const updatedHighlights = verse.highlights?.filter((h) => {
-                                if ((h.text.includes(text.trim()) && h.index === index)) return false;
+                                if (((h.text.includes(text.trim()) || text.trim().includes(h.text)) && h.index === index)) return false;
                                 return true;
-                            })
+                            }) ?? []
+                            syncHighlightsWithDB(verse.id, updatedHighlights)
                             return {
                                 ...verse,
-                                highlights: (updatedHighlights ?? [])
+                                highlights: (updatedHighlights)
                             }
                         }
                         return verse

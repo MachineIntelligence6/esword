@@ -34,6 +34,6 @@ export const GET = async (req: Request) => {
 
 
 export async function POST(req: Request) {
-    const res = await serverApiHandlers.highlights.create(req)
+    const res = await serverApiHandlers.highlights.update(req)
     return NextResponse.json(res)
 }

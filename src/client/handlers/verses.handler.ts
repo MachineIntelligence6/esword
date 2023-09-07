@@ -71,9 +71,12 @@ export async function update(id: number, update: VerseFormSchema): Promise<ApiRe
     }
 }
 
-export async function updateHighlights(id: number, highilights: Array<IHighlight>): Promise<ApiResponse<IVerse>> {
+export async function updateHighlights(id: number, highlights: Array<IHighlight>): Promise<ApiResponse> {
     try {
-        const res = await axios.put<ApiResponse<IVerse>>(`/api/verses/${id}`, { highilights })
+        const res = await axios.post<ApiResponse>(`/api/highlights`, {
+            highlights: highlights?.map((highlight) => ({ ...highlight, id: undefined })) ?? [],
+            verse: id
+        })
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {

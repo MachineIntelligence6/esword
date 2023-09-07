@@ -220,3 +220,50 @@ export async function create(req: Request): Promise<ApiResponse<IHighlight>> {
 
 
 
+type UpdateHighlightsReq = {
+    verse: number;
+    highlights: Array<IHighlight>;
+}
+
+export async function update(req: Request): Promise<ApiResponse<null>> {
+    try {
+        const session = await getServerAuth()
+        if (!session) return {
+            code: "UNAUTHORIZED",
+            succeed: false
+        }
+        const { verse: verseId, highlights } = await req.json() as UpdateHighlightsReq
+        const verse = await db.verse.findFirst({ where: { id: verseId } })
+        if (!verse) throw new Error()
+        await db.highlight.deleteMany({
+            where: {
+                verseId: verseId,
+                userId: Number(session.user.id)
+            }
+        })
+        if (highlights?.length > 0) {
+            const createdHighlights = await db.highlight.createMany({
+                data: highlights.map((h) => ({
+                    index: h.index,
+                    text: h.text,
+                    userId: Number(session.user.id),
+                    verseId: verseId
+                }))
+            })
+            console.log("Created Highlights = ", createdHighlights.count)
+        }
+        return {
+            succeed: true,
+            code: "SUCCESS",
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR"
+        }
+    }
+}
+
+
+

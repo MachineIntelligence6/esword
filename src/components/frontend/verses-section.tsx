@@ -44,21 +44,44 @@ export function VersesSection() {
 
 
 
+function findNearestNumber(target: number, numbers: number[]) {
+    if (numbers.length === 0) {
+        return -1;
+    }
+
+    let nearestNumberIndex = 1;
+    let minDifference = Math.abs(target - numbers[0])
+
+    for (let i = 1; i < numbers.length; i++) {
+        if (numbers[i - 1] === -1) continue;
+        const difference = Math.abs(target - numbers[i]);
+        if (difference < minDifference) {
+            minDifference = difference;
+            nearestNumberIndex = i + 1;
+        }
+    }
+
+    return nearestNumberIndex;
+}
+
 
 function countOccurrences(verseText: string, selection: Selection) {
     var regexPattern = new RegExp(selection.toString(), "g")
     const matches = Array.from(verseText.matchAll(regexPattern))
 
 
-    const index = matches.findIndex((m) => {
-        console.log(`${m.index} === `, selection.anchorOffset)
-        return (m.index === selection.focusOffset || m.index === selection.anchorOffset);
-    })
-    if (matches.length === 1) return 1
+    // const index = matches.findIndex((m) => {
+    //     // console.log(`${m.index} === `, selection.anchorOffset)
+    //     return (m.index === selection.focusOffset || m.index === selection.anchorOffset);
+    // })
+    // if (matches.length === 1) return 1
+    // console.log(matches)
+    console.log(matches)
+    console.log("Offset = ", selection.focusOffset)
 
-    console.log("index = ", (index))
-
-    return ((index === -1) ? index : (index + 1));
+    const index = findNearestNumber(selection.focusOffset, matches.map((m) => (m.index ?? -1)))
+    console.log("Nearest Num = ", index)
+    return index;
 }
 
 
