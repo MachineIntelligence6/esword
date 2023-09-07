@@ -13,7 +13,7 @@ export default async function Page() {
             </h3>
             <div className="bg-primary flex  justify-center p-7 md:max-h-[calc(100vh_-_100px)] min-h-[calc(100vh_-_100px)]">
                 <Card className="bg-white w-full overflow-auto">
-                    <CardContent className="p-5 h-auto flex flex-col gap-4 md:gap-16 ">
+                    <CardContent className="p-5 pb-8 h-auto flex flex-col gap-4 md:gap-16 ">
                         <QuillEditor disabled value={aboutContent?.content} />
                     </CardContent>
                 </Card>
