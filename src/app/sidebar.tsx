@@ -1,6 +1,7 @@
 'use client'
 import { BooksLoadingPlaceholder, ChaptersLoadingPlaceholder } from "@/components/loading-placeholders";
 import { SideBarEl } from "@/components/ui/select";
+import { TooltipEl } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { IBook } from "@/shared/types/models.types";
@@ -79,36 +80,27 @@ function SidebarBooksComponent() {
                         }))}
                     />
                 </div>
-
-                {/* 
-                <select
-                    name="book"
-                    onChange={(e) => setActiveBook(Number(e.target.value))}
-                    className="lg:hidden mx-4 pt-1 ">
-                    {
-                        booksList?.map((book) => (
-                            <option key={book.id} value={book.id}>
-                                {book.name}
-                            </option>
-                        ))
-                    }
-                </select>  */}
-
             </div>
             <div className="h-[calc(100vh_-_100px)] overflow-y-auto overflow-x-hidden lg:flex hidden">
                 <div className="w-full h-full">
                     {
                         booksList ?
                             booksList?.map((book) => (
-                                <button
-                                    key={book.id} type="button"
-                                    onClick={() => changeBook(book)}
-                                    className={cn(
-                                        "px-5 py-2 transition-all w-full text-start block max-w-full text-sm overflow-hidden text-ellipsis whitespace-nowrap hover:scale-110",
-                                        activeBook.id === book.id ? "bg-secondary font-bold text-primary-dark " : "hover:font-bold hover:text-primary-dark hover:bg-secondary"
-                                    )}>
-                                    {book.name}
-                                </button>
+                                <TooltipEl
+                                    key={book.id}
+                                    trigger={
+                                        <button type="button"
+                                            onClick={() => changeBook(book)}
+                                            className={cn(
+                                                "px-5 py-2 transition-all w-full text-start block max-w-full text-sm overflow-hidden text-ellipsis whitespace-nowrap hover:scale-110",
+                                                activeBook.id === book.id ? "bg-secondary font-bold text-primary-dark " : "hover:font-bold hover:text-primary-dark hover:bg-secondary"
+                                            )}>
+                                            {book.name}
+                                        </button>
+                                    }
+                                    content={book.name}
+                                />
+
                             ))
                             :
                             <BooksLoadingPlaceholder />
