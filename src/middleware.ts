@@ -1,4 +1,3 @@
-import { User } from '@prisma/client'
 import { NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 import { canUserAccessPath } from './lib/roles-manager'
@@ -42,7 +41,7 @@ export default withAuth(
             }
         },
         pages: {
-            signIn: "/login"
+            signIn: "/login",
         }
     }
 )

@@ -337,7 +337,12 @@ export async function importFromCSV(req: Request): Promise<ApiResponse<IVerse[]>
             code: "FILE_NOT_FOUND"
         }
         const csvInputData = await blob.text()
-        const csvRecords: any[] = csvParse(csvInputData, { delimiter: "$", from_line: 2, relaxQuotes: true })
+        const csvRecords: any[] = csvParse(csvInputData, {
+            delimiter: "$",
+            from_line: 2,
+            relaxQuotes: true,
+            skip_empty_lines: true
+        })
         const csvIVerses: CsvIVerse[] = csvRecords.map((record: any[]) => ({
             book: record[0],
             bookAbbr: record[1],

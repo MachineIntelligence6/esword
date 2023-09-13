@@ -221,7 +221,21 @@ function columns(rowActions: TableActionProps): ColumnDef<IBook, any>[] {
                 )
             }
         },
-
+        {
+            accessorKey: "priority",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Priority" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <div className="flex items-center">
+                        <span className="max-w-[100px] truncate font-normal">
+                            {row.getValue("priority")}
+                        </span>
+                    </div>
+                )
+            }
+        },
     ]
     if (rowActions.deleteAction || rowActions.viewAction || rowActions.editAction) {
         tableCols.push({

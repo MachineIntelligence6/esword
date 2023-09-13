@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from "crypto"
-import { AuthOptions, getServerSession } from "next-auth"
+import { AuthOptions, Session, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import db from "@/server/db"
 import bcrypt from 'bcryptjs'
@@ -64,7 +64,26 @@ export const authOptions: AuthOptions = {
 }
 
 
-export const getServerAuth = () => getServerSession(authOptions)
+export async function getServerAuth(): Promise<Session | null | false> {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) return null
+    const user = await db.user.findFirst({ where: { id: Number(session.user.id) } })
+    if (!user) return false;
+    return {
+        ...session,
+        user: {
+            id: String(user.id),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            archived: user.archived,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            archivedAt: user.archivedAt,
+            image: user.image
+        }
+    }
+}
 
 
 

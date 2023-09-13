@@ -38,10 +38,14 @@ export default function SiteSidebar() {
     // }, [])
 
     return (
-        <div className="flex lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white lg:max-w-[186px] lg:min-w-[186px] w-full lg:px-0 px-3">
+        <div className="flex lg:my-0 my-1 gap-x-3 lg:gap-x-0 bg-white w-full lg:px-0 px-3">
             <SidebarBooksComponent />
             <SidebarChaptersComponent />
         </div>
+        // <div className="flex lg:my-0 my-1 gap-x-3 lg:gap-x-0 resize-x bg-white lg:max-w-[186px] lg:min-w-[186px] w-full lg:px-0 px-3">
+        //     <SidebarBooksComponent />
+        //     <SidebarChaptersComponent />
+        // </div>
     );
 }
 
@@ -56,10 +60,11 @@ function SidebarBooksComponent() {
         // window.location.reload()
     }
     return (
-        <div className="lg:min-w-[130px] lg:max-w-[130px] w-full lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
+        // <div className="lg:min-w-[130px] lg:max-w-[130px] w-full lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
+        <div className="lg:min-w-[130px] w-full lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
             <div className="lg:bg-silver-light bg-white py-3 flex lg:border-0 border-b flex-col lg:rounded-none rounded-lg">
-                <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 ">
-                    BIBLE BOOKS
+                <h3 className="lg:text-xs text-[10px] lg:font-bold font-normal px-5 uppercase">
+                    Apocryphal BOOKS
                 </h3>
                 <div className="lg:hidden text-primary-dark ">
                     <SideBarEl

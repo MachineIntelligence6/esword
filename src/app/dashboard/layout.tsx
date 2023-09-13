@@ -10,7 +10,7 @@ import { Cross1Icon } from "@radix-ui/react-icons";
 
 
 export const metadata: Metadata = {
-    title: 'Dashboard - E-Sword',
+    title: 'Dashboard - Hidden Sword',
     description: '',
 }
 

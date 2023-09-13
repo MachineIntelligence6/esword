@@ -414,7 +414,17 @@ export const useReadBookStore = create<ReadBookStoreType>()(
         },
         loadInitialData: async (bookSlug, chapterNum, verseNum) => {
             set({ initialLoading: true })
-            const { data: books } = await clientApiHandlers.books.get({ page: 1, perPage: -1 })
+            const { data: books } = await clientApiHandlers.books.get({
+                page: 1, perPage: -1,
+                orderBy: [
+                    {
+                        priority: "desc",
+                    },
+                    {
+                        name: "asc"
+                    }
+                ]
+            })
             set((state) => ({ ...state, booksList: books }))
             await get().loadBookmarks()
             const book = bookSlug ? books?.find((b) => b.slug === bookSlug) : books?.[0]

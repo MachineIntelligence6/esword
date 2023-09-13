@@ -9,6 +9,7 @@ import { EditorProps } from './editor';
 
 Quill.register('modules/blotFormatter', BlotFormatter);
 
+
 class PreserveWhiteSpace {
     constructor(private quill: any, private options: {}) {
         quill.container.style.whiteSpace = "pre-line";
@@ -30,12 +31,12 @@ const modules = (disabled?: boolean) => {
                 // [{ size: [] }],
                 // [{ 'color': [] }, { 'background': [] }],
                 ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [
-                    { align: '' },
-                    { align: 'center' },
-                    { align: 'right' },
-                    { align: 'justify' }
-                ],
+                // [
+                //     { align: '' },
+                //     { align: 'center' },
+                //     { align: 'right' },
+                //     { align: 'justify' }
+                // ],
                 [
                     { 'list': 'ordered' },
                     { 'list': 'bullet' },

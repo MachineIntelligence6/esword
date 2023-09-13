@@ -38,6 +38,7 @@ model Book {
   name         String    @unique
   slug         String    @unique
   abbreviation String    @db.MediumText
+  priority     Float     @default(0) @db.Double
   chapters     Chapter[]
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @default(now()) @updatedAt() @map("updated_at")
@@ -66,7 +67,7 @@ model Chapter {
 
 model Topic {
   id         Int       @id @default(autoincrement())
-  name       String
+  name       String    @db.MediumText
   number     Int
   chapterId  Int       @map("chapter_id")
   chapter    Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
@@ -165,7 +166,7 @@ model Activity {
   id          Int                @id @default(autoincrement())
   action      ActivityActionType
   model       ActivityModelType
-  description String             @db.Text
+  description String             @db.MediumText
   ref         Int?
   userId      Int                @map("user_id")
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -150,7 +150,7 @@ type CreateBlogReq = {
 export async function create(req: Request): Promise<ApiResponse<IBlog>> {
     try {
         const session = await getServerAuth()
-        if (!session?.user) throw new Error();
+        if (typeof session === "boolean" || !session?.user) throw new Error();
 
         const blogReq = await req.json() as CreateBlogReq
         const blogExist = await db.blog.findFirst({

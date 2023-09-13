@@ -16,6 +16,7 @@ import { IBook } from "@/shared/types/models.types";
 export const bookFormSchema = z.object({
     info: z.string().nullable().default(""),
     name: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
+    priority: z.number({ required_error: "This field is required.", invalid_type_error: "This field is required." }).optional(),
     slug: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
     abbreviation: z.string({ required_error: "This field is required." }).min(1, { message: "This field is required." }),
 })
@@ -52,7 +53,8 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
         form.reset({
             name: book.name,
             slug: book.slug,
-            abbreviation: book.abbreviation
+            abbreviation: book.abbreviation,
+            priority: book.priority
         })
     }, [book, form])
 
@@ -61,7 +63,7 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
         form.reset({
             name: "",
             slug: "",
-            abbreviation: ""
+            abbreviation: "",
         })
     }
 
@@ -175,6 +177,22 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                                     <FormLabel>Abbreviation <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <Input type="text" required {...field} />
+                                    </FormControl>
+                                    {
+                                        fieldState.error &&
+                                        <FormMessage />
+                                    }
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="priority"
+                            render={({ field, fieldState }) => (
+                                <FormItem>
+                                    <FormLabel>Priority</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
                                     </FormControl>
                                     {
                                         fieldState.error &&

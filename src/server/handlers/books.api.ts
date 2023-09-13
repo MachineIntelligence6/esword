@@ -192,7 +192,8 @@ export async function create(req: Request): Promise<ApiResponse> {
             data: {
                 name: bookReq.name.trim(),
                 slug: bookReq.slug,
-                abbreviation: bookReq.abbreviation
+                abbreviation: bookReq.abbreviation,
+                priority: bookReq.priority,
             },
             include: {
                 chapters: false
@@ -221,6 +222,7 @@ type UpdateBookReq = {
     slug?: string
     abbreviation?: string
     archived?: boolean;
+    priority?: number
 }
 
 
@@ -249,6 +251,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
                 ...(bookReq.name && { name: bookReq.name.trim() }),
                 ...(bookReq.slug && { slug: bookReq.slug }),
                 ...(bookReq.abbreviation && { abbreviation: bookReq.abbreviation }),
+                ...(bookReq.priority && { priority: bookReq.priority }),
             },
             where: {
                 id: id

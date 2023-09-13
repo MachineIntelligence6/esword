@@ -7,6 +7,7 @@ import { Inter } from 'next/font/google'
 import SiteHeader from './header'
 import { cn } from '@/lib/utils'
 import SiteInnerLayout from './inner-layout'
+import { redirect } from 'next/navigation'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -14,10 +15,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'E-Sword',
+  title: 'Hidden Sword',
   description: '',
 }
-
 
 
 
@@ -27,6 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await getServerAuth()
+  if (typeof session === "boolean" && session === false) return redirect("/api/auth/logout")
   return (
     <html lang="en">
       <body className={cn(
@@ -34,15 +35,15 @@ export default async function RootLayout({
         "max-w-full !overflow-x-hidden overflow-hidden "
         // "max-h-screen overflow-hidden "
       )}>
-          <AuthProvider session={session}>
-            <SiteHeader />
-            <div className='pt-[70px] overflow-y-auto'>
-              <SiteInnerLayout>
-                {children}
-              </SiteInnerLayout>
-            </div>
-            <Toaster />
-          </AuthProvider>
+        <AuthProvider session={session}>
+          <SiteHeader />
+          <div className='pt-[70px] overflow-y-auto'>
+            <SiteInnerLayout>
+              {children}
+            </SiteInnerLayout>
+          </div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   )
