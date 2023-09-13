@@ -123,9 +123,12 @@ export default function BlogsTable({ user, archivedOnly }: Props) {
         ),
         deleteMessage: "This action will delete delete the selected blog.",
         archiveAction: handleDelete,
+        deleteAction: handlePermanentDelete,
+        deleteOptions: {
+            message: "This action will delete the selected blogs(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
+        },
         ...(archivedOnly && {
             restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
         }),
     }
 

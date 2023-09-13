@@ -45,6 +45,9 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
     const handleDelete = async (book: IBook) => {
         const res = await clientApiHandlers.books.archive(book.id)
         if (res.succeed) {
+            toast({
+                title: "Book(s) archived successfully.",
+            })
             window.location.reload()
         } else if (res.code === "DATA_LINKED") {
             toast({
@@ -119,9 +122,12 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
             <Link href={`/dashboard/books/${book.id}`}>View</Link>
         ),
         archiveAction: handleDelete,
+        deleteAction: handlePermanentDelete,
+        deleteOptions: {
+            message: "This action will delete the selected book(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
+        },
         ...(archivedOnly && {
             restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
         }),
     }
 

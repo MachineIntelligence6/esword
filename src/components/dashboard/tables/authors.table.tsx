@@ -127,9 +127,12 @@ export default function AuthorsTable({ showPagination, showToolbar, archivedOnly
         ),
         archiveAction: handleDelete,
         deleteMessage: "This action will delete the author and all data (commentaries) linked with it.",
+        deleteAction: handlePermanentDelete,
+        deleteOptions: {
+            message: "This action will delete the selected author(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
+        },
         ...(archivedOnly && {
             restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
         }),
     }
 

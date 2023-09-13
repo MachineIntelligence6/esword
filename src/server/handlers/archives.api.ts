@@ -228,7 +228,6 @@ async function deleteBooks(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     const chapters = await db.chapter.findMany({
@@ -246,7 +245,6 @@ async function deleteChapters(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     const topics = await db.topic.findMany({
@@ -264,7 +262,6 @@ async function deleteTopics(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     const verses = await db.verse.findMany({
@@ -281,7 +278,6 @@ async function deleteVerses(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     const commentaries = await db.commentary.findMany({
@@ -298,7 +294,6 @@ async function deleteAuthors(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     const commentaries = await db.commentary.findMany({
@@ -315,7 +310,6 @@ async function deleteUsers(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     const notes = await db.note.findMany({
@@ -332,7 +326,6 @@ async function deleteNotes(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     return res.count
@@ -343,7 +336,6 @@ async function deleteCommentaries(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     return res.count
@@ -354,7 +346,6 @@ async function deleteBlogs(ids: number[]) {
             id: {
                 in: ids,
             },
-            archived: true
         },
     })
     return res.count

@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBook } from "@/shared/types/models.types";
 import { BooksPaginationProps } from "@/shared/types/pagination.types";
+import { getServerAuth } from "../auth";
 
 
 
@@ -113,6 +114,9 @@ export async function getByRef(ref: string, include?: Prisma.BookInclude): Promi
 
 export async function archive(id: number): Promise<ApiResponse<IBook>> {
     try {
+        const session = await getServerAuth()
+        if (typeof session === "boolean" || !session?.user) throw new Error();
+
         const book = await db.book.findFirst({ where: { id: id }, include: { chapters: true } })
         if (book?.chapters && book.chapters.length > 0) {
             return {

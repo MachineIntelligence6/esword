@@ -121,7 +121,7 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
     }
 
     return (
-        <Card className="w-full  rounded-md">
+        <Card className="w-full rounded-md">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(book ? handleUpdateBook : handleAddNewBook)}>

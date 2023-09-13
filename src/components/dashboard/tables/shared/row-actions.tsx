@@ -84,7 +84,7 @@ export function DataTableRowActions<TData>({
                             :
                             (deleteEnabled) &&
                             <DropdownMenuItem onClick={() => setAlertOpen(true)}>
-                                Delete
+                                Archive
                             </DropdownMenuItem>
                     }
                 </DropdownMenuContent>
@@ -113,7 +113,7 @@ export type TableActionPopupProps = {
 
 export function TableActionPopup({
     open, setOpen, action,
-    title, description, actionBtn
+    title, description, actionBtn,
 }: TableActionPopupProps) {
     const [processing, setProcessing] = useState(false);
 
@@ -124,11 +124,11 @@ export function TableActionPopup({
         setOpen(false);
     }
     return (
-        <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialog open={open} onOpenChange={(value) => !processing && setOpen(value)}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogDescription className="whitespace-pre-line">
                         {description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>

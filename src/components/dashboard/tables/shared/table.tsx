@@ -45,6 +45,7 @@ import {
 import { cn } from "@/lib/utils"
 import Spinner from "@/components/spinner"
 import { DataTableToolbar, ToolbarProps } from "./toolbar"
+import { useSession } from "next-auth/react"
 
 
 
@@ -74,6 +75,7 @@ export function BaseTable<TData, TValue>({
     React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
+  const { data: session } = useSession()
 
   const table = useReactTable({
     data: data ?? [],
@@ -105,6 +107,7 @@ export function BaseTable<TData, TValue>({
         showToolbar &&
         <DataTableToolbar
           table={table}
+          session={session}
           getFilterValue={getFilterValue}
           setFilterValue={setFilterValue}
           toolbarActions={toolbarActions} />

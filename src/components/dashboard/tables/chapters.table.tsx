@@ -125,10 +125,13 @@ export default function ChaptersTable({ book, archivedOnly }: Props) {
         editAction: (chapter) => (
             <Link href={`/dashboard/chapters/${chapter.id}/edit`}>Edit</Link>
         ),
+        deleteAction: handlePermanentDelete,
+        deleteOptions: {
+            message: "This action will delete the selected chapter(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
+        },
         archiveAction: handleDelete,
         ...(archivedOnly && {
             restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
         }),
     }
 

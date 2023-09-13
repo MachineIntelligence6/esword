@@ -112,9 +112,12 @@ export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, a
         ),
         archiveAction: handleDelete,
         deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it.",
+        deleteAction: handlePermanentDelete,
+        deleteOptions: {
+            message: "This action will delete the selected verse(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
+        },
         ...(archivedOnly && {
             restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
         }),
     }
 

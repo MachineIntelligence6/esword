@@ -10,6 +10,7 @@ import { DataTableViewOptions } from "./table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TableActionPopup, TableActionPopupProps } from "./row-actions";
 import { TableActionProps } from "./types";
+import { Session } from "next-auth";
 
 
 export interface ToolbarProps<TData> {
@@ -19,6 +20,7 @@ export interface ToolbarProps<TData> {
 }
 interface DataTableToolbarProps<TData> extends ToolbarProps<TData> {
     table: TTable<TData>;
+    session?: Session | null;
 }
 
 type TableActionPopupState = {
@@ -33,7 +35,8 @@ export function DataTableToolbar<TData>({
     table,
     getFilterValue,
     setFilterValue,
-    toolbarActions
+    toolbarActions,
+    session
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0
     const [alertOpen, setAlertOpen] = React.useState<TableActionPopupState>({ state: false, type: "RESTORE" });
@@ -43,7 +46,7 @@ export function DataTableToolbar<TData>({
 
     const restoreAllPopupProps: TableActionPopupProps = {
         title: "Are you sure to restore?",
-        description: alertOpen.type === "RESTORE" ? RESTORE_DESCRIPTION : (alertOpen.type === "PERMANENT_DELETE" ? PERMANENT_DELETE_DESCRIPTION : DELETE_DESCRIPTION),
+        description: alertOpen.type === "RESTORE" ? RESTORE_DESCRIPTION : (alertOpen.type === "PERMANENT_DELETE" ? (toolbarActions?.deleteOptions?.message ?? PERMANENT_DELETE_DESCRIPTION) : DELETE_DESCRIPTION),
         actionBtn: { text: (alertOpen.type === "RESTORE" ? "Restore" : "Delete"), variant: (alertOpen.type === "RESTORE" ? "default" : "destructive") },
         open: alertOpen.state, setOpen: (value) => setAlertOpen({ state: value, type: "RESTORE" }),
         action: async () => {
@@ -105,7 +108,7 @@ export function DataTableToolbar<TData>({
 
                             }
                             {
-                                toolbarActions.deleteAction &&
+                                toolbarActions.deleteAction && session?.user.role === "ADMIN" &&
                                 <DropdownMenuItem
                                     disabled={selectedRows.length <= 0}
                                     onClick={() => setAlertOpen({ state: true, type: "PERMANENT_DELETE" })}>

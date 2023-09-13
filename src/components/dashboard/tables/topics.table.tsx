@@ -121,10 +121,13 @@ export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) 
             <Link href={`/dashboard/topics/${topic.id}`}>View</Link>
         ),
         archiveAction: handleDelete,
-        deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it.",
+        deleteMessage: "This action will delete the topic and all data (verses & commentaries) linked with it.",
+        deleteAction: handlePermanentDelete,
+        deleteOptions: {
+            message: "This action will delete the selected topics(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
+        },
         ...(archivedOnly && {
             restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
         }),
     }
 
