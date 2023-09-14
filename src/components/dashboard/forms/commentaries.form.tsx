@@ -14,6 +14,7 @@ import { ComboBox, SelectEl } from "../../ui/select";
 import { Textarea } from "../../ui/textarea";
 import { useEffect, useState } from "react";
 import { IAuthor, IBook, IChapter, ICommentary, ITopic, IVerse } from "@/shared/types/models.types";
+import QuillEditor from "@/components/ui/editor";
 
 
 export const commentaryFormSchema = z.object({
@@ -346,7 +347,7 @@ export default function CommentariesForm({ commentary }: { commentary?: IComment
                                 <FormItem className="col-span-full">
                                     <FormLabel>Text <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Textarea rows={8} required {...field} />
+                                        <QuillEditor {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -369,7 +370,12 @@ export default function CommentariesForm({ commentary }: { commentary?: IComment
                         />
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                        <Button variant="outline" onClick={() => window.history.back()}>Cancel</Button>
+                        <Button
+                            variant="outline"
+                            disabled={!formState.isDirty || formState.isSubmitting}
+                            onClick={resetFormValues}>
+                            Cancel
+                        </Button>
                         <Button
                             type="submit"
                             disabled={!formState.isDirty || formState.isSubmitting}>

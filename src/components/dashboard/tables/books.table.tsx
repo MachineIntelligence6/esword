@@ -12,7 +12,6 @@ import clientApiHandlers from "@/client/handlers"
 import { IBook } from "@/shared/types/models.types"
 import Link from "next/link"
 import { useToast } from "@/components/ui/use-toast"
-import definedMessages from "@/shared/constants/messages"
 import { useRouter } from "next/navigation"
 
 
@@ -42,64 +41,25 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
         setTableData(res)
     }
 
-    const handleDelete = async (book: IBook) => {
-        const res = await clientApiHandlers.books.archive(book.id)
-        if (res.succeed) {
-            toast({
-                title: "Book(s) archived successfully.",
-            })
-            window.location.reload()
-        } else if (res.code === "DATA_LINKED") {
-            toast({
-                title: "Book can not be deleted.",
-                variant: "destructive",
-                description: "All chapters linked with this book must be unlinked in order to delete this book."
-            })
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-    const handlePermanentDelete = async (books: IBook[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: books.map((b) => b.id),
-            model: "Book"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Book(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-    const handleRestore = async (books: IBook[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: books.map((b) => b.id),
-            model: "Book"
-        })
-        console.log(res)
-        if (res.succeed) {
-            toast({
-                title: "Book(s) restored successfully.",
-            })
-            router.push("/dashboard/books")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
+    // const handleRestore = async (books: IBook[]) => {
+    //     const res = await clientApiHandlers.archives.restore({
+    //         ids: books.map((b) => b.id),
+    //         model: "Book"
+    //     })
+    //     console.log(res)
+    //     if (res.succeed) {
+    //         toast({
+    //             title: "Book(s) restored successfully.",
+    //         })
+    //         router.push("/dashboard/books")
+    //     } else {
+    //         toast({
+    //             title: "Error",
+    //             variant: "destructive",
+    //             description: definedMessages.UNKNOWN_ERROR
+    //         })
+    //     }
+    // }
 
     useEffect(() => {
         loadData()
@@ -121,14 +81,10 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
         viewAction: (book) => (
             <Link href={`/dashboard/books/${book.id}`}>View</Link>
         ),
-        archiveAction: handleDelete,
-        deleteAction: handlePermanentDelete,
-        deleteOptions: {
-            message: "This action will delete the selected book(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
-        },
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Book"
     }
 
     return (
@@ -139,10 +95,7 @@ export default function BooksTable({ showPagination, showToolbar, archivedOnly, 
             pagination={pagination}
             showPagination={showPagination}
             showToolbar={showToolbar}
-            getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
-            setFilterValue={(table, value) => {
-                table.getColumn("name")?.setFilterValue(value)
-            }} />
+        />
     )
 }
 

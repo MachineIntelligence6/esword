@@ -59,64 +59,6 @@ export default function ChaptersTable({ book, archivedOnly }: Props) {
     }
 
 
-    const handleDelete = async (chapter: IChapter) => {
-        const res = await clientApiHandlers.chapters.archive(chapter.id)
-        if (res.succeed) {
-            window.location.reload()
-        } else if (res.code === "DATA_LINKED") {
-            toast({
-                title: "Chapter can not be deleted.",
-                variant: "destructive",
-                description: "All topics linked with this chapter must be unlinked in order to delete this chapter."
-            })
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handlePermanentDelete = async (chapters: IChapter[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: chapters.map((b) => b.id),
-            model: "Chapter"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Chapter(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handleRestore = async (chapters: IChapter[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: chapters.map((b) => b.id),
-            model: "Chapter"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Chapter(s) restored successfully.",
-            })
-            // window.location.reload()
-            router.push("/dashboard/chapters")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
 
     const tableActionProps: TableActionProps = {
         viewAction: (chapter) => (
@@ -125,30 +67,21 @@ export default function ChaptersTable({ book, archivedOnly }: Props) {
         editAction: (chapter) => (
             <Link href={`/dashboard/chapters/${chapter.id}/edit`}>Edit</Link>
         ),
-        deleteAction: handlePermanentDelete,
-        deleteOptions: {
-            message: "This action will delete the selected chapter(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
-        },
-        archiveAction: handleDelete,
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Chapter"
     }
 
 
 
     return (
         <div>
-
             <BaseTable
                 data={tableData?.data}
                 columns={columns(tableActionProps)}
                 pagination={pagination}
                 toolbarActions={tableActionProps}
-                getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
-                setFilterValue={(table, value) => {
-                    table.getColumn("name")?.setFilterValue(value)
-                }}
             />
         </div>
 
@@ -192,7 +125,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
         //     enableHiding: false,
         // },
         {
-            accessorKey: "name",
+            id: "name",
+            accessorFn: (chapter) => String(chapter.name),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Name" />
             ),
@@ -200,7 +134,7 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
                 return (
                     <div className="flex max-w-[100px] space-x-2">
                         <span className="max-w-[100px] truncate font-medium">
-                            {row.getValue("name")}
+                            {row.original.name}
                         </span>
                     </div>
                 )
@@ -253,7 +187,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
             },
         },
         {
-            accessorKey: "book",
+            id: "book",
+            accessorFn: (chapter) => chapter.book?.name,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Book" />
             ),

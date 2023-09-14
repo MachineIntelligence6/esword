@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import db from "@/server/db";
 import { ICommentary } from "@/shared/types/models.types";
+import QuillEditor from "@/components/ui/editor";
 
 
 
@@ -57,7 +58,10 @@ export default async function Page({ params }: { params: { id: string } }) {
                         <h1 className="font-semibold text-2xl">
                             {commentary?.name}
                         </h1>
-                        <p className="mt-2">{commentary.text}</p>
+                        {/* <p className="mt-2">{commentary.text}</p> */}
+                        <div className="mt-2">
+                            <QuillEditor disabled value={commentary.text} />
+                        </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">

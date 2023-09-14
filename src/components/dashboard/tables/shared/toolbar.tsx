@@ -11,54 +11,62 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TableActionPopup, TableActionPopupProps } from "./row-actions";
 import { TableActionProps } from "./types";
 import { Session } from "next-auth";
+import { Prisma } from "@prisma/client";
+import tableActions, { ARCHIVE_DESCRIPTION, DELETE_DESCRIPTION, RESTORE_DESCRIPTION } from "./table-actions";
 
 
 export interface ToolbarProps<TData> {
-    getFilterValue: (table: TTable<TData>) => string;
-    setFilterValue: (table: TTable<TData>, value: string) => void;
-    toolbarActions?: TableActionProps
+    // getFilterValue: (table: TTable<TData>) => string;
+
+    toolbarActions?: TableActionProps;
 }
 interface DataTableToolbarProps<TData> extends ToolbarProps<TData> {
     table: TTable<TData>;
     session?: Session | null;
+    filterValue: string;
+    setFilterValue: (value: string) => void;
 }
 
-type TableActionPopupState = {
+export type TableActionPopupState = {
     state: boolean;
-    type: "DELETE" | "RESTORE" | "PERMANENT_DELETE"
+    type: "ARCHIVE" | "RESTORE" | "DELETE"
 }
-const RESTORE_DESCRIPTION = "This action will restore the selected rows and all data linked with them."
-const PERMANENT_DELETE_DESCRIPTION = "This action will delete permanentaly the selected rows and all data linked with them."
-const DELETE_DESCRIPTION = "This action will delete the selected rows and all data linked with them."
+
 
 export function DataTableToolbar<TData>({
     table,
-    getFilterValue,
+    filterValue,
     setFilterValue,
     toolbarActions,
-    session
+    session,
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0
     const [alertOpen, setAlertOpen] = React.useState<TableActionPopupState>({ state: false, type: "RESTORE" });
 
     const selectedRows = table.getSelectedRowModel().rows.map((r) => r.original);
 
+    const warningMessage = () => {
+        if (!toolbarActions?.modelName) return ""
+        if (alertOpen.type === "RESTORE") return `This action will restore the ${toolbarActions.modelName.toLowerCase()}(s) and all data linked with them.`
+        if (alertOpen.type === "ARCHIVE") return `This action will move the ${toolbarActions.modelName.toLowerCase()}(s) and all data linked with them to archive.`
+        if (alertOpen.type === "DELETE") return `This action will delete (permanantly) the ${toolbarActions.modelName.toLowerCase()}(s) and all data linked with them.`
+    }
 
-    const restoreAllPopupProps: TableActionPopupProps = {
-        title: "Are you sure to restore?",
-        description: alertOpen.type === "RESTORE" ? RESTORE_DESCRIPTION : (alertOpen.type === "PERMANENT_DELETE" ? (toolbarActions?.deleteOptions?.message ?? PERMANENT_DELETE_DESCRIPTION) : DELETE_DESCRIPTION),
-        actionBtn: { text: (alertOpen.type === "RESTORE" ? "Restore" : "Delete"), variant: (alertOpen.type === "RESTORE" ? "default" : "destructive") },
+    const actionPopupProps: TableActionPopupProps = {
+        title: "Warning!",
+        description: warningMessage() ?? "",
+        actionBtn: { text: "Continue", variant: (alertOpen.type === "RESTORE" ? "default" : "destructive") },
         open: alertOpen.state, setOpen: (value) => setAlertOpen({ state: value, type: "RESTORE" }),
         action: async () => {
-            if (selectedRows.length <= 0) return;
+            if (selectedRows.length <= 0 || !toolbarActions) return;
             if (alertOpen.type === "RESTORE") {
-                await toolbarActions?.restoreAction?.(selectedRows)
-            }
-            else if (alertOpen.type === "PERMANENT_DELETE") {
-                await toolbarActions?.deleteAction?.(selectedRows)
+                await tableActions.restore(selectedRows, toolbarActions.modelName, `Restored successfully.`)
             }
             else if (alertOpen.type === "DELETE") {
-                // await toolbarActions?.deletePermanently?.(selectedRows)
+                await tableActions.deletePermanantly(selectedRows, toolbarActions.modelName, `Selected ${toolbarActions.modelName}(s) and all data linked with them deleted successfully.`)
+            }
+            else if (alertOpen.type === "ARCHIVE") {
+                await tableActions.archive(selectedRows, toolbarActions.modelName, `Selected ${toolbarActions.modelName}(s) and all data linked with them moved to archive successfully.`)
             }
         }
     }
@@ -68,9 +76,9 @@ export function DataTableToolbar<TData>({
             <div className="flex flex-1 items-center space-x-2">
                 <Input
                     placeholder="Search..."
-                    value={getFilterValue(table)}
+                    value={filterValue}
                     onChange={(event) =>
-                        setFilterValue(table, event.target.value)
+                        setFilterValue(event.target.value)
                     }
                     className="h-8 w-[150px] lg:w-[250px]"
                 />
@@ -87,41 +95,49 @@ export function DataTableToolbar<TData>({
             </div>
             <div className="flex items-center gap-3">
                 {
-                    (toolbarActions?.restoreAction || toolbarActions?.deleteAction || toolbarActions?.archiveAction) &&
+                    ((toolbarActions?.restoreAction
+                        || toolbarActions?.deleteAction
+                        || toolbarActions?.archiveAction)
+                        && session?.user.role === "ADMIN") &&
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
+                                disabled={selectedRows?.length <= 0 || (!toolbarActions.restoreAction && !toolbarActions.deleteAction && !toolbarActions.archiveAction)}
                                 variant="ghost"
                                 className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
                             >
                                 <DotsHorizontalIcon className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[180px]">
+                        <DropdownMenuContent align="end" className="w-[250px]">
                             {
-                                toolbarActions.restoreAction &&
-                                <DropdownMenuItem
-                                    disabled={selectedRows.length <= 0}
-                                    onClick={() => setAlertOpen({ state: true, type: "RESTORE" })}>
-                                    Restore
-                                </DropdownMenuItem>
-
+                                toolbarActions.restoreAction ?
+                                    <DropdownMenuItem
+                                        disabled={selectedRows.length <= 0}
+                                        onClick={() => setAlertOpen({ state: true, type: "RESTORE" })}>
+                                        Restore
+                                    </DropdownMenuItem>
+                                    :
+                                    <DropdownMenuItem
+                                        disabled={selectedRows.length <= 0}
+                                        onClick={() => setAlertOpen({ state: true, type: "ARCHIVE" })}>
+                                        Archive
+                                    </DropdownMenuItem>
                             }
                             {
-                                toolbarActions.deleteAction && session?.user.role === "ADMIN" &&
+                                toolbarActions.deleteAction &&
                                 <DropdownMenuItem
                                     disabled={selectedRows.length <= 0}
-                                    onClick={() => setAlertOpen({ state: true, type: "PERMANENT_DELETE" })}>
-                                    Delete Permanentaly
+                                    onClick={() => setAlertOpen({ state: true, type: "DELETE" })}>
+                                    Delete (Permanantly)
                                 </DropdownMenuItem>
-
                             }
                         </DropdownMenuContent>
                     </DropdownMenu>
                 }
                 <DataTableViewOptions table={table} />
             </div>
-            <TableActionPopup {...restoreAllPopupProps} />
+            <TableActionPopup {...actionPopupProps} />
         </div >
     )
 }

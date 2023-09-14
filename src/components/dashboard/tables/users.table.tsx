@@ -58,70 +58,15 @@ export default function UsersTable({ archivedOnly, ...props }: Props) {
 
 
 
-    const handleDelete = async (user: IUser) => {
-        const res = await clientApiHandlers.users.archive(user.id)
-        if (res.succeed) {
-            window.location.reload();
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handlePermanentDelete = async (users: IUser[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: users.map((b) => b.id),
-            model: "User"
-        })
-        if (res.succeed) {
-            toast({
-                title: "User(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handleRestore = async (users: IUser[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: users.map((b) => b.id),
-            model: "User"
-        })
-        if (res.succeed) {
-            toast({
-                title: "User(s) restored successfully.",
-            })
-            // window.location.reload()
-            router.push("/dashboard/users")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-
     const tableActionProps: TableActionProps = {
         ...props,
         viewAction: (user: IUser) => (
             <Link href={`/dashboard/users/${user.id}`}>View</Link>
         ),
-        deleteMessage: "This action will delete the user account and all data (notes) linked with it.",
-        archiveAction: handleDelete,
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "User"
     }
 
 

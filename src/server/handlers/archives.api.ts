@@ -18,12 +18,12 @@ async function restoreBooks(ids: number[]) {
             archived: false,
         },
     })
-    const chapters = await db.chapter.findMany({
-        where: {
-            bookId: { in: ids }
-        }
-    })
-    await restoreChapters(chapters.map((ch) => ch.id))
+    // const chapters = await db.chapter.findMany({
+    //     where: {
+    //         bookId: { in: ids }
+    //     }
+    // })
+    // await restoreChapters(chapters.map((ch) => ch.id))
     return res.count
 }
 
@@ -39,12 +39,12 @@ async function restoreChapters(ids: number[]) {
             archived: false,
         },
     })
-    const topics = await db.topic.findMany({
-        where: {
-            chapterId: { in: ids }
-        }
-    })
-    await restoreTopics(topics.map((t) => t.id))
+    // const topics = await db.topic.findMany({
+    //     where: {
+    //         chapterId: { in: ids }
+    //     }
+    // })
+    // await restoreTopics(topics.map((t) => t.id))
     return res.count
 }
 
@@ -60,12 +60,12 @@ async function restoreTopics(ids: number[]) {
             archived: false,
         },
     })
-    const verses = await db.verse.findMany({
-        where: {
-            topicId: { in: ids }
-        }
-    })
-    await restoreVerses(verses.map((v) => v.id))
+    // const verses = await db.verse.findMany({
+    //     where: {
+    //         topicId: { in: ids }
+    //     }
+    // })
+    // await restoreVerses(verses.map((v) => v.id))
     return res.count
 }
 async function restoreVerses(ids: number[]) {
@@ -80,12 +80,12 @@ async function restoreVerses(ids: number[]) {
             archived: false,
         },
     })
-    const commentaries = await db.commentary.findMany({
-        where: {
-            verseId: { in: ids }
-        }
-    })
-    await restoreCommentaries(commentaries.map((c) => c.id))
+    // const commentaries = await db.commentary.findMany({
+    //     where: {
+    //         verseId: { in: ids }
+    //     }
+    // })
+    // await restoreCommentaries(commentaries.map((c) => c.id))
     return res.count
 }
 async function restoreAuthors(ids: number[]) {
@@ -100,12 +100,12 @@ async function restoreAuthors(ids: number[]) {
             archived: false,
         },
     })
-    const commentaries = await db.commentary.findMany({
-        where: {
-            authorId: { in: ids }
-        }
-    })
-    await restoreCommentaries(commentaries.map((c) => c.id))
+    // const commentaries = await db.commentary.findMany({
+    //     where: {
+    //         authorId: { in: ids }
+    //     }
+    // })
+    // await restoreCommentaries(commentaries.map((c) => c.id))
     return res.count
 }
 async function restoreUsers(ids: number[]) {
@@ -120,12 +120,12 @@ async function restoreUsers(ids: number[]) {
             archived: false,
         },
     })
-    const notes = await db.note.findMany({
-        where: {
-            userId: { in: ids }
-        }
-    })
-    await restoreNotes(notes.map((c) => c.id))
+    // const notes = await db.note.findMany({
+    //     where: {
+    //         userId: { in: ids }
+    //     }
+    // })
+    // await restoreNotes(notes.map((c) => c.id))
     return res.count
 }
 async function restoreNotes(ids: number[]) {

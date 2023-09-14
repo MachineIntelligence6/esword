@@ -5,17 +5,25 @@ import {
     AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import React, { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { TableActionProps } from "../shared/types"
 import { DotsHorizontalIcon } from "@radix-ui/react-icons"
 import { Row } from "@tanstack/react-table"
 import { useSession } from "next-auth/react";
+import { TableActionPopupState } from "./toolbar";
+import tableActions, { ARCHIVE_DESCRIPTION, DELETE_DESCRIPTION, RESTORE_DESCRIPTION } from "./table-actions";
+import clientApiHandlers from "@/client/handlers";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
 
 
 
 interface DataTableRowActionsProps<TData> extends TableActionProps {
-    row: Row<TData>
+    row: Row<TData>;
 }
 
 
@@ -24,27 +32,37 @@ export function DataTableRowActions<TData>({
     editAction,
     viewAction,
     archiveAction,
-    deleteMessage,
+    deleteAction,
     restoreAction,
+    modelName
 }: DataTableRowActionsProps<TData>) {
     const { data: session } = useSession()
-    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertOpen, setAlertOpen] = React.useState<TableActionPopupState>({ state: false, type: "RESTORE" });
     const archived = (row.original as any).archived
-    const deleteEnabled = session?.user && session.user.role === "ADMIN" && archiveAction
+    const deleteEnabled = session?.user && session.user.role === "ADMIN"
 
-    const deletePopupProps: TableActionPopupProps = {
-        title: "Are you sure to delete?",
-        description: deleteMessage ?? "This action will delete the current row and all data linked with it.",
-        actionBtn: { text: "Delete", variant: "destructive" },
-        open: alertOpen, setOpen: setAlertOpen,
-        action: async () => await archiveAction?.(row.original)
+    const warningMessage = () => {
+        if (alertOpen.type === "RESTORE") return `This action will restore the ${modelName.toLowerCase()} and all data linked with it.`
+        if (alertOpen.type === "ARCHIVE") return `This action will move the ${modelName.toLowerCase()} and all data linked with it to archive.`
+        if (alertOpen.type === "DELETE") return `This action will delete (permanantly) the ${modelName.toLowerCase()} and all data linked with it.`
     }
-    const restorePopupProps: TableActionPopupProps = {
-        title: "Are you sure to restore?",
-        description: deleteMessage ?? "This action will restore the current row and all data linked with it.",
-        actionBtn: { text: "Restore", variant: "default" },
-        open: alertOpen, setOpen: setAlertOpen,
-        action: async () => await restoreAction?.([row.original])
+
+    const actionPopupProps: TableActionPopupProps = {
+        title: "Warning!",
+        description: warningMessage() ?? "",
+        actionBtn: { text: "Continue", variant: (alertOpen.type === "RESTORE" ? "default" : "destructive") },
+        open: alertOpen.state, setOpen: (value) => setAlertOpen({ state: value, type: "RESTORE" }),
+        action: async () => {
+            if (alertOpen.type === "RESTORE") {
+                await tableActions.restore([row.original], modelName, `${modelName} restored successfully.`)
+            }
+            else if (alertOpen.type === "DELETE") {
+                await tableActions.deletePermanantly([row.original], modelName, `${modelName} and all data linked with it deleted successfully.`)
+            }
+            else if (alertOpen.type === "ARCHIVE") {
+                await tableActions.archive([row.original], modelName, `${modelName} and all data linked with it moved to archive successfully.`)
+            }
+        }
     }
 
     return (
@@ -78,19 +96,30 @@ export function DataTableRowActions<TData>({
                     {
                         archived ?
                             restoreAction &&
-                            <DropdownMenuItem onClick={() => setAlertOpen(true)}>
+                            <DropdownMenuItem onClick={() => setAlertOpen({ state: true, type: "RESTORE" })}>
                                 Restore
                             </DropdownMenuItem>
                             :
-                            (deleteEnabled) &&
-                            <DropdownMenuItem onClick={() => setAlertOpen(true)}>
-                                Archive
-                            </DropdownMenuItem>
+                            deleteEnabled &&
+                            <>
+                                {
+                                    archiveAction &&
+                                    <DropdownMenuItem onClick={() => setAlertOpen({ state: true, type: "ARCHIVE" })}>
+                                        Archive
+                                    </DropdownMenuItem>
+                                }
+                                {
+                                    deleteAction &&
+                                    <DropdownMenuItem onClick={() => setAlertOpen({ state: true, type: "DELETE" })}>
+                                        Delete
+                                    </DropdownMenuItem>
+                                }
+                            </>
                     }
                 </DropdownMenuContent>
             </DropdownMenu>
             {
-                <TableActionPopup {...(archived ? { ...restorePopupProps } : { ...deletePopupProps })} />
+                <TableActionPopup {...actionPopupProps} />
             }
         </div>
     )
@@ -108,86 +137,91 @@ export type TableActionPopupProps = {
     actionBtn: {
         variant?: "link" | "default" | "primary" | "destructive" | "outline" | "secondary" | "ghost",
         text: string
-    }
+    };
 }
+
+
+const passwordVeifySchema = z.object({
+    password: z.string({ required_error: "Required!" }).min(1, { message: "Required!" })
+})
+
+type PasswordVerifySchema = z.infer<typeof passwordVeifySchema>
 
 export function TableActionPopup({
     open, setOpen, action,
     title, description, actionBtn,
 }: TableActionPopupProps) {
     const [processing, setProcessing] = useState(false);
+    const form = useForm<PasswordVerifySchema>({
+        resolver: zodResolver(passwordVeifySchema),
+        mode: "onSubmit"
+    })
 
-    const handleDoAction = async () => {
+    const handleDoAction = async (formData: PasswordVerifySchema) => {
+        if (!formData.password) return;
         setProcessing(true);
-        await action?.()
+        await clientApiHandlers.users.verifyPassword(formData.password).then(async (res) => {
+            if (res.succeed) {
+                await action?.()
+                setOpen(false);
+            } else {
+                form.setError("password", {
+                    message: "Wrong password",
+                    type: "validate"
+                })
+            }
+        })
         setProcessing(false);
-        setOpen(false);
     }
     return (
         <AlertDialog open={open} onOpenChange={(value) => !processing && setOpen(value)}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{title}</AlertDialogTitle>
-                    <AlertDialogDescription className="whitespace-pre-line">
+                    <AlertDialogTitle className="text-orange-500">{title}</AlertDialogTitle>
+                    <AlertDialogDescription className="whitespace-pre-line pt-3">
                         {description}
+                        <br />
+                        Enter your password below to continue
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
-                    <Button variant={actionBtn.variant} onClick={handleDoAction}>
-                        {
-                            processing ?
-                                <Spinner className="border-white" />
-                                :
-                                <span>{actionBtn.text}</span>
-                        }
-                    </Button>
-                </AlertDialogFooter>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleDoAction)}>
+                        <div>
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field, fieldState }) => (
+                                    <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" required {...field} />
+                                        </FormControl>
+                                        {fieldState.error && <FormMessage />}
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <AlertDialogFooter className="mt-5">
+                            <AlertDialogCancel type="button" disabled={processing}>Cancel</AlertDialogCancel>
+                            <Button
+                                type="submit"
+                                variant={actionBtn.variant}
+                                disabled={!form.formState.isDirty || !form.getValues("password")}
+                            >
+                                {
+                                    processing ?
+                                        <Spinner className="border-white" />
+                                        :
+                                        <span>{actionBtn.text}</span>
+                                }
+                            </Button>
+                        </AlertDialogFooter>
+                    </form>
+                </Form>
+
             </AlertDialogContent>
         </AlertDialog>
     )
 }
 
 
-
-
-
-export function DeleteBatchRowsAction({ onDelete }: { onDelete?: () => Promise<void> }) {
-    const [processing, setProcessing] = useState(false);
-    const [open, setOpen] = useState(false)
-
-    const handleDelete = async () => {
-        setProcessing(true);
-        await onDelete?.()
-        setProcessing(false);
-        setOpen(false)
-    }
-    return (
-        <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger>
-                <Button variant="destructive">
-                    Delete
-                </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        This action will delete all selected rows.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button variant={"destructive"} onClick={handleDelete}>
-                        {
-                            processing ?
-                                <Spinner className="border-white" />
-                                :
-                                <span>Delete</span>
-                        }
-                    </Button>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    )
-}

@@ -58,82 +58,15 @@ export default function AuthorsTable({ showPagination, showToolbar, archivedOnly
 
 
 
-    const handleDelete = async (author: IAuthor) => {
-        const res = await clientApiHandlers.authors.archive(author.id)
-        if (res.succeed) {
-            window.location.reload();
-        } else if (res.code === "DATA_LINKED") {
-            toast({
-                title: "Author can not be deleted.",
-                variant: "destructive",
-                description: "All commentaries linked with this author must be unlinked in order to delete this authtor."
-            })
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handlePermanentDelete = async (authors: IAuthor[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: authors.map((a) => a.id),
-            model: "Author"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Author(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-
-
-
-    const handleRestore = async (authors: IAuthor[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: authors.map((a) => a.id),
-            model: "Author"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Author(s) restored successfully.",
-            })
-            // window.location.reload()
-            router.push("/dashboard/authors")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-
     const tableActionProps: TableActionProps = {
         ...props,
         viewAction: (author: IAuthor) => (
             <Link href={`/dashboard/authors/${author.id}`}>View</Link>
         ),
-        archiveAction: handleDelete,
-        deleteMessage: "This action will delete the author and all data (commentaries) linked with it.",
-        deleteAction: handlePermanentDelete,
-        deleteOptions: {
-            message: "This action will delete the selected author(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
-        },
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Author"
     }
 
 
@@ -146,10 +79,7 @@ export default function AuthorsTable({ showPagination, showToolbar, archivedOnly
             pagination={pagination}
             showPagination={showPagination}
             showToolbar={showToolbar}
-            getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
-            setFilterValue={(table, value) => {
-                table.getColumn("name")?.setFilterValue(value)
-            }} />
+        />
     )
 }
 

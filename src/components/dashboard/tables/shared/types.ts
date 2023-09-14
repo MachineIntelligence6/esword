@@ -1,17 +1,14 @@
+import { Prisma } from "@prisma/client";
 import { ReactNode } from "react";
 
 
 export type TableActionProps = {
     viewAction?: (row: any) => ReactNode;
     editAction?: (row: any) => ReactNode;
-    deleteAction?: (row: any) => Promise<void>;
-    deleteOptions?: {
-        confirmation?: boolean;
-        message: string;
-    };
-    restoreAction?: (row: any) => Promise<void>;
-    archiveAction?: (row: any) => Promise<void>;
-    deleteMessage?: string
+    restoreAction?: boolean;
+    deleteAction?: boolean;
+    archiveAction?: boolean;
+    modelName: Prisma.ModelName
 }
 export type TableToolbarAction = {
     btn: { text: string },

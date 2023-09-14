@@ -194,6 +194,7 @@ enum ActivityModelType {
   NOTES
   USERS
   BLOGS
+  ABOUTCONTENT
 }
 
 model Settings {

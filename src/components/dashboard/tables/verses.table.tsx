@@ -7,7 +7,6 @@ import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/ui/use-toast";
-import definedMessages from "@/shared/constants/messages";
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
@@ -49,59 +48,6 @@ export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, a
         totalPages: tableData?.pagination?.totalPages ?? 1
     }
 
-    const handleDelete = async (verse: IVerse) => {
-        const res = await clientApiHandlers.verses.archive(verse.id)
-        if (res.succeed) {
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-
-    const handlePermanentDelete = async (verses: IVerse[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: verses.map((b) => b.id),
-            model: "Verse"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Verse(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-
-    const handleRestore = async (verses: IVerse[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: verses.map((b) => b.id),
-            model: "Verse"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Verse(s) restored successfully.",
-            })
-            // window.location.reload()
-            router.push("/dashboard/verses")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
 
     const tableActionProps: TableActionProps = {
         viewAction: (verse: IVerse) => (
@@ -110,15 +56,10 @@ export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, a
         editAction: (verse: IVerse) => (
             <Link href={`/dashboard/verses/${verse.id}/edit`}>Edit</Link>
         ),
-        archiveAction: handleDelete,
-        deleteMessage: "This action will delete the verse and all data (commentaries & notes) linked with it.",
-        deleteAction: handlePermanentDelete,
-        deleteOptions: {
-            message: "This action will delete the selected verse(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
-        },
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Verse"
     }
 
 
@@ -130,8 +71,6 @@ export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, a
                 pagination={pagination}
                 columns={columns(tableActionProps)}
                 toolbarActions={tableActionProps}
-                getFilterValue={(table) => (table.getColumn("number")?.getFilterValue() as string ?? "")}
-                setFilterValue={(table, value) => table.getColumn("number")?.setFilterValue(value)}
             />
         </div>
     )
@@ -174,7 +113,11 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
         //     enableHiding: false,
         // },
         {
-            accessorKey: "number",
+            id: "name",
+            accessorFn: (verse) => {
+                const chapter = verse.topic?.chapter
+                return `${chapter?.book?.abbreviation} ${chapter?.name}:${verse.number}`
+            },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Name" />
             ),
@@ -205,7 +148,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
             }
         },
         {
-            accessorKey: "topic",
+            id: "topic",
+            accessorFn: (verse) => verse.topic?.name,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Topic" />
             ),
@@ -220,7 +164,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
             }
         },
         {
-            accessorKey: "chapter",
+            id: "chapter",
+            accessorFn: (verse) => `${verse.topic?.chapter?.book?.name}/${verse.topic?.chapter?.name}`,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Chapter" />
             ),

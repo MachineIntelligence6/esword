@@ -69,20 +69,6 @@ export default function NotesTable({ user, verse }: Props) {
         totalPages: tableData?.pagination?.totalPages ?? 1
     }
 
-    const handleDelete = async (note: INote) => {
-        const res = await clientApiHandlers.notes.archive(note.id)
-        if (res.succeed) {
-            window.location.reload();
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    
 
     const tableColumns = columns({
         viewAction: (note: INote) => (
@@ -91,7 +77,10 @@ export default function NotesTable({ user, verse }: Props) {
         editAction: (note: INote) => (
             <Link href={`/dashboard/notes/${note.id}/edit`}>Edit</Link>
         ),
-        // deleteAction: handleDelete
+        // archiveAction: true,
+        // deleteAction: true,
+        // restoreAction: archivedOnly,
+        modelName: "Note"
     })
 
 
@@ -101,8 +90,6 @@ export default function NotesTable({ user, verse }: Props) {
                 data={tableData?.data}
                 pagination={pagination}
                 columns={tableColumns}
-                getFilterValue={(table) => (table.getColumn("text")?.getFilterValue() as string ?? "")}
-                setFilterValue={(table, value) => table.getColumn("text")?.setFilterValue(value)}
             />
         </div>
     )

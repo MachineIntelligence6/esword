@@ -20,10 +20,10 @@ import { useSession } from "next-auth/react"
 
 type Props = {
     book?: IBook;
+    archivedOnly?: boolean;
 }
 
-export default function ActivitiesTable({ book }: Props) {
-    const { toast } = useToast()
+export default function ActivitiesTable({ archivedOnly }: Props) {
     const { data: session } = useSession();
     const [tableData, setTableData] = useState<PaginatedApiResponse<IActivity[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -51,27 +51,11 @@ export default function ActivitiesTable({ book }: Props) {
     }
 
 
-    const handleDelete = async (activity: IActivity) => {
-        const res = await clientApiHandlers.activities.archive(activity.id)
-        if (res.succeed) {
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
     const tableColumns = columns({
-        // viewAction: (activity) => (
-        //     <Link href={`/dashboard/activities/${activity.id}`}>View</Link>
-        // ),
-        // editAction: (activity) => (
-        //     <Link href={`/dashboard/activities/${activity.id}/edit`}>Edit</Link>
-        // ),
-        archiveAction: handleDelete
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Activity"
     }, session)
 
 
@@ -81,10 +65,6 @@ export default function ActivitiesTable({ book }: Props) {
                 data={tableData?.data}
                 columns={tableColumns}
                 pagination={pagination}
-                getFilterValue={(table) => (table.getColumn("datetime")?.getFilterValue() as string ?? "")}
-                setFilterValue={(table, value) => {
-                    table.getColumn("datetime")?.setFilterValue(value)
-                }}
             />
         </div>
 
@@ -141,7 +121,8 @@ function columns(rowActions: TableActionProps, session: Session | null): ColumnD
         //     enableHiding: false,
         // },
         {
-            accessorKey: "datetime",
+            id: "datetime",
+            accessorFn: (activity) => (new Date(activity.timestamp)).toLocaleString(),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Date/Time" />
             ),
@@ -156,7 +137,8 @@ function columns(rowActions: TableActionProps, session: Session | null): ColumnD
             },
         },
         {
-            accessorKey: "user",
+            id: "user",
+            accessorFn: (activity) => activity.user?.name,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="User" />
             ),

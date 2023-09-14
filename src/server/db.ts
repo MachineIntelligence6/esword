@@ -7,7 +7,8 @@ const activityModels = [
     "Book", "Chapter",
     "Topic", "Verse",
     "Author", "Author",
-    "Note", "User", "Blog"
+    "Note", "User", "Blog",
+    "AboutContent"
 ]
 
 
@@ -69,9 +70,11 @@ basePrisma.$use(async (params, next) => {
         let activityAction = getActivityAction(action, args)
         let activityModel = getActivityModel(model)
         if (!session || !activityAction || !activityModel) return result;
-        const description = `${session.user.name} ${activityAction.toLowerCase()}d ${activityAction === "CREATE" ? "new" : ""} ${model.toLowerCase()}${(activityAction === "CREATE" || activityAction === "UPDATE") ? "" : "(s)"}`;
+        let description = `${session.user.name} ${activityAction.toLowerCase()}d ${activityAction === "CREATE" ? "new" : ""} ${model.toLowerCase()}${(activityAction === "CREATE" || activityAction === "UPDATE") ? "" : "(s)"}`;
+        if (model === "AboutContent") {
+            description = `${session.user.name} updated about page content`
+        }
         const refId: number | undefined | null = (activityAction === "CREATE") ? result.id : (args as any)?.where?.id
-
 
         await basePrisma.activity.create({
             data: {

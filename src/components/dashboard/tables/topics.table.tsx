@@ -29,65 +29,6 @@ export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) 
 
     const { toast } = useToast();
 
-    const handleDelete = async (topic: ITopic) => {
-        const res = await clientApiHandlers.topics.archive(topic.id)
-        if (res.succeed) {
-            window.location.reload()
-        } else if (res.code === "DATA_LINKED") {
-            toast({
-                title: "Topic can not be deleted.",
-                variant: "destructive",
-                description: "All verses linked with this topic must be unlinked in order to delete this topic."
-            })
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-
-    const handlePermanentDelete = async (topics: ITopic[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: topics.map((b) => b.id),
-            model: "Topic"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Topic(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handleRestore = async (topics: ITopic[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: topics.map((b) => b.id),
-            model: "Topic"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Topic(s) restored successfully.",
-            })
-            // window.location.reload()
-            router.push("/dashboard/topics")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
 
     const loadData = async () => {
         setTableData(null)
@@ -120,15 +61,10 @@ export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) 
         viewAction: (topic: ITopic) => (
             <Link href={`/dashboard/topics/${topic.id}`}>View</Link>
         ),
-        archiveAction: handleDelete,
-        deleteMessage: "This action will delete the topic and all data (verses & commentaries) linked with it.",
-        deleteAction: handlePermanentDelete,
-        deleteOptions: {
-            message: "This action will delete the selected topics(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
-        },
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Topic"
     }
 
     return (

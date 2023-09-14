@@ -1,6 +1,5 @@
 import axios from "axios";
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Prisma, UserRole } from "@prisma/client";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { UserFormSchema } from "@/components/dashboard/forms/users.form";
 import { IUser, IUserRole } from "@/shared/types/models.types";
 import { UserPaginationProps } from "@/shared/types/pagination.types";
@@ -46,6 +45,18 @@ export async function create(data: UserFormSchema): Promise<ApiResponse<IUser>> 
 export async function update(id: number, update: UserFormSchema): Promise<ApiResponse<IUser>> {
     try {
         const res = await axios.put<ApiResponse<IUser>>(`/api/users/${id}`, update)
+        if (res.status !== 200) throw new Error()
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKOWN_ERROR"
+        }
+    }
+}
+export async function verifyPassword(password: string): Promise<ApiResponse<IUser>> {
+    try {
+        const res = await axios.post<ApiResponse<IUser>>(`/api/users/verify-password`, { password: password })
         if (res.status !== 200) throw new Error()
         return res.data
     } catch (error) {

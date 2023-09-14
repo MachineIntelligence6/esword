@@ -14,6 +14,7 @@ import { useEffect, useState } from "react"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { IAuthor, ICommentary, IVerse } from "@/shared/types/models.types"
 import { useRouter } from "next/navigation"
+import { extractTextFromHtml } from "@/lib/utils"
 
 
 
@@ -58,58 +59,6 @@ export default function CommentariesTable({ author, verse, archivedOnly }: Props
     }
 
 
-    const handleDelete = async (commentary: ICommentary) => {
-        const res = await clientApiHandlers.commentaries.archive(commentary.id)
-        if (res.succeed) {
-            window.location.reload();
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handlePermanentDelete = async (commmentaries: ICommentary[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: commmentaries.map((b) => b.id),
-            model: "Commentary"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Commentaries(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handleRestore = async (commmentaries: ICommentary[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: commmentaries.map((b) => b.id),
-            model: "Commentary"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Commentaries restored successfully.",
-            })
-            // window.location.reload()
-            router.push("/dashboard/commentaries")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
 
     const tableActionProps: TableActionProps = {
         viewAction: (commentary: ICommentary) => (
@@ -118,11 +67,10 @@ export default function CommentariesTable({ author, verse, archivedOnly }: Props
         editAction: (commentary: ICommentary) => (
             <Link href={`/dashboard/commentaries/${commentary.id}/edit`}>Edit</Link>
         ),
-        archiveAction: handleDelete,
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-            deleteAction: handlePermanentDelete,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Commentary"
     }
 
 
@@ -134,8 +82,6 @@ export default function CommentariesTable({ author, verse, archivedOnly }: Props
                 pagination={pagination}
                 columns={columns(tableActionProps)}
                 toolbarActions={tableActionProps}
-                getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
-                setFilterValue={(table, value) => table.getColumn("name")?.setFilterValue(value)}
             />
         </div>
     )
@@ -193,7 +139,8 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
             },
         },
         {
-            accessorKey: "text",
+            id: "text",
+            accessorFn: (commentary) => extractTextFromHtml(commentary.text),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Text" />
             ),
@@ -201,14 +148,15 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
                 return (
                     <div className="flex items-center">
                         <span className="max-w-[500px] font-normal line-clamp-2">
-                            {row.getValue("text")}
+                            {extractTextFromHtml(row.getValue("text"))}
                         </span>
                     </div>
                 )
             }
         },
         {
-            accessorKey: "author",
+            id: "author",
+            accessorFn: (commentary) => commentary.author?.name,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Author" />
             ),
@@ -224,7 +172,11 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
             }
         },
         {
-            accessorKey: "verse",
+            id: "verse",
+            accessorFn: (commentary) => {
+                const chapter = commentary.verse?.topic?.chapter
+                return `${chapter?.book?.abbreviation} ${chapter?.name}:${commentary.verse?.number}`
+            },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Verse" />
             ),

@@ -28,10 +28,9 @@ import {
 } from "@/components/ui/table"
 
 import { DataTablePagination, TablePagination } from "./pagination"
-import { ArrowDownIcon, ArrowUpIcon, CaretSortIcon, Cross2Icon, EyeNoneIcon, MixerHorizontalIcon } from "@radix-ui/react-icons"
+import { ArrowDownIcon, ArrowUpIcon, CaretSortIcon, EyeNoneIcon, MixerHorizontalIcon } from "@radix-ui/react-icons"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
 import {
   DropdownMenu,
@@ -62,12 +61,10 @@ interface DataTableProps<TData, TValue> extends ToolbarProps<TData> {
 export function BaseTable<TData, TValue>({
   columns,
   data,
-  getFilterValue,
-  setFilterValue,
   pagination,
   showPagination = true,
   showToolbar = true,
-  toolbarActions
+  ...toolbarProps
 }: DataTableProps<TData, TValue>) {
 
   const [rowSelection, setRowSelection] = React.useState({})
@@ -76,6 +73,7 @@ export function BaseTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
   const { data: session } = useSession()
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({
     data: data ?? [],
@@ -85,6 +83,7 @@ export function BaseTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      globalFilter
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -108,9 +107,9 @@ export function BaseTable<TData, TValue>({
         <DataTableToolbar
           table={table}
           session={session}
-          getFilterValue={getFilterValue}
-          setFilterValue={setFilterValue}
-          toolbarActions={toolbarActions} />
+          {...toolbarProps}
+          filterValue={globalFilter}
+          setFilterValue={setGlobalFilter} />
       }
       <div className="rounded-md border">
         <Table>

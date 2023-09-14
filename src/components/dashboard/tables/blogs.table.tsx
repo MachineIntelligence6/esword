@@ -24,8 +24,6 @@ type Props = {
 }
 
 export default function BlogsTable({ user, archivedOnly }: Props) {
-    const router = useRouter()
-    const { toast } = useToast()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IBlog[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
@@ -61,58 +59,6 @@ export default function BlogsTable({ user, archivedOnly }: Props) {
     }
 
 
-    const handleDelete = async (blog: IBlog) => {
-        const res = await clientApiHandlers.blogs.archive(blog.id)
-        if (res.succeed) {
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handlePermanentDelete = async (blogs: IBlog[]) => {
-        const res = await clientApiHandlers.archives.deletePermanantly({
-            ids: blogs.map((b) => b.id),
-            model: "Blog"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Blog(s) deleted successfully.",
-            })
-            window.location.reload()
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
-    const handleRestore = async (blogs: IBlog[]) => {
-        const res = await clientApiHandlers.archives.restore({
-            ids: blogs.map((b) => b.id),
-            model: "Blog"
-        })
-        if (res.succeed) {
-            toast({
-                title: "Blog(s) restored successfully.",
-            })
-            // window.location.reload()
-            router.push("/dashboard/blogs")
-        } else {
-            toast({
-                title: "Error",
-                variant: "destructive",
-                description: definedMessages.UNKNOWN_ERROR
-            })
-        }
-    }
-
 
     const tableActionProps: TableActionProps = {
         viewAction: (blog) => (
@@ -121,15 +67,10 @@ export default function BlogsTable({ user, archivedOnly }: Props) {
         editAction: (blog) => (
             <Link href={`/dashboard/blogs/${blog.id}/edit`}>Edit</Link>
         ),
-        deleteMessage: "This action will delete delete the selected blog.",
-        archiveAction: handleDelete,
-        deleteAction: handlePermanentDelete,
-        deleteOptions: {
-            message: "This action will delete the selected blogs(s) permanantly and delete all data linked with them. \n\n Are you sure to continue?",
-        },
-        ...(archivedOnly && {
-            restoreAction: handleRestore,
-        }),
+        archiveAction: true,
+        deleteAction: true,
+        restoreAction: archivedOnly,
+        modelName: "Blog"
     }
 
 
@@ -141,10 +82,6 @@ export default function BlogsTable({ user, archivedOnly }: Props) {
                 columns={columns(tableActionProps)}
                 pagination={pagination}
                 toolbarActions={tableActionProps}
-                getFilterValue={(table) => (table.getColumn("title")?.getFilterValue() as string ?? "")}
-                setFilterValue={(table, value) => {
-                    table.getColumn("title")?.setFilterValue(value)
-                }}
             />
         </div>
     )
@@ -233,7 +170,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IBlog, any>[] {
             },
         },
         {
-            accessorKey: "content",
+            id: "content",
+            accessorFn: (blog) => extractTextFromHtml(blog.content),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Content" />
             ),
@@ -263,7 +201,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IBlog, any>[] {
         //     },
         // },
         {
-            accessorKey: "user",
+            id: "user",
+            accessorFn: (blog) => blog.user?.name,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="User" />
             ),

@@ -2,7 +2,7 @@ import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared
 import db from '@/server/db'
 import { Prisma, UserRole } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
-import { hashPassword } from "../auth";
+import { comparePassword, getServerAuth, hashPassword } from "../auth";
 import { IUser, IUserRole } from "@/shared/types/models.types";
 import { UserPaginationProps } from "@/shared/types/pagination.types";
 
@@ -254,6 +254,42 @@ export async function update(req: Request, id: number): Promise<ApiResponse<any>
         return {
             succeed: false,
             code: "UNKOWN_ERROR"
+        }
+    }
+}
+
+
+
+type VerifyPasswordReq = {
+    password: string
+}
+
+
+export async function verifyPassword(req: Request): Promise<ApiResponse<IUser>> {
+    try {
+        const session = await getServerAuth()
+        if (typeof session === "boolean" || !session?.user) throw new Error("")
+        const { password } = await req.json() as VerifyPasswordReq
+        const user = await db.user.findFirst({
+            where: { id: Number(session.user.id) }
+        })
+        if (!user) throw new Error("");
+        const passwordMatch = await comparePassword(password, user.password)
+        return {
+            succeed: passwordMatch,
+            code: passwordMatch ? "SUCCESS" : "WRONG_PASSWORD",
+            ...(passwordMatch && {
+                data: {
+                    ...user,
+                    password: ""
+                }
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            succeed: false,
+            code: "UNAUTHORIZED"
         }
     }
 }
