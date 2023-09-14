@@ -11,23 +11,18 @@ import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { IUser } from "@/shared/types/models.types"
 import { useSession } from "next-auth/react"
-import { useToast } from "@/components/ui/use-toast"
-import definedMessages from "@/shared/constants/messages"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 
 
-type Props = TableActionProps & {
+type Props = Omit<TableActionProps, "modelName"> & {
     archivedOnly?: boolean;
 }
 
 export default function UsersTable({ archivedOnly, ...props }: Props) {
-    const router = useRouter()
     const { data: session } = useSession()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IUser[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
-    const { toast } = useToast()
 
     const loadData = async () => {
         if (!session) return;
@@ -76,10 +71,7 @@ export default function UsersTable({ archivedOnly, ...props }: Props) {
             columns={columns(tableActionProps)}
             pagination={pagination}
             toolbarActions={tableActionProps}
-            getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
-            setFilterValue={(table, value) => {
-                table.getColumn("name")?.setFilterValue(value)
-            }} />
+        />
     )
 }
 

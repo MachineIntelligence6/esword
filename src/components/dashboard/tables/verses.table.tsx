@@ -13,6 +13,7 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { ITopic, IVerse } from "@/shared/types/models.types"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 
 export default function VersesTable({ topic, archivedOnly }: { topic?: ITopic, archivedOnly?: boolean }) {
@@ -154,11 +155,17 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
                 <DataTableColumnHeader column={column} title="Topic" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.topic?.archived ?? true
                 return (
-                    <div className="flex items-center">
-                        <span className="max-w-[200px] truncate font-normal">
+                    <div className="flex max-w-[200px]">
+                        <Link
+                            href={archived ? "#" : `/dashboard/topics/${row.original.topicId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {row.original.topic?.name}
-                        </span>
+                        </Link>
                     </div>
                 )
             }
@@ -170,10 +177,14 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
                 <DataTableColumnHeader column={column} title="Chapter" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.topic?.chapter?.archived ?? true
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/chapters/${row.original.topic?.chapter?.id}`}
-                            className="max-w-[100px] text-primary truncate font-normal">
+                        <Link href={archived ? "#" : `/dashboard/chapters/${row.original.topic?.chapter?.id}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {`${row.original.topic?.chapter?.book?.name}/${row.original.topic?.chapter?.name}`}
                         </Link>
                     </div>

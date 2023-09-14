@@ -83,7 +83,7 @@ export function BaseTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
-      globalFilter
+      // globalFilter
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,

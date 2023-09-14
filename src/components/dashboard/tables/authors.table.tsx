@@ -10,25 +10,19 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import clientApiHandlers from "@/client/handlers"
 import { IAuthor } from "@/shared/types/models.types"
-import { useToast } from "@/components/ui/use-toast"
-import definedMessages from "@/shared/constants/messages"
 import Link from "next/link"
-import { buttonVariants } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
 
 
-type Props = TableActionProps & {
+type Props = Omit<TableActionProps, "modelName"> & {
     showPagination?: boolean;
     showToolbar?: boolean;
     archivedOnly?: boolean;
 }
 
 export default function AuthorsTable({ showPagination, showToolbar, archivedOnly, ...props }: Props) {
-    const router = useRouter()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IAuthor[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
-    const { toast } = useToast();
 
 
     const loadData = async () => {

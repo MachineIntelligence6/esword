@@ -1,7 +1,5 @@
 import axios from "axios";
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Prisma } from "@prisma/client";
-import { AuthorFormSchema } from "@/components/dashboard/forms/authors.form";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { CommentaryFormSchema } from "@/components/dashboard/forms/commentaries.form";
 import defaults from "@/shared/constants/defaults";
 import { ICommentary } from "@/shared/types/models.types";

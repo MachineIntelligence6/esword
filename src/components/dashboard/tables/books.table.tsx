@@ -11,19 +11,15 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import clientApiHandlers from "@/client/handlers"
 import { IBook } from "@/shared/types/models.types"
 import Link from "next/link"
-import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from "next/navigation"
 
 
-type Props = TableActionProps & {
+type Props = Omit<TableActionProps, "modelName"> & {
     showPagination?: boolean;
     showToolbar?: boolean;
     archivedOnly?: boolean;
 }
 
 export default function BooksTable({ showPagination, showToolbar, archivedOnly, ...props }: Props) {
-    const router = useRouter()
-    const { toast } = useToast()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IBook[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);

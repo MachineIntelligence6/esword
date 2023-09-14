@@ -1,6 +1,5 @@
 import axios from "axios";
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Prisma } from "@prisma/client";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { BookFormSchema } from "@/components/dashboard/forms/books.form";
 import { IBook } from "@/shared/types/models.types";
 import { BooksPaginationProps } from "@/shared/types/pagination.types";

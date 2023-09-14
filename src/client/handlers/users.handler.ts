@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { UserFormSchema } from "@/components/dashboard/forms/users.form";
-import { IUser, IUserRole } from "@/shared/types/models.types";
+import { IUser } from "@/shared/types/models.types";
 import { UserPaginationProps } from "@/shared/types/pagination.types";
 
 

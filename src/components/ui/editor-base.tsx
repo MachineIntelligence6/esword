@@ -66,7 +66,7 @@ const formats = [
 
 
 
-export default function QuillEditorBase({ disabled, readOnly, value, onChange }: EditorProps) {
+export default function QuillEditorBase({ disabled, readOnly, value, onChange, className }: EditorProps) {
 
     return (
         <div id="editor-container"
@@ -82,7 +82,8 @@ export default function QuillEditorBase({ disabled, readOnly, value, onChange }:
                 value={value}
                 className={cn(
                     "w-full",
-                    disabled && "ql-disabled"
+                    disabled ? "ql-disabled" : "min-300",
+                    className
                 )}
                 onChange={onChange}
                 modules={modules(disabled)}

@@ -19,6 +19,7 @@ const activityOperations = [
     "updateMany",
     "delete",
     "deleteMany",
+    "upsert"
 ]
 
 
@@ -26,8 +27,8 @@ const activityOperations = [
 function getActivityAction(operation: string, args: any): ActivityActionType | undefined {
     if (operation === "create" || operation === "createMany") return "CREATE"
     if (operation === "delete" || operation === "deleteMany") return "DELETE"
-    if (operation === "update" || operation === "updateMany") {
-        const archived: boolean | undefined = args.data.archived
+    if (operation === "update" || operation === "updateMany" || operation === "upsert") {
+        const archived: boolean | undefined = args.data?.archived
         if (archived === true) return "ARCHIVE"
         if (archived === false) return "RESTORE"
         return "UPDATE"
@@ -49,6 +50,7 @@ function getActivityModel(model: Prisma.ModelName): ActivityModelType | undefine
     if (model === "Commentary") return "COMMENTARIES"
     if (model === "Author") return "AUTHORS"
     if (model === "Blog") return "BLOGS"
+    if (model === "AboutContent") return "ABOUTCONTENT"
     return undefined
 }
 

@@ -1,8 +1,8 @@
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
-import { IBookmark, IHighlight } from "@/shared/types/models.types";
+import { IHighlight } from "@/shared/types/models.types";
 import { HighlightsPaginationProps } from "@/shared/types/pagination.types";
 import { getServerAuth } from "../auth";
 

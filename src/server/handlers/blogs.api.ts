@@ -1,4 +1,4 @@
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
 import { BlogType, Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
@@ -13,7 +13,7 @@ import { saveBlogImage } from "../files-handler";
 
 export async function getAll({
     page = 1, perPage = defaults.PER_PAGE_ITEMS,
-    user = -1, include, where, orderBy, type
+    user = -1, include, where, orderBy
 }: BlogsPaginationProps): Promise<PaginatedApiResponse<IBlog[]>> {
     try {
         const blogs = await db.blog.findMany({

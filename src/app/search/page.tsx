@@ -4,9 +4,7 @@ import { SearchLoadingPlaceholder } from "@/components/loading-placeholders";
 import { Card, CardContent } from "@/components/ui/card";
 import { PaginatedApiResponse } from "@/shared/types/api.types";
 import { IVerse } from "@/shared/types/models.types";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 import Highlighter from "react-highlight-words";
 import useSwr from 'swr'
 

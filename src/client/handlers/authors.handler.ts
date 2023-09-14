@@ -1,6 +1,5 @@
 import axios from "axios";
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
-import { Prisma } from "@prisma/client";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { AuthorFormSchema } from "@/components/dashboard/forms/authors.form";
 import { IAuthor } from "@/shared/types/models.types";
 import { AuthorsPaginationProps } from "@/shared/types/pagination.types";

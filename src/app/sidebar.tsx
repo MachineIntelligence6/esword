@@ -5,7 +5,7 @@ import { TooltipEl } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { IBook } from "@/shared/types/models.types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 
@@ -53,8 +53,7 @@ export default function SiteSidebar() {
 
 
 function SidebarBooksComponent() {
-    const { booksList, activeBook, setActiveBook } = useReadBookStore()
-    const router = useRouter()
+    const { booksList, activeBook } = useReadBookStore()
 
     const changeBook = (book: IBook) => {
         window.location.replace(`/?book=${book.slug}`)

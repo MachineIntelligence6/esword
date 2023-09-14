@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { Prisma } from "@prisma/client";
 import { VerseFormSchema } from "@/components/dashboard/forms/verses.form";
 import { IHighlight, IVerse } from "@/shared/types/models.types";

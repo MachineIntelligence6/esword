@@ -1,7 +1,6 @@
 import { BackButton } from "@/components/dashboard/buttons";
 import serverApiHandlers from "@/server/handlers";
 import { notFound } from "next/navigation";
-import CommentariesTable from "@/components/dashboard/tables/commentaries.table";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";

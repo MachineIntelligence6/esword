@@ -1,9 +1,5 @@
 'use client'
 import { useState } from "react";
-import clientApiHandlers from "@/client/handlers";
-import { useToast } from "@/components/ui/use-toast";
-import definedMessages from "@/shared/constants/messages";
-import Link from "next/link";
 import { ITopic } from "@/shared/types/models.types";
 import TopicsTable from "@/components/dashboard/tables/topics.table";
 import { AddTopicForm, EditTopicForm } from "@/components/dashboard/forms/topics.form";

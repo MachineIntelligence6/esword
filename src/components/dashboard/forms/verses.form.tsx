@@ -10,7 +10,7 @@ import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter } from "next/navigation";
-import { ComboBox, SelectEl } from "../../ui/select";
+import { SelectEl } from "../../ui/select";
 import { Textarea } from "../../ui/textarea";
 import { useEffect, useState } from "react";
 import { IBook, IVerse } from "@/shared/types/models.types";

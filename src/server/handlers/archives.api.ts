@@ -128,20 +128,21 @@ async function restoreUsers(ids: number[]) {
     // await restoreNotes(notes.map((c) => c.id))
     return res.count
 }
-async function restoreNotes(ids: number[]) {
-    const res = await db.note.updateMany({
-        where: {
-            id: {
-                in: ids,
-            },
-            archived: true
-        },
-        data: {
-            archived: false,
-        },
-    })
-    return res.count
-}
+
+// async function restoreNotes(ids: number[]) {
+//     const res = await db.note.updateMany({
+//         where: {
+//             id: {
+//                 in: ids,
+//             },
+//             archived: true
+//         },
+//         data: {
+//             archived: false,
+//         },
+//     })
+//     return res.count
+// }
 async function restoreCommentaries(ids: number[]) {
     const res = await db.commentary.updateMany({
         where: {

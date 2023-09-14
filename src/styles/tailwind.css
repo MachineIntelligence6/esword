@@ -38,9 +38,11 @@ input.autofill-text-white:-webkit-autofill:active {
 
 
 .ql-container {
-    min-height: 300px !important;
     max-height: 600px !important;
     overflow-y: auto !important;
+}
+.min-300 .ql-container {
+    min-height: 300px !important;
 }
 
 

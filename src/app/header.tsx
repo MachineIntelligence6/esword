@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { BackButton, LogoutButton } from "@/components/dashboard/buttons"
+import { LogoutButton } from "@/components/dashboard/buttons"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDownIcon, TextAlignJustifyIcon, Cross1Icon, MagnifyingGlassIcon, PersonIcon, } from "@radix-ui/react-icons"
+import { ChevronDownIcon, MagnifyingGlassIcon, PersonIcon, } from "@radix-ui/react-icons"
 import { Session } from "next-auth";
 import { Form, FormField, FormItem } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,14 +20,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import { ResponsiveSidebarButtton } from "./dashboard/sidebar";
-import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 
 
-type Props = {
-    session: Session | null
-}
 
 export default function SiteHeader() {
     const { data: session } = useSession()
@@ -109,7 +105,7 @@ function SearchComponent() {
                     <FormField
                         control={form.control}
                         name="query"
-                        render={({ field, fieldState }) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <div className="flex items-center gap-3 px-3">
                                     <MagnifyingGlassIcon className="w-5 h-5" />

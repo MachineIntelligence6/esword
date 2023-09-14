@@ -21,7 +21,7 @@ export const authOptions: AuthOptions = {
                     label: "Password",
                 },
             },
-            async authorize(credentials, req) {
+            async authorize(credentials) {
                 const { email, password } = credentials as { email: string, password: string }
                 const user = await db.user.findFirst({
                     where: {

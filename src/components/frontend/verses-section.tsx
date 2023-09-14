@@ -85,6 +85,9 @@ function countOccurrences(verseText: string, selection: Selection) {
 }
 
 
+const MIN_SCALE_VALUE = 0.8
+const MAX_SCALE_VALUE = 1.8
+
 function VersesSectionContent() {
     const {
         topicsList, setActiveVerse, activeChapter,
@@ -130,10 +133,10 @@ function VersesSectionContent() {
     const [scale, setScale] = useState(1);
 
     const handleZoomIn = () => {
-        setScale((prevScale) => Math.min(2, prevScale + 0.2));  // Increase scale by 0.1
+        setScale((prevScale) => Math.min(MAX_SCALE_VALUE, prevScale + 0.2));  // Increase scale by 0.1
     };
     const handleZoomOut = () => {
-        setScale((prevScale) => Math.max(1, prevScale - 0.2)); // Decrease scale by 0.1 but never below 0.1
+        setScale((prevScale) => Math.max(MIN_SCALE_VALUE, prevScale - 0.2)); // Decrease scale by 0.1 but never below 0.1
     };
 
 
@@ -187,14 +190,14 @@ function VersesSectionContent() {
                         <button
                             type="button"
                             className="zoom-in hover:scale-110 transition-all disabled:hover:!scale-100"
-                            disabled={(!topicsList || topicsList.length <= 0 || scale >= 2)}
+                            disabled={(!topicsList || topicsList.length <= 0 || scale >= MAX_SCALE_VALUE)}
                             onClick={handleZoomIn}>
                             <ZoomInIcon className="w-5 h-5" />
                         </button>
                         <button
                             type="button"
                             className="zoom-out disabled:opacity-60 hover:scale-110 transition-all disabled:hover:!scale-100"
-                            disabled={(scale <= 1) || (!topicsList || topicsList.length <= 0)} onClick={handleZoomOut}>
+                            disabled={(scale <= MIN_SCALE_VALUE) || (!topicsList || topicsList.length <= 0)} onClick={handleZoomOut}>
                             <ZoomOutIcon className="w-5 h-5" />
                         </button>
                         <Separator orientation="vertical" className="h-5" />
@@ -216,8 +219,9 @@ function VersesSectionContent() {
                 </div>
                 {/* content */}
                 <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)] ">
-                    <div ref={versesContainerRef} className=" pb-10 pt-2 max-h-[100vh] w-full max-w-full overflow-auto">
-                        <div className="min-h-full bg-white space-y-5" style={{ transform: `scale(${scale}) `, transformOrigin: "top left" }}>
+                    <div ref={versesContainerRef} className=" pb-10 pt-2 max-h-[100vh] min-h-[calc(100vh_-_150px)] w-full max-w-full">
+                        {/* <div className="min-h-full bg-white space-y-5" style={{ transform: `scale(${scale}) `, transformOrigin: "top left" }}> */}
+                        <div className="min-h-full bg-white space-y-5">
                             {
                                 showPlaceholder ?
                                     <div className="flex flex-col  h-full">
@@ -236,18 +240,19 @@ function VersesSectionContent() {
                                             topicsList?.map((topic) => (
                                                 <div key={topic.id}>
                                                     <div className="flex items-center justify-center py-[10px]">
-                                                        <h1 className="font-bold text-center text-base text-primary-dark font-roman md:text-xl">
+                                                        <h1 className="font-bold text-center text-primary-dark font-roman" style={{ fontSize: `${scale * 20}px` }}>
                                                             {topic.name}
                                                         </h1>
                                                     </div>
                                                     <div className="flex flex-col gap-y-[10px]">
                                                         <div className="flex">
-                                                            <div className="flex flex-col gap-y-[10px] px-5 font-roman">
+                                                            <div className="flex flex-col px-5 font-roman">
                                                                 {
                                                                     topic.verses?.map((verse) => (
                                                                         <VerseComponent
                                                                             key={verse.id}
                                                                             verse={verse}
+                                                                            scale={scale}
                                                                             versesContainerRef={versesContainerRef}
                                                                             active={activeVerse.id === verse.id}
                                                                             onClick={() => setActiveVerse(verse.id)} />
@@ -298,17 +303,6 @@ function VersesSectionContent() {
 
 
 
-
-
-
-const generateRegexPattern = (text: string, index: number) => {
-    const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape any regex special characters
-    return `(?:\\b${escapedText}\\b\\W*){${index}}\\b${escapedText}\\b`;
-};
-
-
-
-
 function generateHighlightedText(verse: IVerse) {
     let highlightedText = verse.text
 
@@ -316,7 +310,7 @@ function generateHighlightedText(verse: IVerse) {
         const regexPattern = new RegExp(h.text, 'gi');
         // const regexPattern = new RegExp(`\\b${h.text}\\b`, 'gi');
         let matchCount = 0;
-        function replaceNthOccurrence(match: string, offset: number, input: string) {
+        function replaceNthOccurrence(match: string) {
             matchCount++;
             return matchCount === h.index ? `<mark id='${h.index}'>${match}</mark>` : match;
         }
@@ -335,10 +329,11 @@ type VerseComponentProps = {
     onClick?: () => void;
     verse: IVerse;
     active?: boolean;
-    versesContainerRef: RefObject<HTMLDivElement>
+    versesContainerRef: RefObject<HTMLDivElement>;
+    scale: number;
 }
 
-function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseComponentProps) {
+function VerseComponent({ verse, onClick, active, scale, versesContainerRef }: VerseComponentProps) {
     const ref = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLSpanElement>(null);
     const { activeBookmark } = useReadBookStore()
@@ -366,13 +361,14 @@ function VerseComponent({ verse, onClick, active, versesContainerRef }: VerseCom
         <div id={`verse_${verse.id}`} ref={ref}
             className={cn(
                 "flex font-normal gap-5 transition-all duration-200",
-                active ? "font-bold" : "select-none"
+                active ? "font-bold" : "select-none",
             )}
+            style={{ fontSize: `${scale * 18}px` }}
             onClick={onClick}>
-            <p className={"text-sm text-light-green min-w-max md:text-base"}>
+            <p className={"text-light-green min-w-max"}>
                 {`${verse.topic?.chapter?.book?.abbreviation} ${verse.topic?.chapter?.name}:${verse.number}`}
             </p>
-            <p className="text-sm text-primary-dark md:text-base [&>mark]:bg-yellow-500 [&>mark]:text-white">
+            <p className="text-primary-dark [&>mark]:bg-yellow-500 [&>mark]:text-white">
                 <span ref={textRef} dangerouslySetInnerHTML={{ __html: verseText }} suppressHydrationWarning />
                 {/* <span>{parseHtmlFromStr(verseText)}</span> */}
             </p>

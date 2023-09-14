@@ -1,4 +1,4 @@
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";

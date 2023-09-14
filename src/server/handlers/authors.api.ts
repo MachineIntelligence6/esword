@@ -3,7 +3,6 @@ import db from '@/server/db'
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IAuthor } from "@/shared/types/models.types";
-import { revalidatePath } from "next/cache";
 import { AuthorsPaginationProps } from "@/shared/types/pagination.types";
 
 

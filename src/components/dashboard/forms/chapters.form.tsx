@@ -10,10 +10,10 @@ import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter } from "next/navigation";
-import { ComboBox, SelectEl } from "../../ui/select";
+import { SelectEl } from "../../ui/select";
 import { useEffect, useState } from "react";
-import { IAuthor, IBook, IChapter } from "@/shared/types/models.types";
-import { Textarea } from "@/components/ui/textarea";
+import { IBook, IChapter } from "@/shared/types/models.types";
+import QuillEditor from "@/components/ui/editor";
 
 
 export const chapterFormSchema = z.object({
@@ -208,7 +208,7 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                                 <FormItem className="col-span-full">
                                     <FormLabel>Text</FormLabel>
                                     <FormControl>
-                                        <Textarea rows={4}  {...field} />
+                                        <QuillEditor  {...field} />
                                     </FormControl>
                                     {
                                         fieldState.error &&
@@ -232,7 +232,11 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
 
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                        <Button variant="outline" onClick={() => window.history.back()}>Cancel</Button>
+                        <Button variant="outline"
+                            disabled={!formState.isDirty || formState.isSubmitting}
+                            onClick={resetFormValues}>
+                            Cancel
+                        </Button>
                         <Button
                             type="submit"
                             disabled={!formState.isDirty || formState.isSubmitting}>

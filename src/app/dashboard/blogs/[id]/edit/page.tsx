@@ -1,6 +1,5 @@
 import { BackButton } from "@/components/dashboard/buttons";
 import BlogsForm from "@/components/dashboard/forms/blogs.form";
-import ChaptersForm from "@/components/dashboard/forms/chapters.form";
 import serverApiHandlers from "@/server/handlers";
 import { notFound } from "next/navigation";
 

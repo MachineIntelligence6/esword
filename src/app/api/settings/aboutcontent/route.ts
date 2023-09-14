@@ -6,7 +6,7 @@ import { NextResponse } from "next/server"
 
 
 
-export async function GET(req: Request) {
+export async function GET() {
     const res = await serverApiHandlers.settings.getAboutContent()
     return NextResponse.json(res)
 }

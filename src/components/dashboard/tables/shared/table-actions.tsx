@@ -58,6 +58,7 @@ const restore = async (data: any[], modelName: Prisma.ModelName, successMessage:
         toast({
             title: successMessage,
         })
+        window.location.reload()
     } else {
         toast({
             title: "Error",

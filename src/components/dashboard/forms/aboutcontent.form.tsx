@@ -9,7 +9,6 @@ import clientApiHandlers from "@/client/handlers";
 import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
 import { z } from 'zod';
-import { useRouter } from "next/navigation";
 import QuillEditor from "@/components/ui/editor";
 import { AboutContent } from "@prisma/client";
 
@@ -28,7 +27,6 @@ export type AboutContentFormSchema = z.infer<typeof aboutContentFormSchema>
 type Props = { aboutContent?: AboutContent | null }
 
 export default function AboutContentForm({ aboutContent }: Props) {
-    const router = useRouter()
     const form = useForm<AboutContentFormSchema>({
         resolver: zodResolver(aboutContentFormSchema),
         mode: "all",

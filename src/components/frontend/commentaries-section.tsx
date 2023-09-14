@@ -6,6 +6,7 @@ import { AuthorsLoadingPlaceholder, CommentaryLoadingPlaceholder } from "../load
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { Button } from "../ui/button";
+import QuillEditor from "../ui/editor";
 
 export default function CommentariesContentComponent() {
     const {
@@ -94,9 +95,9 @@ export default function CommentariesContentComponent() {
                                                         <h3 className="font-bold text-base text-primary-dark flex justify-center items-center py-[10px]">
                                                             {activeChapter.data?.commentaryName}
                                                         </h3>
-                                                        <p className="lg:pl-4 lg:pr-2 px-[10px] text-primary-dark font-normal text-sm">
-                                                            {activeChapter.data?.commentaryText}
-                                                        </p>
+                                                        <div className="lg:pl-4 lg:pr-2 px-[10px]">
+                                                            <QuillEditor disabled value={activeChapter.data?.commentaryText ?? ""} />
+                                                        </div>
                                                     </div>
                                                 )
                                                 :
@@ -122,9 +123,9 @@ export default function CommentariesContentComponent() {
                                                         <h3 className="font-bold text-sm text-primary-dark flex justify-center items-center py-[10px] font-roman md:text-base">
                                                             {activeAuthor.commentaries.active?.name}
                                                         </h3>
-                                                        <p className="lg:pl-4 lg:pr-2 px-[10px] text-primary-dark font-normal text-sm font-roman">
-                                                            {activeAuthor.commentaries.active?.text}
-                                                        </p>
+                                                        <div className="lg:pl-4 lg:pr-2 px-[10px]">
+                                                            <QuillEditor disabled value={activeAuthor.commentaries.active?.text ?? ""} />
+                                                        </div>
                                                     </div>
                                                 )
                                                 :

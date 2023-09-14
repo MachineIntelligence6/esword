@@ -6,15 +6,12 @@ import { DataTableRowActions } from "./shared/row-actions"
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
-import { IActivity, IBook, IChapter } from "@/shared/types/models.types"
-import definedMessages from "@/shared/constants/messages"
-import { Session } from "next-auth"
-import { useSession } from "next-auth/react"
+import { IActivity, IBook } from "@/shared/types/models.types"
+import { cn } from "@/lib/utils"
 
 
 
@@ -24,7 +21,6 @@ type Props = {
 }
 
 export default function ActivitiesTable({ archivedOnly }: Props) {
-    const { data: session } = useSession();
     const [tableData, setTableData] = useState<PaginatedApiResponse<IActivity[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
@@ -56,7 +52,7 @@ export default function ActivitiesTable({ archivedOnly }: Props) {
         deleteAction: true,
         restoreAction: archivedOnly,
         modelName: "Activity"
-    }, session)
+    })
 
 
     return (
@@ -88,7 +84,7 @@ function generateActivityRefUrl(activity: IActivity) {
 }
 
 
-function columns(rowActions: TableActionProps, session: Session | null): ColumnDef<IActivity, any>[] {
+function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
     return [
         {
             id: "select",
@@ -143,11 +139,15 @@ function columns(rowActions: TableActionProps, session: Session | null): ColumnD
                 <DataTableColumnHeader column={column} title="User" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.user?.archived ?? true
                 return (
                     <div className="flex max-w-[100px] space-x-2">
                         <Link
-                            href={`/dashboard/users/${row.original.userId}`}
-                            className="max-w-[100px] text-primary truncate font-medium">
+                            href={archived ? "#" : `/dashboard/users/${row.original.userId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {row.original.user?.name}
                         </Link>
                     </div>

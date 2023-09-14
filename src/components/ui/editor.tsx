@@ -16,7 +16,8 @@ export type EditorProps = {
     disabled?: boolean;
     readOnly?: boolean;
     value?: string;
-    onChange?: (value: string) => void
+    onChange?: (value: string) => void;
+    className?: string;
 }
 
 

@@ -4,8 +4,7 @@ import DashboardSidebar from "./sidebar";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getServerAuth } from "@/server/auth";
-import { Button } from "@/components/ui/button";
-import { Cross1Icon } from "@radix-ui/react-icons";
+
 
 
 

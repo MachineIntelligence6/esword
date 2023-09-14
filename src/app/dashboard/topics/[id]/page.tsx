@@ -1,5 +1,4 @@
 import { BackButton } from "@/components/dashboard/buttons";
-import ChaptersTable from "@/components/dashboard/tables/chapters.table";
 import serverApiHandlers from "@/server/handlers";
 import { notFound } from "next/navigation";
 import {
@@ -13,7 +12,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import db from "@/server/db";
-import { IBook, ITopic } from "@/shared/types/models.types";
+import { ITopic } from "@/shared/types/models.types";
 import VersesTable from "@/components/dashboard/tables/verses.table";
 
 

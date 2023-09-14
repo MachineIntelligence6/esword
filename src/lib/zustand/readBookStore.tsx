@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import clientApiHandlers from "@/client/handlers";
 import { IBook, IBookmark, IChapter, ICommentary, IHighlight, ITopic, IVerse } from "@/shared/types/models.types";
 import { Author } from "@prisma/client";
@@ -42,9 +43,7 @@ type ActiveVerse = StoreStateItem<IVerse> & {
     authors?: AuthorsState;
     selectedText?: string;
 }
-type ActiveCommentary = StoreStateItem<ICommentary> & {
-    id?: number;
-}
+
 
 
 
@@ -231,7 +230,10 @@ export const useReadBookStore = create<ReadBookStoreType>()(
                             author: {
                                 include: {
                                     commentaries: {
-                                        where: { archived: false }
+                                        where: {
+                                            archived: false,
+                                            verseId: verseId
+                                        }
                                     }
                                 }
                             }

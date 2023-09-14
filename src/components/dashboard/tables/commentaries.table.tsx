@@ -14,7 +14,7 @@ import { useEffect, useState } from "react"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { IAuthor, ICommentary, IVerse } from "@/shared/types/models.types"
 import { useRouter } from "next/navigation"
-import { extractTextFromHtml } from "@/lib/utils"
+import { cn, extractTextFromHtml } from "@/lib/utils"
 
 
 
@@ -161,10 +161,14 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
                 <DataTableColumnHeader column={column} title="Author" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.author?.archived ?? true
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/authors/${row.original.author?.id}`}
-                            className="max-w-[100px] text-primary truncate font-normal">
+                        <Link href={archived ? "#" : `/dashboard/authors/${row.original.author?.id}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {row.original.author?.name}
                         </Link>
                     </div>
@@ -181,11 +185,15 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
                 <DataTableColumnHeader column={column} title="Verse" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.verse?.archived ?? true
                 const chapter = row.original.verse?.topic?.chapter
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/verses/${row.original.verseId}`}
-                            className="max-w-[100px] text-primary truncate font-normal">
+                        <Link href={archived ? "#" : `/dashboard/verses/${row.original.verseId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`}
                         </Link>
                     </div>

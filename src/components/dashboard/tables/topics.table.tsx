@@ -11,23 +11,19 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import clientApiHandlers from "@/client/handlers"
 import { IChapter, ITopic } from "@/shared/types/models.types"
 import Link from "next/link"
-import { useToast } from "@/components/ui/use-toast"
-import definedMessages from "@/shared/constants/messages"
-import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 
-type Props = TableActionProps & {
+type Props = Omit<TableActionProps, "modelName"> & {
     chapter?: IChapter;
     archivedOnly?: boolean;
 }
 
 export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) {
-    const router = useRouter()
     const [tableData, setTableData] = useState<PaginatedApiResponse<ITopic[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
 
-    const { toast } = useToast();
 
 
     const loadData = async () => {
@@ -73,10 +69,7 @@ export default function TopicsTable({ chapter, archivedOnly, ...props }: Props) 
             columns={columns(tableActionProps)}
             pagination={pagination}
             toolbarActions={tableActionProps}
-            getFilterValue={(table) => (table.getColumn("name")?.getFilterValue() as string ?? "")}
-            setFilterValue={(table, value) => {
-                table.getColumn("name")?.setFilterValue(value)
-            }} />
+        />
     )
 }
 
@@ -146,14 +139,21 @@ function columns(rowActions: TableActionProps): ColumnDef<ITopic, any>[] {
             }
         },
         {
-            accessorKey: "chapter",
+            id: "chapter",
+            accessorFn: (topic) => `${topic.chapter?.book?.name} / ${topic.chapter?.name}`,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Chapter" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.chapter?.archived ?? true
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/chapters/${row.original.chapterId}`} className="max-w-[100px] text-primary truncate font-normal">
+                        <Link
+                            href={archived ? "#" : `/dashboard/chapters/${row.original.chapterId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {`${row.original.chapter?.book?.name} / ${row.original.chapter?.name}`}
                         </Link>
                     </div>

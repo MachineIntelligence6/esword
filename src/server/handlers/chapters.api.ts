@@ -1,6 +1,6 @@
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
-import { Chapter, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IChapter } from "@/shared/types/models.types";
 import { ChaptersPaginationProps } from "@/shared/types/pagination.types";

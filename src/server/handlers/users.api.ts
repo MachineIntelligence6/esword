@@ -1,15 +1,13 @@
-import { ApiResponse, BasePaginationProps, PaginatedApiResponse } from "@/shared/types/api.types";
+import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
 import { Prisma, UserRole } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { comparePassword, getServerAuth, hashPassword } from "../auth";
-import { IUser, IUserRole } from "@/shared/types/models.types";
+import { IUser } from "@/shared/types/models.types";
 import { UserPaginationProps } from "@/shared/types/pagination.types";
 
 
-type PaginationProps = BasePaginationProps<Prisma.UserInclude> & {
-    role?: IUserRole
-}
+
 
 
 export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, role = "ALL", include, where, orderBy }: UserPaginationProps): Promise<PaginatedApiResponse<IUser[]>> {

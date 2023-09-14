@@ -2,7 +2,7 @@ import Spinner from "@/components/spinner";
 import {
     AlertDialog, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter,
-    AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
+    AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
@@ -12,7 +12,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons"
 import { Row } from "@tanstack/react-table"
 import { useSession } from "next-auth/react";
 import { TableActionPopupState } from "./toolbar";
-import tableActions, { ARCHIVE_DESCRIPTION, DELETE_DESCRIPTION, RESTORE_DESCRIPTION } from "./table-actions";
+import tableActions from "./table-actions";
 import clientApiHandlers from "@/client/handlers";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -130,6 +130,7 @@ export function DataTableRowActions<TData>({
 
 export type TableActionPopupProps = {
     open: boolean;
+    // eslint-disable-next-line no-unused-vars
     setOpen: (value: boolean) => void;
     action?: () => Promise<void>;
     title: string;
@@ -174,7 +175,9 @@ export function TableActionPopup({
         setProcessing(false);
     }
     return (
-        <AlertDialog open={open} onOpenChange={(value) => !processing && setOpen(value)}>
+        <AlertDialog open={open} onOpenChange={(value) => {
+            if (!processing) setOpen(value)
+        }}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle className="text-orange-500">{title}</AlertDialogTitle>
@@ -206,7 +209,7 @@ export function TableActionPopup({
                             <Button
                                 type="submit"
                                 variant={actionBtn.variant}
-                                disabled={!form.formState.isDirty || !form.getValues("password")}
+                                disabled={!form.formState.isDirty || !form.getValues("password") || form.formState.isSubmitting}
                             >
                                 {
                                     processing ?

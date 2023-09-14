@@ -6,15 +6,12 @@ import { DataTableRowActions } from "./shared/row-actions"
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import { useToast } from "@/components/ui/use-toast";
-import definedMessages from "@/shared/constants/messages";
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { IBlog, IUser } from "@/shared/types/models.types"
-import { useRouter } from "next/navigation"
-import { extractTextFromHtml } from "@/lib/utils"
+import { cn, extractTextFromHtml } from "@/lib/utils"
 
 
 
@@ -207,11 +204,17 @@ function columns(rowActions: TableActionProps): ColumnDef<IBlog, any>[] {
                 <DataTableColumnHeader column={column} title="User" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.user?.archived ?? true
                 return (
                     <div className="flex max-w-[100px] space-x-2">
-                        <span className="max-w-[100px] truncate font-medium">
+                        <Link
+                            href={archived ? "#" : `/dashboard/users/${row.original.userId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {row.original.user?.name}
-                        </span>
+                        </Link>
                     </div>
                 )
             },

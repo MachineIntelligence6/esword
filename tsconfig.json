@@ -6,9 +6,10 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -27,7 +28,8 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "allowJs": true
   },
   "include": [
     "next-env.d.ts",

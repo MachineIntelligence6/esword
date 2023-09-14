@@ -1,7 +1,6 @@
 import axios from "axios";
 import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { IBookmark } from "@/shared/types/models.types";
-import { TopicFormSchema } from "@/components/dashboard/forms/topics.form";
 import { BookmarksPaginationProps } from "@/shared/types/pagination.types";
 import { Prisma } from "@prisma/client";
 

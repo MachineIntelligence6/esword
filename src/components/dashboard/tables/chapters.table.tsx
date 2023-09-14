@@ -6,14 +6,12 @@ import { DataTableRowActions } from "./shared/row-actions"
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import { useToast } from "@/components/ui/use-toast";
-import definedMessages from "@/shared/constants/messages";
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { IBook, IChapter } from "@/shared/types/models.types"
-import { useRouter } from "next/navigation"
+import { cn, extractTextFromHtml } from "@/lib/utils"
 
 
 
@@ -23,8 +21,6 @@ type Props = {
 }
 
 export default function ChaptersTable({ book, archivedOnly }: Props) {
-    const router = useRouter()
-    const { toast } = useToast()
     const [tableData, setTableData] = useState<PaginatedApiResponse<IChapter[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
@@ -172,7 +168,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
             },
         },
         {
-            accessorKey: "commentaryText",
+            id: "commentaryText",
+            accessorFn: (chapter) => extractTextFromHtml(chapter.commentaryText ?? ""),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Commentary Text" />
             ),
@@ -180,7 +177,7 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
                 return (
                     <div className="flex max-w-[100px] space-x-2">
                         <span className="max-w-[100px] truncate font-medium">
-                            {row.original.commentaryText}
+                            {extractTextFromHtml(row.original.commentaryText ?? "")}
                         </span>
                     </div>
                 )
@@ -193,10 +190,14 @@ function columns(rowActions: TableActionProps): ColumnDef<IChapter, any>[] {
                 <DataTableColumnHeader column={column} title="Book" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.book?.archived ?? true
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/books/${row.original.bookId}`}
-                            className="max-w-[100px] text-primary truncate font-normal">
+                        <Link href={archived ? "#" : `/dashboard/books/${row.original.bookId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {row.original.book?.name}
                         </Link>
                     </div>

@@ -13,7 +13,7 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { TablePagination, perPageCountOptions } from "./shared/pagination"
 import { INote, IUser, IVerse } from "@/shared/types/models.types"
 import Link from "next/link"
-import { extractTextFromHtml } from "@/lib/utils"
+import { cn, extractTextFromHtml } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 
@@ -132,7 +132,8 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
         //     enableHiding: false,
         // },
         {
-            accessorKey: "text",
+            id: "text",
+            accessorFn: (note) => extractTextFromHtml(note.text),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Text" />
             ),
@@ -147,15 +148,20 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
             },
         },
         {
-            accessorKey: "user",
+            id: "user",
+            accessorFn: (note) => note.user?.name,
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="User" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.user?.archived ?? true
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/users/${row.original.userId}`}
-                            className="max-w-[100px] text-primary truncate font-normal">
+                        <Link href={archived ? "#" : `/dashboard/users/${row.original.userId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {row.original.user?.name}
                         </Link>
                     </div>
@@ -163,16 +169,24 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
             }
         },
         {
-            accessorKey: "verse",
+            id: "verse",
+            accessorFn: (note) => {
+                const chapter = note.verse?.topic?.chapter
+                return `${chapter?.book?.abbreviation} ${chapter?.name}:${note.verse?.number}`
+            },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Verse" />
             ),
             cell: ({ row }) => {
+                const archived = row.original.verse?.archived ?? true
                 const chapter = row.original.verse?.topic?.chapter
                 return (
                     <div className="flex items-center">
-                        <Link href={`/dashboard/verses/${row.original.verseId}`}
-                            className="max-w-[100px] text-primary truncate font-normal">
+                        <Link href={archived ? "#" : `/dashboard/verses/${row.original.verseId}`}
+                            className={cn(
+                                "max-w-[100px] truncate font-medium",
+                                archived ? "text-gray-700" : "text-primary"
+                            )}>
                             {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`}
                         </Link>
                     </div>
