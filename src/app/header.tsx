@@ -33,9 +33,9 @@ export default function SiteHeader() {
         <header className="fixed left-0 top-0 z-50 shadow w-full max-w-[100vw] overflow-hidden">
             <nav className="flex justify-between px-3 md:px-6 items-center h-[70px] w-full bg-primary">
                 <div>
-                    <Link href="/">
-                        <Image width={250} height={100} quality={100} alt="" src="/images/logo.png" className="object-contain bg-cover md:min-h-[60px] w-[150px] min-w-[150px] md:min-w-[200px] md:w-[250px]" />
-                    </Link>
+                    <a href="/">
+                        <Image width={250} height={100} quality={100} alt="" src="/images/logo.svg" className="object-contain h-auto w-[150px] md:w-[200px]" />
+                    </a>
                 </div>
                 <div className="flex items-center gap-2 md:gap-x-6">
                     {
