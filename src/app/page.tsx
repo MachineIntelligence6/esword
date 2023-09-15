@@ -5,6 +5,7 @@ import NotesContentComponent from "@/components/frontend/notes-section";
 import { VersesSection } from "@/components/frontend/verses-section";
 
 
+// export const dynamic = "force-dynamic";
 
 export default function Page() {
     return (
