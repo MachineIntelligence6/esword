@@ -40,15 +40,15 @@ export default function SiteHeader() {
                 <div className="flex items-center gap-2 md:gap-x-6">
                     {
                         !pathname.startsWith("/dashboard") && !pathname.startsWith("/login") &&
-                        <div className="flex text-white lg:gap-x-11 md:gap-x-6 md:px-3 px-5 gap-x-1 text-sm">
+                        <div className="flex px-5 text-sm text-white lg:gap-x-11 md:gap-x-6 md:px-3 gap-x-1">
                             <div className="flex xl:hidden">
                                 <Dropdown />
                             </div>
-                            <div className="hidden xl:flex items-center md:gap-x-6 ">
+                            <div className="items-center hidden xl:flex md:gap-x-6 ">
                                 {
                                     menuList.map((menuItem, index) => (
                                         menuItem.path !== "/search" &&
-                                        <Link className="font-normal py-3 text-white md:block hidden hover:scale-110 transition-all" href={menuItem.path} key={index}>
+                                        <Link className="hidden py-3 font-normal text-white transition-all md:block hover:scale-110" href={menuItem.path} key={index}>
                                             {menuItem.label}
                                         </Link>
                                     ))
@@ -56,7 +56,7 @@ export default function SiteHeader() {
 
 
                             </div>
-                            <div className="xl:block hidden">
+                            <div className="hidden xl:block">
                                 <SearchComponent />
                             </div>
                         </div>
@@ -112,7 +112,7 @@ function SearchComponent() {
                                     <input
                                         {...field}
                                         type="text"
-                                        className="bg-transparent outline-none border-none py-2 autofill-text-white" />
+                                        className="py-2 bg-transparent border-none outline-none autofill-text-white-lg" />
                                 </div>
                             </FormItem>
                         )}
@@ -165,7 +165,7 @@ function Dropdown() {
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger>
-                <div className="flex gap-1 items-center">
+                <div className="flex items-center gap-1">
                     {menuList.find((m) => m.path === pathname)?.label}
                     <ChevronDownIcon />
                 </div>
@@ -174,7 +174,7 @@ function Dropdown() {
                 {
                     menuList.map((menuItem, index) => (
                         menuItem.path !== "/search" &&
-                        <Link key={index} href={menuItem.path} className="w-full block px-3 py-1">
+                        <Link key={index} href={menuItem.path} className="block w-full px-3 py-1">
                             {menuItem.label}
                         </Link>
                     ))
@@ -195,7 +195,7 @@ export function UserDropdownMenu({ session }: { session: Session }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant='outline' className="h-auto p-2 aspect-square rounded-full">
+                <Button variant='outline' className="h-auto p-2 rounded-full aspect-square">
                     <PersonIcon className="w-6 h-6 text-primary-dark" />
                 </Button>
             </DropdownMenuTrigger>

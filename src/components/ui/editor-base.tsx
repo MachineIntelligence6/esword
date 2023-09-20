@@ -66,7 +66,7 @@ const formats = [
 
 
 
-export default function QuillEditorBase({ disabled, readOnly, value, onChange, className }: EditorProps) {
+export default function QuillEditorBase({ disabled, readOnly, value, onChange, className, maxHeight = true }: EditorProps) {
 
     return (
         <div id="editor-container"
@@ -83,6 +83,7 @@ export default function QuillEditorBase({ disabled, readOnly, value, onChange, c
                 className={cn(
                     "w-full",
                     disabled ? "ql-disabled" : "min-300",
+                    maxHeight && "max-600",
                     className
                 )}
                 onChange={onChange}

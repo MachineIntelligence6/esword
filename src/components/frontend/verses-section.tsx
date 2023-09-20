@@ -9,6 +9,7 @@ import Image from "next/image";
 import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, ZoomInIcon, ZoomOutIcon } from "@radix-ui/react-icons";
 import { Separator } from "../ui/separator";
 import BookmarksList from "./bookmarks-list";
+import useWindowSize from "../hooks/use-window-size";
 
 
 
@@ -16,7 +17,7 @@ import BookmarksList from "./bookmarks-list";
 export function VersesSection() {
     return (
         <div className="flex flex-col xl:max-w-[70%] xl:min-w-[70%] lg:min-w-[60%] lg:max-w-[60%] w-full lg:h-screen  lg:border-r-[10px]">
-            <div className="flex mainDiv flex-col lg:h-auto w-auto">
+            <div className="flex flex-col w-auto mainDiv lg:h-auto">
                 {/* verses component for lg screen */}
                 <div className="hidden lg:block">
                     <VersesSectionContent />
@@ -76,8 +77,6 @@ function countOccurrences(verseText: string, selection: Selection) {
     // })
     // if (matches.length === 1) return 1
     // console.log(matches)
-    console.log(matches)
-    console.log("Offset = ", selection.focusOffset)
 
     const index = findNearestNumber(selection.focusOffset, matches.map((m) => (m.index ?? -1)))
     console.log("Nearest Num = ", index)
@@ -96,6 +95,7 @@ function VersesSectionContent() {
         setActiveChapter, activeVerse, saveHighlight, removeHighlight
     } = useReadBookStore()
     const versesContainerRef = useRef<HTMLDivElement>(null)
+    const windowSize = useWindowSize()
 
     const activeChIndex = chaptersList?.findIndex((ch) => ch.id === activeChapter.id) ?? -1;
     const previousChapter = (activeChIndex !== -1 && chaptersList && activeChIndex > 0) ? chaptersList[activeChIndex - 1] : undefined;
@@ -149,12 +149,11 @@ function VersesSectionContent() {
         setActiveChapter(previousChapter.id)
     }
 
-    const [showBookmarks, setShowBookmarks] = useState(false);
-
-    const toggleBookmarks = () => {
-        setShowBookmarks((prevShowBookmarks) => !prevShowBookmarks);
-    };
+    
     const showPlaceholder = initialLoading || activeBook.loading || activeChapter.loading || !booksList || !chaptersList;
+
+    const baseFontSize = (windowSize && windowSize.width >= 1024) ? 18 : 14
+
     return (
         <>
             {/* title */}
@@ -166,7 +165,7 @@ function VersesSectionContent() {
             <div className="block">
                 {/* buttons tab */}
                 <div className="lg:flex block justify-between lg:border-b min-h-[39px] max-h-[39px]">
-                    <div className="flex xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 border-b lg:px-1 px-5 xl:px-6 justify-between items-center py-2">
+                    <div className="flex items-center justify-between px-5 py-2 border-b xl:gap-x-12 lg:gap-x-3 md:w-full lg:w-auto lg:pr-7 lg:border-0 lg:px-1 xl:px-6">
                         <button
                             disabled
                             className="hover:scale-110 transition-all disabled:hover:!scale-100">
@@ -219,17 +218,17 @@ function VersesSectionContent() {
                 </div>
                 {/* content */}
                 <div className="flex lg:mt-0 mt-[10px] max-w-full  max-h-screen overflow-hidden lg:max-h-[calc(100vh_-_150px)] ">
-                    <div ref={versesContainerRef} className=" pb-10 pt-2 max-h-[100vh] min-h-[calc(100vh_-_150px)] w-full max-w-full">
-                        {/* <div className="min-h-full bg-white space-y-5" style={{ transform: `scale(${scale}) `, transformOrigin: "top left" }}> */}
-                        <div className="min-h-full bg-white space-y-5">
+                    <div ref={versesContainerRef} className="pb-10 pt-2 max-h-[calc(100vh_-_340px)] min-h-[calc(100vh_-_340px)] lg:max-h-[calc(100vh_-_150px)] lg:min-h-[calc(100vh_-_150px)] overflow-y-auto w-full max-w-full">
+                        {/* <div className="min-h-full space-y-5 bg-white" style={{ transform: `scale(${scale}) `, transformOrigin: "top left" }}> */}
+                        <div className="min-h-full space-y-5 bg-white">
                             {
                                 showPlaceholder ?
-                                    <div className="flex flex-col  h-full">
-                                        <div className="flex items-center justify-center flex-col">
+                                    <div className="flex flex-col h-full">
+                                        <div className="flex flex-col items-center justify-center">
                                             <TopicLoadingPlaceholder />
                                             <VersesLoadingPlaceholder />
                                         </div>
-                                        <div className="flex items-center justify-center flex-col">
+                                        <div className="flex flex-col items-center justify-center">
                                             <TopicLoadingPlaceholder />
                                             <VersesLoadingPlaceholder />
                                         </div>
@@ -240,7 +239,7 @@ function VersesSectionContent() {
                                             topicsList?.map((topic) => (
                                                 <div key={topic.id}>
                                                     <div className="flex items-center justify-center py-[10px]">
-                                                        <h1 className="font-bold text-center text-primary-dark font-roman" style={{ fontSize: `${scale * 20}px` }}>
+                                                        <h1 className="font-bold text-center text-primary-dark font-roman" style={{ fontSize: `${scale * (baseFontSize + 2)}px` }}>
                                                             {topic.name}
                                                         </h1>
                                                     </div>
@@ -252,7 +251,7 @@ function VersesSectionContent() {
                                                                         <VerseComponent
                                                                             key={verse.id}
                                                                             verse={verse}
-                                                                            scale={scale}
+                                                                            fontSize={scale * baseFontSize}
                                                                             versesContainerRef={versesContainerRef}
                                                                             active={activeVerse.id === verse.id}
                                                                             onClick={() => setActiveVerse(verse.id)} />
@@ -272,26 +271,8 @@ function VersesSectionContent() {
                         </div>
                     </div>
                     {/* bookmark icons section */}
-                    <div className="hidden lg:block">
+                    <div className="">
                         <BookmarksList />
-                    </div>
-                    <div className="lg:hidden">
-                        {showBookmarks ? (
-                            <ChevronRightIcon
-                                onClick={toggleBookmarks}
-                                className="cursor-pointer"
-                            />
-                        ) : (
-                            <ChevronLeftIcon
-                                onClick={toggleBookmarks}
-                                className="cursor-pointer"
-                            />
-                        )}
-
-                        <div className={showBookmarks ? 'w-full' : 'hidden'}>
-                            {showBookmarks && <BookmarksList />}
-                        </div>
-
                     </div>
 
                 </div>
@@ -330,13 +311,14 @@ type VerseComponentProps = {
     verse: IVerse;
     active?: boolean;
     versesContainerRef: RefObject<HTMLDivElement>;
-    scale: number;
+    fontSize: number;
 }
 
-function VerseComponent({ verse, onClick, active, scale, versesContainerRef }: VerseComponentProps) {
+function VerseComponent({ verse, onClick, active, fontSize, versesContainerRef }: VerseComponentProps) {
     const ref = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLSpanElement>(null);
     const { activeBookmark } = useReadBookStore()
+    const windowSize = useWindowSize()
 
     const scrollToItem = () => {
         if (!versesContainerRef.current || !ref.current) return;
@@ -363,7 +345,7 @@ function VerseComponent({ verse, onClick, active, scale, versesContainerRef }: V
                 "flex font-normal gap-5 transition-all duration-200",
                 active ? "font-bold" : "select-none",
             )}
-            style={{ fontSize: `${scale * 18}px` }}
+            style={{ fontSize: `${fontSize}px` }}
             onClick={onClick}>
             <p className={"text-light-green min-w-max"}>
                 {`${verse.topic?.chapter?.book?.abbreviation} ${verse.topic?.chapter?.name}:${verse.number}`}

@@ -18,6 +18,7 @@ export type EditorProps = {
     value?: string;
     onChange?: (value: string) => void;
     className?: string;
+    maxHeight?: boolean;
 }
 
 

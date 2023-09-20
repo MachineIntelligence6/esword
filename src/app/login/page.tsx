@@ -12,23 +12,17 @@ export default async function Page() {
 
     return (
         <div className="overflow-hidden overflow-y-auto">
-            <div className="bg-primary min-h-[calc(100vh_-_70px)] flex items-center justify-center  pt-5">
-                <div className="">
-                    <div
-                        className="md:w-[446px] w-auto md h-auto flex flex-col items-center justify-center bg-white mx-4 md:mx-0 pt-10 rounded-lg">
-                        <div>
-                            <p className="font-inter font-bold text-2xl text-primary-dark">
-                                Login with
-                            </p>
+            <div className="bg-primary min-h-[calc(100vh_-_70px)] flex items-center justify-center pt-5 px-5">
+                <div className="w-full max-w-lg bg-white pt-10 rounded-lg">
+                    <h3 className="font-inter font-bold text-2xl text-primary-dark text-center">
+                        Login with
+                    </h3>
+                    <div className="flex justify-center  flex-col w-full py-3">
+                        <div className="md:px-10 px-5 w-full">
+                            <LoginForm />
                         </div>
-                        <div className="flex justify-center  flex-col w-full py-3">
-                            <div className="md:px-10 px-4">
-                                <LoginForm />
-                            </div>
 
-                        </div>
                     </div>
-
                 </div>
             </div>
         </div>

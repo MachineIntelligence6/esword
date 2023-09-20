@@ -1,4 +1,4 @@
-import { NextRequestWithAuth, withAuth } from 'next-auth/middleware'
+import { NextMiddlewareWithAuth, NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 import { canUserAccessPath } from './lib/roles-manager'
 import { ApiResponse } from './shared/types/api.types'
@@ -9,6 +9,8 @@ const unauthorizedRes: ApiResponse<null> = {
     succeed: false,
     code: "UNAUTHORIZED"
 }
+
+
 
 
 export default withAuth(
@@ -43,10 +45,11 @@ export default withAuth(
         pages: {
             signIn: "/login",
         }
-    }
+    },
 )
 
-
-// export const config = {
-//     matcher: ["/((?!login|$).*)"],
-// };
+export const config = {
+    matcher: [
+        '/((?!images|icons|_next/static|_next/image|favicon.ico).*)',
+    ],
+}

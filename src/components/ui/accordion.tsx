@@ -46,7 +46,7 @@ const AccordionContent = React.forwardRef<
       className={cn("overflow-hidden text-sm", className)}
       {...props}
     >
-      <div className="pb-4 pt-0">{children}</div>
+      <div className="">{children}</div>
     </AccordionPrimitive.Content>
   );
 });
