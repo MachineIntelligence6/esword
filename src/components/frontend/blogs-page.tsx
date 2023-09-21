@@ -25,7 +25,6 @@ import {
   BlogLoadingPlaceholder,
 } from "../loading-placeholders";
 import { Button } from "../ui/button";
-import { BasePaginationProps } from "@/shared/types/api.types";
 
 type Props = {
   variant: BlogType;
