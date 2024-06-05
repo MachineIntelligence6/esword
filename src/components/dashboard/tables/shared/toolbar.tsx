@@ -54,7 +54,7 @@ export function DataTableToolbar<TData>({
     if (alertOpen.type === "ARCHIVE")
       return `This action will move the ${toolbarActions.modelName.toLowerCase()}(s) and all data linked with them to archive.`;
     if (alertOpen.type === "DELETE")
-      return `This action will delete (permanantly) the ${toolbarActions.modelName.toLowerCase()}(s) and all data linked with them.`;
+      return `This action will delete (permanently) the ${toolbarActions.modelName.toLowerCase()}(s) and all data linked with them.`;
   };
 
   const actionPopupProps: TableActionPopupProps = {
