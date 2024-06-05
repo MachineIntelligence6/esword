@@ -14,16 +14,10 @@ import {
 import { TableActionPopup, TableActionPopupProps } from "./row-actions";
 import { TableActionProps } from "./types";
 import { Session } from "next-auth";
-import { Prisma } from "@prisma/client";
-import tableActions, {
-  ARCHIVE_DESCRIPTION,
-  DELETE_DESCRIPTION,
-  RESTORE_DESCRIPTION,
-} from "./table-actions";
+import tableActions from "./table-actions";
 
 export interface ToolbarProps<TData> {
   // getFilterValue: (table: TTable<TData>) => string;
-
   toolbarActions?: TableActionProps;
 }
 interface DataTableToolbarProps<TData> extends ToolbarProps<TData> {

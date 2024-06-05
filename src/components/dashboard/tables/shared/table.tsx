@@ -75,7 +75,13 @@ export function BaseTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([
+    {
+      id: "priority",
+      desc: false,
+    },
+  ]);
+
   const { data: session } = useSession();
   const [globalFilter, setGlobalFilter] = React.useState("");
 
