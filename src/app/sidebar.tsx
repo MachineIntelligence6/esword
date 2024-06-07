@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { IBook } from "@/shared/types/models.types";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function SiteSidebar() {
   const searchParams = useSearchParams();
@@ -125,6 +125,20 @@ function SidebarChaptersComponent() {
     booksList,
   } = useReadBookStore();
 
+  const value = useMemo(
+    () => (activeChapter || {}).id?.toString() || "",
+    [activeChapter]
+  );
+  const options = useMemo(
+    () =>
+      (chaptersList || [])?.map((chapter) => ({
+        label: String(chapter.name),
+        value: (chapter.id || "").toString(),
+        rawValue: chapter,
+      })),
+    [chaptersList]
+  );
+
   return (
     <div className="lg:min-w-[56px] lg:max-w-[56px] w-full lg:border-r-2 lg:border-0 border text-primary-dark border-solid rounded-lg lg:rounded-none">
       <div className="lg:bg-silver-light bg-white py-3  lg:border-0 border-b flex flex-col lg:rounded-none rounded-lg">
@@ -149,17 +163,11 @@ function SidebarChaptersComponent() {
                 </select> */}
         <div className="lg:hidden text-primary-dark">
           <SideBarEl
-            value={
-              activeChapter !== undefined ? activeChapter.id?.toString() : ""
-            }
+            value={value}
             onChange={(opt) => {
               if (opt?.value) setActiveChapter(Number(opt.value));
             }}
-            options={chaptersList?.map((chapter) => ({
-              label: String(chapter.name),
-              value: chapter.id.toString(),
-              rawValue: chapter,
-            }))}
+            options={options}
           />
         </div>
       </div>
