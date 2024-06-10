@@ -13,7 +13,7 @@ import { PaginatedApiResponse } from "@/shared/types/api.types";
 import { TablePagination, perPageCountOptions } from "./shared/pagination";
 import { ITopic, IVerse } from "@/shared/types/models.types";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, debounce } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 
 export default function VersesTable({
@@ -80,20 +80,7 @@ export default function VersesTable({
     setTableData(res);
   };
 
-  const debounce = (
-    func: (...args: any) => void,
-    delay: number | undefined
-  ) => {
-    let timeoutId: NodeJS.Timeout | null = null;
-    return (...args: any) => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-
-  const debouncedLoadData = debounce(loadData, 1000); // adjust the delay as needed
+  const debouncedLoadData = debounce(loadData, 1000);
 
   useEffect(() => {
     debouncedLoadData();

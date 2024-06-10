@@ -31,3 +31,16 @@ export const resizeImage = (file: File, maxWidth = 512, maxHeight = 512) =>
       resolve(null);
     }
   });
+
+export const debounce = (
+  func: (...args: any) => void,
+  delay: number | undefined
+) => {
+  let timeoutId: NodeJS.Timeout | null = null;
+  return (...args: any) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};

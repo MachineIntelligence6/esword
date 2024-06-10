@@ -6,14 +6,12 @@ import { DataTableRowActions } from "./shared/row-actions";
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { PaginatedApiResponse } from "@/shared/types/api.types";
 import { useEffect, useState } from "react";
 import { TablePagination, perPageCountOptions } from "./shared/pagination";
 import { IAuthor, ICommentary, IVerse } from "@/shared/types/models.types";
-import { useRouter } from "next/navigation";
-import { cn, extractTextFromHtml } from "@/lib/utils";
+import { cn, debounce, extractTextFromHtml } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 
 type Props = {
@@ -72,20 +70,7 @@ export default function CommentariesTable({
     setTableData(res);
   };
 
-  const debounce = (
-    func: (...args: any) => void,
-    delay: number | undefined
-  ) => {
-    let timeoutId: NodeJS.Timeout | null = null;
-    return (...args: any) => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-
-  const debouncedLoadData = debounce(loadData, 1000); // adjust the delay as needed
+  const debouncedLoadData = debounce(loadData, 1000);
 
   useEffect(() => {
     debouncedLoadData();
