@@ -38,7 +38,6 @@ export default function TopicsTable({
       perPage: perPage,
       chapter: chapter?.id,
       include: { chapter: { include: { book: true } } },
-      //   ...(archivedOnly && { where: { archived: true } }),
       where: {
         ...(searchQuery && {
           OR: [
