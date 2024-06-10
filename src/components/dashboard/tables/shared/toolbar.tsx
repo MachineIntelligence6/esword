@@ -15,6 +15,7 @@ import { TableActionPopup, TableActionPopupProps } from "./row-actions";
 import { TableActionProps } from "./types";
 import { Session } from "next-auth";
 import tableActions from "./table-actions";
+import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 
 export interface ToolbarProps<TData> {
   // getFilterValue: (table: TTable<TData>) => string;
@@ -23,8 +24,8 @@ export interface ToolbarProps<TData> {
 interface DataTableToolbarProps<TData> extends ToolbarProps<TData> {
   table: TTable<TData>;
   session?: Session | null;
-  filterValue: string;
-  setFilterValue: (value: string) => void;
+  // filterValue: string;
+  // setFilterValue: (value: string) => void;
 }
 
 export type TableActionPopupState = {
@@ -34,8 +35,8 @@ export type TableActionPopupState = {
 
 export function DataTableToolbar<TData>({
   table,
-  filterValue,
-  setFilterValue,
+  // filterValue,
+  // setFilterValue,
   toolbarActions,
   session,
 }: DataTableToolbarProps<TData>) {
@@ -46,6 +47,7 @@ export function DataTableToolbar<TData>({
   });
 
   const selectedRows = table.getSelectedRowModel().rows.map((r) => r.original);
+  const { entity, searchQuery, setSearchQuery } = useTableSearchStore();
 
   const warningMessage = () => {
     if (!toolbarActions?.modelName) return "";
@@ -95,10 +97,9 @@ export function DataTableToolbar<TData>({
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder="Search..."
-          value={filterValue}
+          value={searchQuery}
           onChange={(event) => {
-            console.log("event", event.target.value);
-            setFilterValue(event.target.value);
+            setSearchQuery(event.target.value);
           }}
           type="text"
           className="h-8 w-[150px] lg:w-[250px]"

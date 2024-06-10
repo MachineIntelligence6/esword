@@ -49,11 +49,12 @@ export default function SiteSidebar() {
   );
 }
 
-const sortByPriority = (a: IBook, b: IBook) => {
+export const sortByPriority = (a: IBook, b: IBook) => {
   if (a.priority === 0) return 1;
   if (b.priority === 0) return -1;
   return a.priority - b.priority;
 };
+
 
 function SidebarBooksComponent() {
   const { booksList, activeBook } = useReadBookStore();

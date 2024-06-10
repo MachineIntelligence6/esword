@@ -51,6 +51,7 @@ import { cn } from "@/lib/utils";
 import Spinner from "@/components/spinner";
 import { DataTableToolbar, ToolbarProps } from "./toolbar";
 import { useSession } from "next-auth/react";
+import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 
 interface DataTableProps<TData, TValue> extends ToolbarProps<TData> {
   columns: ColumnDef<TData, TValue>[];
@@ -83,7 +84,9 @@ export function BaseTable<TData, TValue>({
   ]);
 
   const { data: session } = useSession();
-  const [globalFilter, setGlobalFilter] = React.useState("");
+  // const [globalFilter, setGlobalFilter] = React.useState("");
+  const { searchQuery } = useTableSearchStore();
+
 
   const table = useReactTable({
     data: data ?? [],
@@ -93,7 +96,7 @@ export function BaseTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
-      globalFilter,
+      globalFilter: searchQuery,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -106,6 +109,10 @@ export function BaseTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    // onGlobalFilterChange: (value) => {
+    //   setGlobalFilter(value);
+    //   console.log("globalFilter", value);
+    // },
     manualPagination: true,
   });
 
@@ -116,8 +123,8 @@ export function BaseTable<TData, TValue>({
           table={table}
           session={session}
           {...toolbarProps}
-          filterValue={globalFilter}
-          setFilterValue={setGlobalFilter}
+          // filterValue={globalFilter}
+          // setFilterValue={setGlobalFilter}
         />
       )}
       <div className="rounded-md border">
@@ -148,7 +155,6 @@ export function BaseTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => {
-                    console.log("cell", cell);
                     return (
                       <TableCell key={cell.id}>
                         {flexRender(

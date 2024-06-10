@@ -11,6 +11,7 @@ import { PaginatedApiResponse } from "@/shared/types/api.types";
 import clientApiHandlers from "@/client/handlers";
 import { IBook } from "@/shared/types/models.types";
 import Link from "next/link";
+import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 
 type Props = Omit<TableActionProps, "modelName"> & {
   showPagination?: boolean;
@@ -29,22 +30,37 @@ export default function BooksTable({
   > | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+  const { searchQuery } = useTableSearchStore();
 
   const loadData = async () => {
     setTableData(null);
-    
+
+    // const res = await clientApiHandlers.books.get({
+    //   page: currentPage,
+    //   perPage: perPage,
+    //   ...(archivedOnly && {
+    //     where: {
+    //       archived: true,
+    //     },
+    //   }),
+    // });
     const res = await clientApiHandlers.books.get({
       page: currentPage,
       perPage: perPage,
-      ...(archivedOnly && {
-        where: {
-          archived: true,
-        },
-      }),
+      where: {
+        ...(searchQuery && {
+          OR: [
+            { name: { contains: searchQuery } },
+            { slug: { contains: searchQuery } },
+            { abbreviation: { contains: searchQuery } },
+            ...(isNaN(parseInt(searchQuery)) ? [] : [{ priority: { equals: parseInt(searchQuery) } }]),
+          ],
+        }),
+        ...(archivedOnly && { archived: true }),
+      },
     });
     setTableData(res);
   };
-
   // const handleRestore = async (books: IBook[]) => {
   //     const res = await clientApiHandlers.archives.restore({
   //         ids: books.map((b) => b.id),
@@ -68,7 +84,7 @@ export default function BooksTable({
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage]);
+  }, [currentPage, perPage, searchQuery]);
 
   const pagination: TablePagination = {
     onPageChange: setCurrentPage,
