@@ -35,15 +35,6 @@ export default function BooksTable({
   const loadData = async () => {
     setTableData(null);
 
-    // const res = await clientApiHandlers.books.get({
-    //   page: currentPage,
-    //   perPage: perPage,
-    //   ...(archivedOnly && {
-    //     where: {
-    //       archived: true,
-    //     },
-    //   }),
-    // });
     const res = await clientApiHandlers.books.get({
       page: currentPage,
       perPage: perPage,
