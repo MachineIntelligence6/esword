@@ -13,7 +13,7 @@ export async function restore(data: ArchivesActionReq): Promise<ApiResponse<any>
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -25,7 +25,7 @@ export async function deletePermanantly(data: ArchivesActionReq): Promise<ApiRes
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -38,7 +38,7 @@ export async function addToArchive(data: ArchivesActionReq): Promise<ApiResponse
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

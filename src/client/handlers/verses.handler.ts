@@ -23,7 +23,7 @@ export async function get({
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -41,7 +41,7 @@ export async function getById(
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -57,7 +57,7 @@ export async function create(
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }
@@ -76,7 +76,7 @@ export async function update(
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }
@@ -96,7 +96,7 @@ export async function updateHighlights(
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }
@@ -109,7 +109,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }
@@ -129,7 +129,7 @@ export async function importFromCSV(
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }

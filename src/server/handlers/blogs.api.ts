@@ -63,7 +63,7 @@ export async function getAll({
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -104,7 +104,7 @@ export async function getByRef(ref: string, include?: Prisma.BlogInclude): Promi
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -130,7 +130,7 @@ export async function archive(id: number): Promise<ApiResponse<IBlog>> {
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -184,7 +184,7 @@ export async function create(req: Request): Promise<ApiResponse<IBlog>> {
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -242,7 +242,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<IBlo
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

@@ -85,7 +85,7 @@ export default function VersesForm({ verse }: { verse?: IVerse }) {
                 message: definedMessages.VERSE_NUMBER_MUST_BE_UNIQUE
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })
@@ -101,7 +101,7 @@ export default function VersesForm({ verse }: { verse?: IVerse }) {
                 message: definedMessages.VERSE_NUMBER_MUST_BE_UNIQUE
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })

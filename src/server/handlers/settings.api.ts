@@ -20,7 +20,7 @@ export async function getAboutContent(): Promise<ApiResponse<AboutContent>> {
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -61,7 +61,7 @@ export async function saveAboutContent(req: Request): Promise<ApiResponse<AboutC
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

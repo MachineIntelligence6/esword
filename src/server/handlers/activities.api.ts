@@ -40,7 +40,7 @@ export async function getAll({
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -71,7 +71,7 @@ export async function getById(id: number, include?: Prisma.ActivityInclude): Pro
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -92,7 +92,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -121,7 +121,7 @@ export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }

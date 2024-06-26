@@ -90,7 +90,7 @@ export default function UsersForm({ user, onReset }: Props) {
                 message: definedMessages.EMAIL_ALREADY_EXISTS
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })
@@ -109,7 +109,7 @@ export default function UsersForm({ user, onReset }: Props) {
                 message: definedMessages.EMAIL_ALREADY_EXISTS
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })

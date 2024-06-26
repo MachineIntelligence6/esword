@@ -50,7 +50,7 @@ export default function AboutContentForm({ aboutContent }: Props) {
   const handleUpdate = async (data: AboutContentFormSchema) => {
     const res = await clientApiHandlers.settings.saveAboutContent(data);
     if (res.succeed) window.location.reload();
-    if (res.code === "UNKOWN_ERROR") {
+    if (res.code === "UNKNOWN_ERROR") {
       form.setError("info", {
         message: definedMessages.UNKNOWN_ERROR,
       });

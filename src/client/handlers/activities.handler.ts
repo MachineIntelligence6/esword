@@ -18,7 +18,7 @@ export async function get({
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -33,7 +33,7 @@ export async function getById(id: number, include?: Prisma.ActivityInclude): Pro
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -49,7 +49,7 @@ export async function getById(id: number, include?: Prisma.ActivityInclude): Pro
 //     } catch (error) {
 //         return {
 //             succeed: false,
-//             code: "UNKOWN_ERROR"
+//             code: "UNKNOWN_ERROR"
 //         }
 //     }
 // }
@@ -62,7 +62,7 @@ export async function getById(id: number, include?: Prisma.ActivityInclude): Pro
 //     } catch (error) {
 //         return {
 //             succeed: false,
-//             code: "UNKOWN_ERROR"
+//             code: "UNKNOWN_ERROR"
 //         }
 //     }
 // }
@@ -77,7 +77,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -90,7 +90,7 @@ export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

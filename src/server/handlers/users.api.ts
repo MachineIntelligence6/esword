@@ -61,7 +61,7 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, role
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -101,7 +101,7 @@ export async function getById(id: number, include?: Prisma.UserInclude): Promise
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -124,7 +124,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -154,7 +154,7 @@ export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -205,7 +205,7 @@ export async function create(req: Request): Promise<ApiResponse<IUser>> {
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -251,7 +251,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<any>
         console.log(error)
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

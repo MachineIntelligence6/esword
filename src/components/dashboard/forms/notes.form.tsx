@@ -53,7 +53,7 @@ export default function NotesEditorForm({ note, readonly }: Props) {
         if (readonly) return;
         const res = await clientApiHandlers.notes.update(note.id, data.text)
         if (res.succeed && res.data) return router.push(`/dashboard/notes`)
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })

@@ -62,7 +62,7 @@ export async function getAll({
     console.error(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -105,7 +105,7 @@ export async function getByRef(
     console.error(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -140,7 +140,7 @@ export async function archive(id: number): Promise<ApiResponse<IBook>> {
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -165,9 +165,10 @@ export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
       },
     };
   } catch (error) {
+    console.error(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -213,7 +214,7 @@ export async function create(req: Request): Promise<ApiResponse> {
     console.error(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }
@@ -267,7 +268,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
     console.error(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }

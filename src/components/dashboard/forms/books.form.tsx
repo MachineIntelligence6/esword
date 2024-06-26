@@ -89,7 +89,7 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                 message: definedMessages.BOOK_NAME_MUST_BE_UNIQUE
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })
@@ -113,7 +113,7 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                 message: definedMessages.BOOK_NAME_MUST_BE_UNIQUE
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })

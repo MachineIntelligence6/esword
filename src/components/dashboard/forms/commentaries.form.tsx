@@ -120,7 +120,7 @@ export default function CommentariesForm({ commentary }: { commentary?: IComment
     const handleAddNew = async (data: CommentaryFormSchema) => {
         const res = await clientApiHandlers.commentaries.create(data)
         if (res.succeed && res.data) return router.push(`/dashboard/commentaries/${res.data.id}`)
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })
@@ -131,7 +131,7 @@ export default function CommentariesForm({ commentary }: { commentary?: IComment
         if (!commentary) return;
         const res = await clientApiHandlers.commentaries.update(commentary.id, data)
         if (res.succeed && res.data) return router.push(`/dashboard/commentaries/${res.data.id}`)
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })

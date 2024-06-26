@@ -17,7 +17,7 @@ export async function get({
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -35,7 +35,7 @@ export async function create(data: { text: string; verse: number; }): Promise<Ap
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -48,7 +48,7 @@ export async function update(id: number, text: string): Promise<ApiResponse<INot
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -62,7 +62,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

@@ -61,7 +61,7 @@ export function AddTopicForm() {
                 message: definedMessages.TOPIC_NUMBER_MUST_BE_UNIQUE
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })
@@ -119,7 +119,7 @@ export function EditTopicForm({ topic, onReset }: FormProps) {
                 message: definedMessages.TOPIC_NUMBER_MUST_BE_UNIQUE
             })
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })
@@ -379,7 +379,7 @@ function FormView({ form, onFormSubmit, variant, resetForm }: FormViewProps) {
 //                 message: definedMessages.TOPIC_NUMBER_MUST_BE_UNIQUE
 //             })
 //         }
-//         if (res.code === "UNKOWN_ERROR") {
+//         if (res.code === "UNKNOWN_ERROR") {
 //             form.setError("info", {
 //                 message: definedMessages.UNKNOWN_ERROR
 //             })
@@ -398,7 +398,7 @@ function FormView({ form, onFormSubmit, variant, resetForm }: FormViewProps) {
 //                 message: definedMessages.TOPIC_NUMBER_MUST_BE_UNIQUE
 //             })
 //         }
-//         if (res.code === "UNKOWN_ERROR") {
+//         if (res.code === "UNKNOWN_ERROR") {
 //             form.setError("info", {
 //                 message: definedMessages.UNKNOWN_ERROR
 //             })

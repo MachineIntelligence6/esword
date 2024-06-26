@@ -57,7 +57,7 @@ export async function findAll({
     console.log(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }

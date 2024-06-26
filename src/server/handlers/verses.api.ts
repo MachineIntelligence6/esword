@@ -76,7 +76,7 @@ export async function getAll({
     console.log(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -116,7 +116,7 @@ export async function getById(
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -149,7 +149,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -178,7 +178,7 @@ export async function archiveMany(req: Request): Promise<ApiResponse<any>> {
   } catch (error) {
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
       data: null,
     };
   }
@@ -239,7 +239,7 @@ export async function create(req: Request): Promise<ApiResponse<IVerse>> {
     console.log(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }
@@ -299,7 +299,7 @@ export async function update(
     console.log(error);
     return {
       succeed: false,
-      code: "UNKOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
   }
 }
@@ -423,6 +423,6 @@ export async function importFromCSV(
   }
   return {
     succeed: false,
-    code: "UNKOWN_ERROR",
+    code: "UNKNOWN_ERROR",
   };
 }

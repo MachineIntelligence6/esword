@@ -16,7 +16,7 @@ export async function findAll({ query, page = 1, perPage = defaults.PER_PAGE_ITE
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

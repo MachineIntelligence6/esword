@@ -68,7 +68,7 @@ export default function AuthorsForm({ author, onReset }: Props) {
         if (res.succeed && res.data) {
             return window.location.reload()
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })
@@ -82,7 +82,7 @@ export default function AuthorsForm({ author, onReset }: Props) {
         if (res.succeed && res.data) {
             return window.location.reload()
         }
-        if (res.code === "UNKOWN_ERROR") {
+        if (res.code === "UNKNOWN_ERROR") {
             form.setError("info", {
                 message: definedMessages.UNKNOWN_ERROR
             })

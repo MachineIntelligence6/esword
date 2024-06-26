@@ -20,7 +20,7 @@ export async function get(
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -37,7 +37,7 @@ export async function create(data: UserFormSchema): Promise<ApiResponse<IUser>> 
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -50,7 +50,7 @@ export async function update(id: number, update: UserFormSchema): Promise<ApiRes
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -62,7 +62,7 @@ export async function verifyPassword(password: string): Promise<ApiResponse<IUse
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -76,7 +76,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

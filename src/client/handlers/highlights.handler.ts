@@ -18,7 +18,7 @@ export async function get({
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -32,7 +32,7 @@ export async function getById(id: number, include: Prisma.BookmarkInclude): Prom
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -48,7 +48,7 @@ export async function create(verse: number, text: string, index: number): Promis
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -64,7 +64,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

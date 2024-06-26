@@ -20,7 +20,7 @@ export async function get({ page = 1, perPage = defaults.PER_PAGE_ITEMS,
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -36,7 +36,7 @@ export async function create(data: CommentaryFormSchema): Promise<ApiResponse<IC
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -49,7 +49,7 @@ export async function update(id: number, update: CommentaryFormSchema): Promise<
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
@@ -63,7 +63,7 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }

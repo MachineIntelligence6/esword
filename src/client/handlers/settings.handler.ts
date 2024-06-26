@@ -12,7 +12,7 @@ export async function getAboutContent(): Promise<ApiResponse<AboutContent>> {
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR",
+            code: "UNKNOWN_ERROR",
             data: null
         }
     }
@@ -28,7 +28,7 @@ export async function saveAboutContent(content: AboutContentFormSchema): Promise
     } catch (error) {
         return {
             succeed: false,
-            code: "UNKOWN_ERROR"
+            code: "UNKNOWN_ERROR"
         }
     }
 }
