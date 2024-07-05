@@ -1,7 +1,6 @@
 "use client"
 
 import React, { ClipboardEvent, ReactNode } from "react";
-import PropTypes from 'prop-types';
 import SiteSidebar from "./sidebar";
 import { usePathname } from "next/navigation";
 import { Resizable } from "re-resizable";
@@ -61,8 +60,5 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
   );
 };
 
-SiteInnerLayout.propTypes = {
-  children: PropTypes.node,
-};
 
 export default SiteInnerLayout;

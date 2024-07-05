@@ -5,6 +5,7 @@ import defaults from "@/shared/constants/defaults";
 import { parse as csvParse } from "csv-parse/sync";
 import { IVerse } from "@/shared/types/models.types";
 import { VersesPaginationProps } from "@/shared/types/pagination.types";
+import { deleteBooks } from "./archives.api";
 
 export async function getAll({
   page = 1,
@@ -313,11 +314,141 @@ type CsvIVerse = {
   text: string;
 };
 
+// export async function importFromCSV(
+//   req: Request
+// ): Promise<ApiResponse<IVerse[]>> {
+//   try {
+//     const data = await req.formData();
+//     const queryParameters = new URLSearchParams(req.url.split("?")[1]);
+//     const importMode = queryParameters.get("importMode") as
+//       | "update"
+//       | "overwrite";
+
+//     const blob = data.get("file")?.valueOf() as Blob | null;
+//     if (!blob)
+//       return {
+//         succeed: false,
+//         code: "FILE_NOT_FOUND",
+//       };
+//     const csvInputData = await blob.text();
+//     const csvRecords: any[] = csvParse(csvInputData, {
+//       delimiter: "$",
+//       from_line: 2,
+//       relaxQuotes: true,
+//       skip_empty_lines: true,
+//     });
+//     const csvIVerses: CsvIVerse[] = csvRecords.map((record: any[]) => ({
+//       book: record[0],
+//       bookAbbr: record[1],
+//       chapter: Number(record[2]),
+//       topic: record[3],
+//       number: Number(record[4]),
+//       text: record[5],
+//     }));
+
+//     const createdIVerses: IVerse[] = [];
+
+//     // for (let csvIVerse of csvIVerses) {
+//     //   const book = await db.book.upsert({
+//     //     where: { name: csvIVerse.book.trim() },
+//     //     create: {
+//     //       name: csvIVerse.book.trim(),
+//     //       abbreviation: csvIVerse.bookAbbr,
+//     //       slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_"),
+//     //     },
+//     //     update: {},
+//     //   });
+//     //   const chapterSlug = `${book.slug}_${csvIVerse.chapter}`;
+//     //   const chapter = await db.chapter.upsert({
+//     //     where: { slug: chapterSlug },
+//     //     create: {
+//     //       name: csvIVerse.chapter,
+//     //       slug: chapterSlug,
+//     //       bookId: book.id,
+//     //     },
+//     //     update: {},
+//     //   });
+//     //   const dbLastTopic = await db.topic.findFirst({
+//     //     orderBy: {
+//     //       number: "desc",
+//     //     },
+//     //     where: {
+//     //       chapterId: chapter.id,
+//     //     },
+//     //   });
+//     //   const topicNumber = dbLastTopic ? dbLastTopic.number + 1 : 1;
+//     //   let topic = await db.topic.findFirst({
+//     //     where: {
+//     //       OR: [{ name: csvIVerse.topic }, { number: topicNumber }],
+//     //       chapter: {
+//     //         id: chapter.id,
+//     //         bookId: chapter.bookId,
+//     //       },
+//     //     },
+//     //   });
+//     //   if (!topic || topic?.name !== csvIVerse.topic) {
+//     //     topic = await db.topic.create({
+//     //       data: {
+//     //         name: csvIVerse.topic,
+//     //         number:
+//     //           topic?.number === topicNumber ? topicNumber + 1 : topicNumber,
+//     //         chapterId: chapter.id,
+//     //       },
+//     //     });
+//     //   }
+//     //   let verse = await db.verse.findFirst({
+//     //     where: {
+//     //       number: csvIVerse.number,
+//     //       topic: {
+//     //         id: topic.id,
+//     //         chapter: {
+//     //           id: chapter.id,
+//     //           bookId: chapter.bookId,
+//     //         },
+//     //       },
+//     //     },
+//     //   });
+//     //   if (!verse) {
+//     //     verse = await db.verse.create({
+//     //       data: {
+//     //         number: csvIVerse.number,
+//     //         text: csvIVerse.text,
+//     //         topicId: topic.id,
+//     //       },
+//     //     });
+//     //     createdIVerses.push(verse);
+//     //   }
+//     // }
+//     if (importMode === "overwrite") {
+//       console.log("Overwrite mode");
+//     }else if (importMode === "update") {
+//       console.log("Update mode");
+//     }
+
+//     return {
+//       succeed: true,
+//       code: "SUCCESS",
+//       data: createdIVerses,
+//     };
+//   } catch (error) {
+//     console.log(error);
+//   }
+//   return {
+//     succeed: false,
+//     code: "UNKNOWN_ERROR",
+//   };
+// }
+
 export async function importFromCSV(
   req: Request
 ): Promise<ApiResponse<IVerse[]>> {
   try {
     const data = await req.formData();
+    const queryParameters = new URLSearchParams(req.url.split("?")[1]);
+    const importMode = queryParameters.get("importMode") as
+      | "update"
+      | "overwrite";
+
     const blob = data.get("file")?.valueOf() as Blob | null;
     if (!blob)
       return {
@@ -342,77 +473,176 @@ export async function importFromCSV(
 
     const createdIVerses: IVerse[] = [];
 
-    for (let csvIVerse of csvIVerses) {
-      const book = await db.book.upsert({
-        where: { name: csvIVerse.book.trim() },
-        create: {
-          name: csvIVerse.book.trim(),
-          abbreviation: csvIVerse.bookAbbr,
-          slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_"),
-        },
-        update: {},
-      });
-      const chapterSlug = `${book.slug}_${csvIVerse.chapter}`;
-      const chapter = await db.chapter.upsert({
-        where: { slug: chapterSlug },
-        create: {
-          name: csvIVerse.chapter,
-          slug: chapterSlug,
-          bookId: book.id,
-        },
-        update: {},
-      });
-      const dbLastTopic = await db.topic.findFirst({
-        orderBy: {
-          number: "desc",
-        },
+    if (importMode === "overwrite") {
+      const books = await db.book.findMany({
         where: {
-          chapterId: chapter.id,
-        },
-      });
-      const topicNumber = dbLastTopic ? dbLastTopic.number + 1 : 1;
-      let topic = await db.topic.findFirst({
-        where: {
-          OR: [{ name: csvIVerse.topic }, { number: topicNumber }],
-          chapter: {
-            id: chapter.id,
-            bookId: chapter.bookId,
+          name: {
+            in: csvIVerses.map((verse) => verse.book),
           },
         },
       });
-      if (!topic || topic?.name !== csvIVerse.topic) {
-        topic = await db.topic.create({
-          data: {
-            name: csvIVerse.topic,
-            number:
-              topic?.number === topicNumber ? topicNumber + 1 : topicNumber,
+      const bookIds = books.map((book) => book.id);
+      await deleteBooks(bookIds);
+
+      const createdIVerses: IVerse[] = [];
+
+      for (let csvIVerse of csvIVerses) {
+        const book = await db.book.upsert({
+          where: { name: csvIVerse.book.trim() },
+          create: {
+            name: csvIVerse.book.trim(),
+            abbreviation: csvIVerse.bookAbbr,
+            slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_"),
+          },
+          update: {},
+        });
+        const chapterSlug = `${book.slug}_${csvIVerse.chapter}`;
+        const chapter = await db.chapter.upsert({
+          where: { slug: chapterSlug },
+          create: {
+            name: csvIVerse.chapter,
+            slug: chapterSlug,
+            bookId: book.id,
+          },
+          update: {},
+        });
+        const dbLastTopic = await db.topic.findFirst({
+          orderBy: {
+            number: "desc",
+          },
+          where: {
             chapterId: chapter.id,
           },
         });
-      }
-      let verse = await db.verse.findFirst({
-        where: {
-          number: csvIVerse.number,
-          topic: {
-            id: topic.id,
+        const topicNumber = dbLastTopic ? dbLastTopic.number + 1 : 1;
+        let topic = await db.topic.findFirst({
+          where: {
+            OR: [{ name: csvIVerse.topic }, { number: topicNumber }],
             chapter: {
               id: chapter.id,
               bookId: chapter.bookId,
             },
           },
-        },
-      });
-      if (!verse) {
-        verse = await db.verse.create({
-          data: {
+        });
+        if (!topic || topic?.name !== csvIVerse.topic) {
+          topic = await db.topic.create({
+            data: {
+              name: csvIVerse.topic,
+              number:
+                topic?.number === topicNumber ? topicNumber + 1 : topicNumber,
+              chapterId: chapter.id,
+            },
+          });
+        }
+        let verse = await db.verse.findFirst({
+          where: {
             number: csvIVerse.number,
-            text: csvIVerse.text,
-            topicId: topic.id,
+            topic: {
+              id: topic.id,
+              chapter: {
+                id: chapter.id,
+                bookId: chapter.bookId,
+              },
+            },
           },
         });
-        createdIVerses.push(verse);
+        if (!verse) {
+          verse = await db.verse.create({
+            data: {
+              number: csvIVerse.number,
+              text: csvIVerse.text,
+              topicId: topic.id,
+            },
+          });
+          createdIVerses.push(verse);
+        }
+      }
+    } else if (importMode === "update") {
+      const createdIVerses: IVerse[] = [];
+
+      for (let csvIVerse of csvIVerses) {
+        const book = await db.book.upsert({
+          where: { name: csvIVerse.book.trim() },
+          create: {
+            name: csvIVerse.book.trim(),
+            abbreviation: csvIVerse.bookAbbr,
+            slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_"),
+          },
+          update: {},
+        });
+        const chapterSlug = `${book.slug}_${csvIVerse.chapter}`;
+        const chapter = await db.chapter.upsert({
+          where: { slug: chapterSlug },
+          create: {
+            name: csvIVerse.chapter,
+            slug: chapterSlug,
+            bookId: book.id,
+          },
+          update: {},
+        });
+        const dbLastTopic = await db.topic.findFirst({
+          orderBy: {
+            number: "desc",
+          },
+          where: {
+            chapterId: chapter.id,
+          },
+        });
+        const topicNumber = dbLastTopic ? dbLastTopic.number + 1 : 1;
+        let topic = await db.topic.findFirst({
+          where: {
+            OR: [{ name: csvIVerse.topic }, { number: topicNumber }],
+            chapter: {
+              id: chapter.id,
+              bookId: chapter.bookId,
+            },
+          },
+        });
+        if (!topic || topic?.name !== csvIVerse.topic) {
+          topic = await db.topic.create({
+            data: {
+              name: csvIVerse.topic,
+              number:
+                topic?.number === topicNumber ? topicNumber + 1 : topicNumber,
+              chapterId: chapter.id,
+            },
+          });
+        }
+        let verse = await db.verse.findFirst({
+          where: {
+            number: csvIVerse.number,
+            topic: {
+              id: topic.id,
+              chapter: {
+                id: chapter.id,
+                bookId: chapter.bookId,
+              },
+            },
+          },
+        });
+        if (!verse) {
+          verse = await db.verse.create({
+            data: {
+              number: csvIVerse.number,
+              text: csvIVerse.text,
+              topicId: topic.id,
+            },
+          });
+          createdIVerses.push(verse);
+        } else {
+          verse = await db.verse.update({
+            data: {
+              text: csvIVerse.text,
+            },
+            where: {
+              id: verse.id,
+            },
+          });
+          createdIVerses.push(verse);
+        }
       }
     }
+
     return {
       succeed: true,
       code: "SUCCESS",

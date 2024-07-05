@@ -115,13 +115,15 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 }
 
 export async function importFromCSV(
-  file: File
+  file: File,
+  importMode: "update" | "overwrite"
 ): Promise<ApiResponse<IVerse[]>> {
   try {
+    console.log("import mode: ", importMode);
     const data = new FormData();
     data.append("file", file);
     const res = await axios.post<ApiResponse<IVerse[]>>(
-      "/api/verses/csv",
+      `/api/verses/csv?importMode=${importMode}`,
       data
     );
     if (res.status !== 200) throw new Error();

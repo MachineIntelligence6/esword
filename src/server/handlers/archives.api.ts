@@ -216,7 +216,7 @@ export async function resetore(
 // Restore Archived Data End
 
 // Delete Permanentally Archived Data Start
-async function deleteBooks(ids: number[]) {
+export async function deleteBooks(ids: number[]) {
   try {
     const chapters = await db.chapter.findMany({
       where: {
