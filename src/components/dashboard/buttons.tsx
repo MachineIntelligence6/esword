@@ -19,7 +19,9 @@ export function BackButton() {
 
 export function LogoutButton() {
     return (
-        <DropdownMenuItem className="flex items-center justify-between" onClick={() => signOut({ redirect: true })}>
+        <DropdownMenuItem className="flex items-center justify-between" onClick={() => signOut({ redirect: false }).then(() => {
+            window.location.href = '/login';
+          })}>
             <span>Log Out</span>
             <ExitIcon className="w-4 h-4" />
         </DropdownMenuItem>
