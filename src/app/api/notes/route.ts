@@ -11,6 +11,7 @@ export const GET = async (req: Request) => {
     const user = parseInt(params.get("user") ?? "-1")
     const verse = parseInt(params.get("verse") ?? "-1")
     const includeStr = params.get("include")
+
     let include: Prisma.NoteInclude | undefined;
     try {
         include = JSON.parse(includeStr ?? "")

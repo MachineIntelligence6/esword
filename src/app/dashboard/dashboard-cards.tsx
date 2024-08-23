@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import clientApiHandlers from "@/client/handlers"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,6 +8,7 @@ import { PaginatedApiResponse } from "@/shared/types/api.types"
 import { IActivity, IBook, ICommentary, INote } from "@/shared/types/models.types"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 
 
 
@@ -68,10 +70,12 @@ export function DBooksCard() {
 }
 
 export function DNotesCard() {
+    const session = useSession()
+    const user = session?.data?.user
     const [notes, setNotes] = useState<INote[] | null>(null)
     useEffect(() => {
         clientApiHandlers.notes.get({
-            page: 1, perPage: 10, include: { user: true },
+            page: 1, perPage: 10, user: user?.role === "ADMIN" ? -1 : user?.id, include: { user: true },
             orderBy: {
                 updatedAt: "desc"
             }

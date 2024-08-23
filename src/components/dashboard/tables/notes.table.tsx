@@ -16,7 +16,7 @@ import { cn, extractTextFromHtml } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 
 type Props = {
-  user?: IUser;
+  user?: any;
   verse?: IVerse;
 };
 

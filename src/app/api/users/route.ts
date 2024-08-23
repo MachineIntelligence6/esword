@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client"
 
 
 export const GET = async (req: Request) => {
+    console.log("test API")
     const params = new URLSearchParams(req.url.split("?")[1])
     const page = parseInt(params.get("page") ?? "1")
     const role = (params.get("role") ?? "ALL") as IUserRole
@@ -33,8 +34,8 @@ export const GET = async (req: Request) => {
     return NextResponse.json(res)
 }
 
-
 export async function POST(req: Request) {
+    console.log("req ", req)
     const res = await serverApiHandlers.users.create(req)
     return NextResponse.json(res)
 }

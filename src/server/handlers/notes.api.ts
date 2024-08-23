@@ -10,13 +10,16 @@ import { getServerAuth } from "../auth";
 
 
 
-export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, user = -1, include, where, orderBy }: NotesPaginationProps): Promise<PaginatedApiResponse<INote[]>> {
+export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, user, include, where, orderBy }: NotesPaginationProps): Promise<PaginatedApiResponse<INote[]>> {
     try {
         const notes = await db.note.findMany({
             where: where ?
                 {
                     ...where,
-                    archived: where.archived ?? false
+                    archived: where.archived ?? false,
+                    ...(user !== -1 && {
+                        userId: user
+                    })
                 }
                 : {
                     ...(user !== -1 && {
@@ -48,7 +51,10 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
             where: where ?
                 {
                     ...where,
-                    archived: where.archived ?? false
+                    archived: where.archived ?? false,
+                    ...(user !== -1 && {
+                        userId: user
+                    })
                 }
                 : {
                     ...(user !== -1 && {
