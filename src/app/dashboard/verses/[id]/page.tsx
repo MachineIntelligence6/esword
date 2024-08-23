@@ -16,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NotesTable from "@/components/dashboard/tables/notes.table";
 import db from "@/server/db";
 import { IVerse } from "@/shared/types/models.types";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
 
 
 
@@ -94,7 +96,8 @@ export default async function Page({ params }: { params: { id: string } }) {
 type ContentTabsProps = {
     verse: IVerse;
 }
-function ContentTabs({ verse }: ContentTabsProps) {
+async function ContentTabs({ verse }: ContentTabsProps) {
+    const session = await getServerSession(authOptions);
     return (
         <Tabs defaultValue="commentaries" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -127,7 +130,7 @@ function ContentTabs({ verse }: ContentTabsProps) {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-5">
-                        <NotesTable verse={verse} />
+                        <NotesTable verse={verse} user={session?.user?.role === "ADMIN" ? '' : session?.user} />
                     </CardContent>
                 </Card>
             </TabsContent>

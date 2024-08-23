@@ -6,7 +6,7 @@ import { IUserRole } from "./models.types";
 
 export type BooksPaginationProps = BasePaginationProps<Prisma.BookInclude, Prisma.BookWhereInput, Prisma.BookOrderByWithRelationInput | Prisma.BookOrderByWithRelationInput[]>
 export type NotesPaginationProps = BasePaginationProps<Prisma.NoteInclude, Prisma.NoteWhereInput, Prisma.NoteOrderByWithRelationInput> & {
-    user?: number;
+    user?: number | any;
     verse?: number;
 }
 export type CommentariesPaginationProps = BasePaginationProps<Prisma.CommentaryInclude, Prisma.CommentaryWhereInput, Prisma.CommentaryOrderByWithRelationInput> & {

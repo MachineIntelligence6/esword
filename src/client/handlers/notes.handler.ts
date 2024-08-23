@@ -66,6 +66,3 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
         }
     }
 }
-
-
-

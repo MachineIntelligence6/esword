@@ -6,7 +6,6 @@ import bcrypt from 'bcryptjs'
 import { SessionUser } from "@/shared/types/models.types"
 
 
-
 export const authOptions: AuthOptions = {
     providers: [
         CredentialsProvider({
