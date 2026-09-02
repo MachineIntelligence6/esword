@@ -1,13 +1,12 @@
 "use client";
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 import React, { useEffect, useRef, MutableRefObject } from "react";
-import ReactQuill from "react-quill";
-import Quill from "quill";
-import BlotFormatter from "quill-blot-formatter";
+import ReactQuill, { Quill } from "react-quill-new";
 import { cn } from "@/lib/utils";
+import { sanitizeRichHtml } from "@/lib/sanitize-html";
 import { EditorProps } from "./editor";
 
-const BaseImageFormat = Quill.import("formats/image");
+const BaseImageFormat = Quill.import("formats/image") as any;
 const ImageFormatAttributesList = ["alt", "height", "width", "style"];
 
 class ImageFormat extends BaseImageFormat {
@@ -39,10 +38,7 @@ class ImageFormat extends BaseImageFormat {
   }
 }
 
-Quill.register(ImageFormat, true);
-
-// Register the BlotFormatter module
-Quill.register("modules/blotFormatter", BlotFormatter);
+Quill.register(ImageFormat as any, true);
 
 // Define a class to preserve white space
 class PreserveWhiteSpace {
@@ -105,9 +101,6 @@ const getModules = (disabled?: boolean) => {
             ["link", "image"],
             ["clean"],
           ],
-          blotFormatter: {
-            // see config options below
-          },
         }),
     preserveWhiteSpace: true,
     clipboard: {
@@ -117,6 +110,7 @@ const getModules = (disabled?: boolean) => {
 };
 
 // Define the formats for the editor
+// Quill 2 registers list bullets via "list"; custom image attrs are handled by ImageFormat.
 const formats = [
   "header",
   "font",
@@ -126,16 +120,9 @@ const formats = [
   "strike",
   "blockquote",
   "list",
-  "bullet",
   "indent",
   "link",
   "image",
-  "width",
-  "height",
-  "align",
-  "float",
-  "alt",
-  "style",
 ];
 
 const QuillEditorBase = ({
@@ -154,7 +141,7 @@ const QuillEditorBase = ({
     if (!quill) return;
 
     const handleEditorChange = () => {
-      const content = quill.root.innerHTML;
+      const content = sanitizeRichHtml(quill.root.innerHTML);
       if (onChange) {
         onChange(content);
       }
@@ -178,7 +165,7 @@ const QuillEditorBase = ({
         bounds="#editor-container"
         readOnly={readOnly || disabled}
         formats={formats}
-        value={value}
+        value={sanitizeRichHtml(value)}
         className={cn(
           "w-full",
           disabled ? "ql-disabled" : "min-300",
@@ -187,7 +174,7 @@ const QuillEditorBase = ({
         )}
         onChange={(content, delta, source, editor) => {
           if (onChange) {
-            onChange(editor.getHTML());
+            onChange(sanitizeRichHtml(editor.getHTML()));
           }
         }}
         modules={getModules(disabled)}

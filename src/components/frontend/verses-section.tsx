@@ -9,6 +9,7 @@ import {
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
+import { escapeRegExp, sanitizeVerseHtml } from "@/lib/sanitize-html";
 import {
   TopicLoadingPlaceholder,
   VersesLoadingPlaceholder,
@@ -87,7 +88,6 @@ function countOccurrences(verseText: string, selection: Selection) {
     selection.focusOffset,
     matches.map((m) => m.index ?? -1)
   );
-  console.log("Nearest Num = ", index);
   return index;
 }
 
@@ -339,8 +339,8 @@ function generateHighlightedText(verse: IVerse) {
   let highlightedText = verse.text;
 
   verse.highlights?.forEach((h) => {
-    const regexPattern = new RegExp(h.text, "gi");
-    // const regexPattern = new RegExp(`\\b${h.text}\\b`, 'gi');
+    if (!h.text) return;
+    const regexPattern = new RegExp(escapeRegExp(h.text), "gi");
     let matchCount = 0;
     function replaceNthOccurrence(match: string) {
       matchCount++;
@@ -354,7 +354,7 @@ function generateHighlightedText(verse: IVerse) {
     );
   });
 
-  return highlightedText;
+  return sanitizeVerseHtml(highlightedText);
 }
 
 type VerseComponentProps = {
