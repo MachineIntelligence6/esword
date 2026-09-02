@@ -163,7 +163,6 @@ export function DataTableRowActions<TData>({
 
 export type TableActionPopupProps = {
   open: boolean;
-  // eslint-disable-next-line no-unused-vars
   setOpen: (value: boolean) => void;
   action?: () => Promise<void>;
   title: string;

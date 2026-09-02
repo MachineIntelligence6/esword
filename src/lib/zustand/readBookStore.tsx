@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import clientApiHandlers from "@/client/handlers";
 import {
   IBook,

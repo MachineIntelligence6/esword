@@ -25,7 +25,6 @@ export default function CommentariesContentComponent({ variant }: { variant: "MO
     useEffect(() => {
         if (activeVerse.data && activeAuthor?.commentaries?.active) setCommentariesTab("verses")
         // else if (activeChapter.data?.commentaryName || activeChapter.data?.commentaryText) setCommentariesTab("chapter")
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeVerse, activeAuthor])
 
 

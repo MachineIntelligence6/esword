@@ -64,7 +64,6 @@ const restore = async (
     ids: data.map((d) => d.id),
     model: modelName,
   });
-  console.log(res);
   if (res.succeed) {
     toast({
       title: successMessage,

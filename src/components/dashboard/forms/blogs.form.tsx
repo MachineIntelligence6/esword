@@ -116,9 +116,6 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
     }
 
 
-    console.log(blog)
-
-
     return (
         <Card className="w-full rounded-md">
             <Form {...form}>
