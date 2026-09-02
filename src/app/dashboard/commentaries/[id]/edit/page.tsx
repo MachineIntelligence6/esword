@@ -5,8 +5,9 @@ import { notFound } from "next/navigation";
 
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { data: commentary } = await serverApiHandlers.commentaries.getById(parseInt(params.id), {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+  const { data: commentary } = await serverApiHandlers.commentaries.getById(parseInt(id), {
     verse: { include: { topic: { include: { chapter: { include: { book: true } } } } } },
     author: true
   })

@@ -14,15 +14,16 @@ import BlogDetailView from "@/components/blog-components";
 
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-    const { data: blog } = await serverApiHandlers.blogs.getByRef(params.id)
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const { data: blog } = await serverApiHandlers.blogs.getByRef(id)
     if (!blog) return notFound()
 
     const next = await db.blog.findFirst({
         take: 1,
         where: {
             id: {
-                gt: parseInt(params.id),
+                gt: parseInt(id),
             },
             archived: false
         },
@@ -34,7 +35,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         take: 1,
         where: {
             id: {
-                lt: parseInt(params.id),
+                lt: parseInt(id),
             },
             archived: false
         },

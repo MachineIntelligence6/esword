@@ -16,8 +16,9 @@ import { ITopic } from "@/shared/types/models.types";
 import VersesTable from "@/components/dashboard/tables/verses.table";
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-    const { data: topic } = await serverApiHandlers.topics.getById(Number(params.id), {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const { data: topic } = await serverApiHandlers.topics.getById(Number(id), {
         chapter: { include: { book: true } }
     })
     if (!topic) return notFound()
@@ -25,7 +26,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         take: 1,
         where: {
             id: {
-                gt: Number(params.id),
+                gt: Number(id),
             },
             archived: false
         },
@@ -37,7 +38,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         take: 1,
         where: {
             id: {
-                lt: Number(params.id),
+                lt: Number(id),
             },
             archived: false
         },

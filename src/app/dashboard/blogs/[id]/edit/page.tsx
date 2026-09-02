@@ -5,8 +5,9 @@ import { notFound } from "next/navigation";
 
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { data: blog } = await serverApiHandlers.blogs.getByRef(params.id)
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+  const { data: blog } = await serverApiHandlers.blogs.getByRef(id)
   if (!blog) return notFound();
 
   return (

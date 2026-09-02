@@ -16,14 +16,15 @@ import db from "@/server/db";
 import { IBook } from "@/shared/types/models.types";
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-    const { data: book } = await serverApiHandlers.books.getByRef(params.id)
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const { data: book } = await serverApiHandlers.books.getByRef(id)
     if (!book) return notFound()
     const next = await db.book.findFirst({
         take: 1,
         where: {
             id: {
-                gt: parseInt(params.id),
+                gt: parseInt(id),
             },
             archived: false
         },
@@ -35,7 +36,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         take: 1,
         where: {
             id: {
-                lt: parseInt(params.id),
+                lt: parseInt(id),
             },
             archived: false
         },

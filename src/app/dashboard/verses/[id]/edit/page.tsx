@@ -5,8 +5,9 @@ import { notFound } from "next/navigation";
 
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { data: verse } = await serverApiHandlers.verses.getById(parseInt(params.id), { topic: { include: { chapter: true } } })
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+  const { data: verse } = await serverApiHandlers.verses.getById(parseInt(id), { topic: { include: { chapter: true } } })
   if (!verse) return notFound();
 
   return (

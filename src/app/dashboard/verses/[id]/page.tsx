@@ -21,8 +21,9 @@ import { authOptions } from "@/server/auth";
 
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-    const { data: verse } = await serverApiHandlers.verses.getById(parseInt(params.id), {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const { data: verse } = await serverApiHandlers.verses.getById(parseInt(id), {
         topic: { include: { chapter: { include: { book: true } } } },
     })
     if (!verse) return notFound()
@@ -30,7 +31,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         take: 1,
         where: {
             id: {
-                gt: parseInt(params.id),
+                gt: parseInt(id),
             },
             archived: false
         },
@@ -42,7 +43,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         take: 1,
         where: {
             id: {
-                lt: parseInt(params.id),
+                lt: parseInt(id),
             },
             archived: false
         },

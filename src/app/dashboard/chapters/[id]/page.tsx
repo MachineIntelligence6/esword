@@ -18,15 +18,16 @@ import QuillEditor from "@/components/ui/editor";
 
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-    const { data: chapter } = await serverApiHandlers.chapters.getByRef(params.id, { book: true })
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const { data: chapter } = await serverApiHandlers.chapters.getByRef(id, { book: true })
     if (!chapter) return notFound()
 
     const next = await db.chapter.findFirst({
         take: 1,
         where: {
             id: {
-                gt: parseInt(params.id),
+                gt: parseInt(id),
             },
             archived: false
         },
@@ -38,7 +39,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         take: 1,
         where: {
             id: {
-                lt: parseInt(params.id),
+                lt: parseInt(id),
             },
             archived: false
         },

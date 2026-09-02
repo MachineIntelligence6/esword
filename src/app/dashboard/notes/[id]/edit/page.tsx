@@ -5,8 +5,9 @@ import { notFound } from "next/navigation";
 
 
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { data: note } = await serverApiHandlers.notes.getById(Number(params.id), {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+  const { data: note } = await serverApiHandlers.notes.getById(Number(id), {
     user: true,
     verse: {
       include: {
