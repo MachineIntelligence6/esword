@@ -4,23 +4,26 @@ import { NextResponse } from "next/server"
 
 
 
-type RouteParams = { params: { id: string } }
+type RouteParams = { params: Promise<{ id: string }> }
 
 // Get By Ref
 export async function GET(req: Request, { params }: RouteParams) {
-    const res = await serverApiHandlers.users.getById(parseInt(params.id))
+    const { id } = await params
+    const res = await serverApiHandlers.users.getById(parseInt(id))
     return NextResponse.json(res)
 }
 
 // Update
 export async function PUT(req: Request, { params }: RouteParams) {
-    const res = await serverApiHandlers.users.update(req, parseInt(params.id))
+    const { id } = await params
+    const res = await serverApiHandlers.users.update(req, parseInt(id))
     return NextResponse.json(res)
 }
 
 // Delete
 export async function DELETE(req: Request, { params }: RouteParams) {
-    const res = await serverApiHandlers.users.archive(parseInt(params.id))
+    const { id } = await params
+    const res = await serverApiHandlers.users.archive(parseInt(id))
     return NextResponse.json(res)
 }
 

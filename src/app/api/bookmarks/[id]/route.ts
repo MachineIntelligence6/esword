@@ -4,18 +4,20 @@ import { NextResponse } from "next/server"
 
 
 
-type RouteParams = { params: { id: string } }
+type RouteParams = { params: Promise<{ id: string }> }
 
 // Get By Id
 export async function GET(req: Request, { params }: RouteParams) {
-    const res = await serverApiHandlers.bookmarks.getById(Number(params.id))
+    const { id } = await params
+    const res = await serverApiHandlers.bookmarks.getById(Number(id))
     return NextResponse.json(res)
 }
 
 
 // Delete
 export async function DELETE(req: Request, { params }: RouteParams) {
-    const res = await serverApiHandlers.bookmarks.archive(Number(params.id))
+    const { id } = await params
+    const res = await serverApiHandlers.bookmarks.archive(Number(id))
     return NextResponse.json(res)
 }
 

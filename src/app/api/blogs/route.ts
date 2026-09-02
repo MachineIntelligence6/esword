@@ -2,32 +2,18 @@ import defaults from "@/shared/constants/defaults"
 import serverApiHandlers from "@/server/handlers"
 import { NextResponse } from "next/server"
 import { BlogType, Prisma } from "@prisma/client"
+import { getSearchParams, parseIntegerParam, parseJsonParam } from "@/server/request-query"
 
 
 export const GET = async (req: Request) => {
-    const params = new URLSearchParams(req.url.split("?")[1])
-    const page = parseInt(params.get("page") ?? "1")
-    const perPage = parseInt(params.get("perPage") ?? `${defaults.PER_PAGE_ITEMS}`)
-    const user = parseInt(params.get("user") ?? "-1")
+    const params = getSearchParams(req)
+    const page = parseIntegerParam(params, "page", 1, { min: 1 })
+    const perPage = parseIntegerParam(params, "perPage", defaults.PER_PAGE_ITEMS, { min: -1 })
+    const user = parseIntegerParam(params, "user", -1, { min: -1 })
     const type = (params.get("type") as BlogType | undefined)
-    const includeStr = params.get("include")
-    let include: Prisma.BlogInclude | undefined;
-    try {
-        include = JSON.parse(includeStr ?? "")
-    } catch (error) {
-    }
-    const whereStr = params.get("where")
-    let where: Prisma.BlogWhereInput | undefined;
-    try {
-        where = JSON.parse(whereStr ?? "")
-    } catch (error) {
-    }
-    const orderByStr = params.get("orderBy")
-    let orderBy: Prisma.BlogOrderByWithRelationInput | undefined;
-    try {
-        orderBy = JSON.parse(orderByStr ?? "")
-    } catch (error) {
-    }
+    const include = parseJsonParam<Prisma.BlogInclude>(params, "include")
+    const where = parseJsonParam<Prisma.BlogWhereInput>(params, "where")
+    const orderBy = parseJsonParam<Prisma.BlogOrderByWithRelationInput>(params, "orderBy")
 
     const res = await serverApiHandlers.blogs.getAll({ page, perPage, user, include, where, orderBy, type })
     return NextResponse.json(res)
