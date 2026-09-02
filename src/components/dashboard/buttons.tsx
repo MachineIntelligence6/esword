@@ -3,6 +3,7 @@ import { ArrowLeftIcon, ExitIcon } from "@radix-ui/react-icons";
 import { Button } from "../ui/button";
 import { signOut } from "next-auth/react";
 import { DropdownMenuItem } from "../ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 
 
@@ -18,9 +19,11 @@ export function BackButton() {
 }
 
 export function LogoutButton() {
+    const router = useRouter()
+
     return (
         <DropdownMenuItem className="flex items-center justify-between" onClick={() => signOut({ redirect: false }).then(() => {
-            window.location.href = '/login';
+            router.push('/login');
           })}>
             <span>Log Out</span>
             <ExitIcon className="w-4 h-4" />
