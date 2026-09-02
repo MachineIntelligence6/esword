@@ -34,9 +34,18 @@ type BookFormProps = {
 
 
 export default function BooksForm({ book, onReset }: BookFormProps) {
+    const emptyValues: BookFormSchema = {
+        info: "",
+        name: "",
+        slug: "",
+        abbreviation: "",
+        priority: undefined,
+    }
+
     const form = useForm<BookFormSchema>({
         resolver: zodResolver(bookFormSchema),
-        mode: "all"
+        mode: "all",
+        defaultValues: emptyValues,
     })
     const { formState } = form
 
@@ -51,6 +60,7 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
     useEffect(() => {
         if (!book) return;
         form.reset({
+            info: "",
             name: book.name,
             slug: book.slug,
             abbreviation: book.abbreviation,
@@ -60,11 +70,7 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
 
 
     const resetFormValues = () => {
-        form.reset({
-            name: "",
-            slug: "",
-            abbreviation: "",
-        })
+        form.reset(emptyValues)
     }
 
 
@@ -192,7 +198,17 @@ export default function BooksForm({ book, onReset }: BookFormProps) {
                                 <FormItem>
                                     <FormLabel>Priority</FormLabel>
                                     <FormControl>
-                                        <Input type="number" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                        <Input
+                                            type="number"
+                                            name={field.name}
+                                            ref={field.ref}
+                                            onBlur={field.onBlur}
+                                            value={field.value ?? ""}
+                                            onChange={(e) => {
+                                                const next = e.target.value
+                                                field.onChange(next === "" ? undefined : e.target.valueAsNumber)
+                                            }}
+                                        />
                                     </FormControl>
                                     {
                                         fieldState.error &&

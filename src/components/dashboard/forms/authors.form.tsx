@@ -32,9 +32,16 @@ type Props = {
 
 
 export default function AuthorsForm({ author, onReset }: Props) {
+    const emptyValues: AuthorFormSchema = {
+        info: "",
+        name: "",
+        description: "",
+    }
+
     const form = useForm<AuthorFormSchema>({
         resolver: zodResolver(authorFormSchema),
         mode: "all",
+        defaultValues: emptyValues,
     })
     const { formState } = form
 
@@ -43,6 +50,7 @@ export default function AuthorsForm({ author, onReset }: Props) {
     useEffect(() => {
         if (!author) return;
         form.reset({
+            info: "",
             name: author.name,
             description: author.description ?? ""
         })
@@ -50,10 +58,7 @@ export default function AuthorsForm({ author, onReset }: Props) {
 
 
     const resetFormValues = () => {
-        form.reset({
-            name: "",
-            description: ""
-        })
+        form.reset(emptyValues)
     }
 
 
