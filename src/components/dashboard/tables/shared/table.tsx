@@ -76,12 +76,15 @@ export function BaseTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [sorting, setSorting] = React.useState<SortingState>([
-    {
-      id: "priority",
-      desc: false,
-    },
-  ]);
+  const [sorting, setSorting] = React.useState<SortingState>(() => {
+    const hasPriorityColumn = columns.some((column) => {
+      const columnId =
+        ("id" in column && column.id) ||
+        ("accessorKey" in column && String(column.accessorKey));
+      return columnId === "priority";
+    });
+    return hasPriorityColumn ? [{ id: "priority", desc: false }] : [];
+  });
 
   const { data: session } = useSession();
   // const [globalFilter, setGlobalFilter] = React.useState("");
