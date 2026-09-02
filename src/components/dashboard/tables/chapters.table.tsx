@@ -17,9 +17,10 @@ import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 type Props = {
   book?: IBook;
   archivedOnly?: boolean;
+  editAction?: TableActionProps["editAction"];
 };
 
-export default function ChaptersTable({ book, archivedOnly }: Props) {
+export default function ChaptersTable({ book, archivedOnly, editAction }: Props) {
   const [tableData, setTableData] = useState<PaginatedApiResponse<
     IChapter[]
   > | null>(null);
@@ -67,9 +68,11 @@ export default function ChaptersTable({ book, archivedOnly }: Props) {
     viewAction: (chapter) => (
       <Link href={`/dashboard/chapters/${chapter.id}`}>View</Link>
     ),
-    editAction: (chapter) => (
-      <Link href={`/dashboard/chapters/${chapter.id}/edit`}>Edit</Link>
-    ),
+    editAction:
+      editAction ??
+      ((chapter) => (
+        <Link href={`/dashboard/chapters/${chapter.id}/edit`}>Edit</Link>
+      )),
     archiveAction: true,
     deleteAction: true,
     restoreAction: archivedOnly,

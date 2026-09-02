@@ -19,9 +19,11 @@ import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 export default function VersesTable({
   topic,
   archivedOnly,
+  editAction,
 }: {
   topic?: ITopic;
   archivedOnly?: boolean;
+  editAction?: TableActionProps["editAction"];
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -105,9 +107,11 @@ export default function VersesTable({
     viewAction: (verse: IVerse) => (
       <Link href={`/dashboard/verses/${verse.id}`}>View</Link>
     ),
-    editAction: (verse: IVerse) => (
-      <Link href={`/dashboard/verses/${verse.id}/edit`}>Edit</Link>
-    ),
+    editAction:
+      editAction ??
+      ((verse: IVerse) => (
+        <Link href={`/dashboard/verses/${verse.id}/edit`}>Edit</Link>
+      )),
     archiveAction: true,
     deleteAction: true,
     restoreAction: archivedOnly,

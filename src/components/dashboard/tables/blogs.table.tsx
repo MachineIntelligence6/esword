@@ -18,9 +18,10 @@ import { cn, extractTextFromHtml } from "@/lib/utils"
 type Props = {
     user?: IUser
     archivedOnly?: boolean;
+    editAction?: TableActionProps["editAction"];
 }
 
-export default function BlogsTable({ user, archivedOnly }: Props) {
+export default function BlogsTable({ user, archivedOnly, editAction }: Props) {
     const [tableData, setTableData] = useState<PaginatedApiResponse<IBlog[]> | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(perPageCountOptions[0]);
@@ -61,9 +62,11 @@ export default function BlogsTable({ user, archivedOnly }: Props) {
         viewAction: (blog) => (
             <Link href={`/dashboard/blogs/${blog.id}`}>View</Link>
         ),
-        editAction: (blog) => (
-            <Link href={`/dashboard/blogs/${blog.id}/edit`}>Edit</Link>
-        ),
+        editAction:
+            editAction ??
+            ((blog) => (
+                <Link href={`/dashboard/blogs/${blog.id}/edit`}>Edit</Link>
+            )),
         archiveAction: true,
         deleteAction: true,
         restoreAction: archivedOnly,

@@ -18,9 +18,10 @@ import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 type Props = {
   user?: any;
   verse?: IVerse;
+  editAction?: TableActionProps["editAction"];
 };
 
-export default function NotesTable({ user, verse }: Props) {
+export default function NotesTable({ user, verse, editAction }: Props) {
   const [tableData, setTableData] = useState<PaginatedApiResponse<
     INote[]
   > | null>(null);
@@ -78,9 +79,11 @@ export default function NotesTable({ user, verse }: Props) {
     viewAction: (note: INote) => (
       <Link href={`/dashboard/notes/${note.id}`}>View</Link>
     ),
-    editAction: (note: INote) => (
-      <Link href={`/dashboard/notes/${note.id}/edit`}>Edit</Link>
-    ),
+    editAction:
+      editAction ??
+      ((note: INote) => (
+        <Link href={`/dashboard/notes/${note.id}/edit`}>Edit</Link>
+      )),
     // archiveAction: true,
     // deleteAction: true,
     // restoreAction: archivedOnly,

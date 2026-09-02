@@ -18,12 +18,14 @@ type Props = {
   author?: IAuthor;
   verse?: IVerse;
   archivedOnly?: boolean;
+  editAction?: TableActionProps["editAction"];
 };
 
 export default function CommentariesTable({
   author,
   verse,
   archivedOnly,
+  editAction,
 }: Props) {
   const [tableData, setTableData] = useState<PaginatedApiResponse<
     ICommentary[]
@@ -95,9 +97,11 @@ export default function CommentariesTable({
     viewAction: (commentary: ICommentary) => (
       <Link href={`/dashboard/commentaries/${commentary.id}`}>View</Link>
     ),
-    editAction: (commentary: ICommentary) => (
-      <Link href={`/dashboard/commentaries/${commentary.id}/edit`}>Edit</Link>
-    ),
+    editAction:
+      editAction ??
+      ((commentary: ICommentary) => (
+        <Link href={`/dashboard/commentaries/${commentary.id}/edit`}>Edit</Link>
+      )),
     archiveAction: true,
     deleteAction: true,
     restoreAction: archivedOnly,
