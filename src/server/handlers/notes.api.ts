@@ -4,7 +4,8 @@ import defaults from "@/shared/constants/defaults";
 import { Prisma } from "@prisma/client";
 import { INote } from "@/shared/types/models.types";
 import { NotesPaginationProps } from "@/shared/types/pagination.types";
-import { getServerAuth } from "../auth";
+import { isAuthError, requireAuth } from "./authz";
+import { sanitizeRichHtml } from "@/lib/sanitize-html";
 
 
 
@@ -12,24 +13,28 @@ import { getServerAuth } from "../auth";
 
 export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, verse = -1, user, include, where, orderBy }: NotesPaginationProps): Promise<PaginatedApiResponse<INote[]>> {
     try {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
+        const requestedUser = session.user.role === "ADMIN" ? user : Number(session.user.id)
+        const scopedWhere = where ?
+            {
+                ...where,
+                archived: where.archived ?? false,
+                ...(requestedUser !== -1 && {
+                    userId: requestedUser
+                })
+            }
+            : {
+                ...(requestedUser !== -1 && {
+                    userId: requestedUser
+                }),
+                ...(verse !== -1 && {
+                    verseId: verse
+                }),
+                archived: false,
+            }
         const notes = await db.note.findMany({
-            where: where ?
-                {
-                    ...where,
-                    archived: where.archived ?? false,
-                    ...(user !== -1 && {
-                        userId: user
-                    })
-                }
-                : {
-                    ...(user !== -1 && {
-                        userId: user
-                    }),
-                    ...(verse !== -1 && {
-                        verseId: verse
-                    }),
-                    archived: false,
-                },
+            where: scopedWhere,
             orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
@@ -48,23 +53,7 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
             )
         })
         const notesCount = await db.note.count({
-            where: where ?
-                {
-                    ...where,
-                    archived: where.archived ?? false,
-                    ...(user !== -1 && {
-                        userId: user
-                    })
-                }
-                : {
-                    ...(user !== -1 && {
-                        userId: user
-                    }),
-                    ...(verse !== -1 && {
-                        verseId: verse
-                    }),
-                    archived: false,
-                },
+            where: scopedWhere,
         })
         return {
             succeed: true,
@@ -91,10 +80,15 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, vers
 
 export async function getById(id: number, include?: Prisma.NoteInclude): Promise<ApiResponse<INote>> {
     try {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const note = await db.note.findFirst({
             where: {
                 id: id,
-                archived: false
+                archived: false,
+                ...(session.user.role !== "ADMIN" && {
+                    userId: Number(session.user.id)
+                })
             },
             include: (include ? {
                 ...include,
@@ -126,8 +120,15 @@ export async function getById(id: number, include?: Prisma.NoteInclude): Promise
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         await db.note.update({
-            where: { id: id },
+            where: {
+                id: id,
+                ...(session.user.role !== "ADMIN" && {
+                    userId: Number(session.user.id)
+                })
+            },
             data: {
                 archived: true,
             }
@@ -156,11 +157,8 @@ type CreateNoteReq = {
 
 export async function create(req: Request): Promise<ApiResponse<INote>> {
     try {
-        const session = await getServerAuth()
-        if (!session || !session.user) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const noteReq = await req.json() as CreateNoteReq
         let note = await db.note.findFirst({
             where: {
@@ -169,11 +167,10 @@ export async function create(req: Request): Promise<ApiResponse<INote>> {
             }
         })
         if (note) {
-            console.log("Updating note already exists.")
             note = await db.note.update({
                 where: { id: note.id },
                 data: {
-                    text: noteReq.text,
+                    text: sanitizeRichHtml(noteReq.text),
                 },
                 include: {
                     verse: false,
@@ -183,7 +180,7 @@ export async function create(req: Request): Promise<ApiResponse<INote>> {
         } else {
             note = await db.note.create({
                 data: {
-                    text: noteReq.text,
+                    text: sanitizeRichHtml(noteReq.text),
                     userId: Number(session.user.id),
                     verseId: noteReq.verse
                 },
@@ -220,13 +217,18 @@ type UpdateNoteReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse<INote>> {
     try {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const noteReq = await req.json() as UpdateNoteReq
         const note = await db.note.update({
             data: {
-                ...(noteReq.text && { text: noteReq.text }),
+                ...(noteReq.text && { text: sanitizeRichHtml(noteReq.text) }),
             },
             where: {
-                id: id
+                id: id,
+                ...(session.user.role !== "ADMIN" && {
+                    userId: Number(session.user.id)
+                })
             }
         })
         if (!note) throw new Error("");

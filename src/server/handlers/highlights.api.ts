@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IHighlight } from "@/shared/types/models.types";
 import { HighlightsPaginationProps } from "@/shared/types/pagination.types";
-import { getServerAuth } from "../auth";
+import { isAuthError, requireAuth } from "./authz";
 
 
 
@@ -14,18 +14,18 @@ export async function getAll({
     verse = -1, include, where, orderBy
 }: HighlightsPaginationProps): Promise<PaginatedApiResponse<IHighlight[]>> {
     try {
-        const session = await getServerAuth()
-        if (!session) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
-        const highlights = await db.highlight.findMany({
-            where: where ? where : {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
+        const scopedWhere = session.user.role === "ADMIN" && where
+            ? where
+            : {
                 ...(verse !== -1 && {
                     verseId: verse
                 }),
                 userId: Number(session.user.id)
-            },
+            }
+        const highlights = await db.highlight.findMany({
+            where: scopedWhere,
             orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
@@ -55,12 +55,7 @@ export async function getAll({
             )
         })
         const highlightsCount = await db.highlight.count({
-            where: where ? where : {
-                ...(verse !== -1 && {
-                    verseId: verse
-                }),
-                userId: Number(session.user.id)
-            },
+            where: scopedWhere,
         })
         return {
             succeed: true,
@@ -87,15 +82,14 @@ export async function getAll({
 
 export async function getById(id: number, include?: Prisma.HighlightInclude): Promise<ApiResponse<IHighlight>> {
     try {
-        const session = await getServerAuth()
-        if (!session) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const highlight = await db.highlight.findFirst({
             where: {
                 id: id,
-                userId: Number(session.user.id)
+                ...(session.user.role !== "ADMIN" && {
+                    userId: Number(session.user.id)
+                })
             },
             include: (
                 include ?
@@ -143,8 +137,15 @@ export async function getById(id: number, include?: Prisma.HighlightInclude): Pr
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         await db.highlight.delete({
-            where: { id: id },
+            where: {
+                id: id,
+                ...(session.user.role !== "ADMIN" && {
+                    userId: Number(session.user.id)
+                })
+            },
         })
         return {
             succeed: true,
@@ -171,11 +172,8 @@ type CreateHighlightReq = {
 
 export async function create(req: Request): Promise<ApiResponse<IHighlight>> {
     try {
-        const session = await getServerAuth()
-        if (!session) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const { verse: verseId, index, text } = await req.json() as CreateHighlightReq
         const highlightExist = await db.highlight.findFirst({
             where: {
@@ -227,11 +225,8 @@ type UpdateHighlightsReq = {
 
 export async function update(req: Request): Promise<ApiResponse<null>> {
     try {
-        const session = await getServerAuth()
-        if (!session) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const { verse: verseId, highlights } = await req.json() as UpdateHighlightsReq
         const verse = await db.verse.findFirst({ where: { id: verseId } })
         if (!verse) throw new Error()
@@ -242,7 +237,7 @@ export async function update(req: Request): Promise<ApiResponse<null>> {
             }
         })
         if (highlights?.length > 0) {
-            const createdHighlights = await db.highlight.createMany({
+            await db.highlight.createMany({
                 data: highlights.map((h) => ({
                     index: h.index,
                     text: h.text,
@@ -250,7 +245,6 @@ export async function update(req: Request): Promise<ApiResponse<null>> {
                     verseId: verseId
                 }))
             })
-            console.log("Created Highlights = ", createdHighlights.count)
         }
         return {
             succeed: true,

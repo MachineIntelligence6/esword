@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IActivity } from "@/shared/types/models.types";
 import { ActivitesPaginationProps } from "@/shared/types/pagination.types";
+import { isAuthError, requireAdmin } from "./authz";
 
 
 
@@ -13,6 +14,9 @@ export async function getAll({
     include, where, orderBy
 }: ActivitesPaginationProps): Promise<PaginatedApiResponse<IActivity[]>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
+        const safeUserSelect = { id: true, name: true, email: true, role: true, image: true }
         const activities = await db.activity.findMany({
             where: where,
             orderBy: orderBy ? orderBy : {
@@ -22,7 +26,10 @@ export async function getAll({
                 take: perPage,
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
-            include: include ? include : { user: true }
+            include: include ? {
+                ...include,
+                ...(include.user && { user: { select: safeUserSelect } })
+            } : { user: { select: safeUserSelect } }
         })
         const activitiesCount = await db.activity.count({ where: where, })
         return {
@@ -50,11 +57,17 @@ export async function getAll({
 
 export async function getById(id: number, include?: Prisma.ActivityInclude): Promise<ApiResponse<IActivity>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
+        const safeUserSelect = { id: true, name: true, email: true, role: true, image: true }
         const activity = await db.activity.findFirst({
             where: {
                 id: id
             },
-            include: include ? include : { user: true }
+            include: include ? {
+                ...include,
+                ...(include.user && { user: { select: safeUserSelect } })
+            } : { user: { select: safeUserSelect } }
         })
         if (!activity) {
             return {
@@ -81,6 +94,8 @@ export async function getById(id: number, include?: Prisma.ActivityInclude): Pro
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         await db.activity.delete({
             where: { id: id },
         })
@@ -102,6 +117,8 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 
 export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         let succeeded = 0;
         let failed = 0;
 

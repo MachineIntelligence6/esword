@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBookmark } from "@/shared/types/models.types";
 import { BookmarksPaginationProps } from "@/shared/types/pagination.types";
-import { getServerAuth } from "../auth";
+import { isAuthError, requireAuth } from "./authz";
 
 
 
@@ -14,18 +14,18 @@ export async function getAll({
     verse = -1, include, where, orderBy
 }: BookmarksPaginationProps): Promise<PaginatedApiResponse<IBookmark[]>> {
     try {
-        const session = await getServerAuth()
-        if (!session) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
-        const bookmarks = await db.bookmark.findMany({
-            where: where ? where : {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
+        const scopedWhere = session.user.role === "ADMIN" && where
+            ? where
+            : {
                 ...(verse !== -1 && {
                     verseId: verse
                 }),
                 userId: Number(session.user.id)
-            },
+            }
+        const bookmarks = await db.bookmark.findMany({
+            where: scopedWhere,
             orderBy: orderBy ? orderBy : {
                 createdAt: "desc"
             },
@@ -55,12 +55,7 @@ export async function getAll({
             )
         })
         const bookmarksCount = await db.bookmark.count({
-            where: where ? where : {
-                ...(verse !== -1 && {
-                    verseId: verse
-                }),
-                userId: Number(session.user.id)
-            },
+            where: scopedWhere,
         })
         return {
             succeed: true,
@@ -87,15 +82,14 @@ export async function getAll({
 
 export async function getById(id: number, include?: Prisma.BookmarkInclude): Promise<ApiResponse<IBookmark>> {
     try {
-        const session = await getServerAuth()
-        if (!session) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const bookmark = await db.bookmark.findFirst({
             where: {
                 id: id,
-                userId: Number(session.user.id)
+                ...(session.user.role !== "ADMIN" && {
+                    userId: Number(session.user.id)
+                })
             },
             include: (
                 include ?
@@ -143,8 +137,15 @@ export async function getById(id: number, include?: Prisma.BookmarkInclude): Pro
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         await db.bookmark.delete({
-            where: { id: id },
+            where: {
+                id: id,
+                ...(session.user.role !== "ADMIN" && {
+                    userId: Number(session.user.id)
+                })
+            },
         })
         return {
             succeed: true,
@@ -169,11 +170,8 @@ type CreateBookmarkReq = {
 
 export async function create(req: Request): Promise<ApiResponse<IBookmark>> {
     try {
-        const session = await getServerAuth()
-        if (!session) return {
-            code: "UNAUTHORIZED",
-            succeed: false
-        }
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const { verse: verseId } = await req.json() as CreateBookmarkReq
         const bookmarkExist = await db.bookmark.findFirst({
             where: {

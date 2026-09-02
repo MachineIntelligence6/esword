@@ -1,6 +1,7 @@
 import { ApiResponse } from "@/shared/types/api.types";
 import { ArchivesActionReq } from "@/shared/types/reqs.types";
 import db from "../db";
+import { isAuthError, requireAdmin } from "./authz";
 
 // Restore Archived Data Start
 async function restoreBooks(ids: number[]) {
@@ -173,6 +174,8 @@ export async function resetore(
   req: ArchivesActionReq
 ): Promise<ApiResponse<any>> {
   try {
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
     let succeed = 0;
     if (req.model === "Book") {
       succeed = await restoreBooks(req.ids);
@@ -419,6 +422,8 @@ export async function permanentDelete(
   req: ArchivesActionReq
 ): Promise<ApiResponse<any>> {
   try {
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
     let succeed = 0;
     if (req.model === "Book") {
       succeed = await deleteBooks(req.ids);
@@ -632,6 +637,8 @@ export async function addToArchive(
   req: ArchivesActionReq
 ): Promise<ApiResponse<any>> {
   try {
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
     let succeed = 0;
     if (req.model === "Book") {
       succeed = await addBooks(req.ids);

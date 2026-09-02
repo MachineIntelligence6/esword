@@ -4,6 +4,8 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IChapter } from "@/shared/types/models.types";
 import { ChaptersPaginationProps } from "@/shared/types/pagination.types";
+import { isAuthError, requireAdmin, requireContentManager } from "./authz";
+import { sanitizeRichHtml } from "@/lib/sanitize-html";
 
 export async function getAll({
   page = 1,
@@ -128,6 +130,8 @@ export async function getByRef(
 
 export async function archive(id: number): Promise<ApiResponse<IChapter>> {
   try {
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
     const chapter = await db.chapter.findFirst({
       where: { id: id },
       include: { topics: true },
@@ -168,6 +172,8 @@ type CreateChapterReq = {
 
 export async function create(req: Request): Promise<ApiResponse<IChapter>> {
   try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) return session;
     const chapterReq = (await req.json()) as CreateChapterReq;
     const chapterExist = await db.chapter.findFirst({
       where: { slug: chapterReq.slug },
@@ -189,7 +195,9 @@ export async function create(req: Request): Promise<ApiResponse<IChapter>> {
         slug: chapterReq.slug,
         bookId: chapterReq.book,
         commentaryName: chapterReq.commentaryName,
-        commentaryText: chapterReq.commentaryText,
+        commentaryText: chapterReq.commentaryText
+          ? sanitizeRichHtml(chapterReq.commentaryText)
+          : chapterReq.commentaryText,
       },
       include: {
         topics: false,
@@ -224,6 +232,8 @@ export async function update(
   id: number
 ): Promise<ApiResponse<IChapter>> {
   try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) return session;
     const chapterReq = (await req.json()) as UpdateChapterReq;
     if (chapterReq.slug) {
       const chapterExist = await db.chapter.findFirst({
@@ -245,7 +255,7 @@ export async function update(
           commentaryName: chapterReq.commentaryName,
         }),
         ...(chapterReq.commentaryText && {
-          commentaryText: chapterReq.commentaryText,
+          commentaryText: sanitizeRichHtml(chapterReq.commentaryText),
         }),
       },
       where: {

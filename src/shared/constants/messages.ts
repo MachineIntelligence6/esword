@@ -10,6 +10,8 @@ const definedMessages = {
     EMAIL_ALREADY_EXISTS: "A user already exists with this email.",
     USER_NOT_FOUND: "Email not registered.",
     WRONG_PASSWORD: "Wrong password.",
+    INVALID_CREDENTIALS: "Invalid email or password.",
+    RATE_LIMITED: "Too many login attempts. Please wait and try again.",
     UNKNOWN_ERROR: "Some error occured while processing your request, please try again.",
     BOOK_DELETED: "Book deleted successfully. Refresh page to see changes.",
     BOOK_ADDED: "Book added successfully. Refresh page to see changes.",

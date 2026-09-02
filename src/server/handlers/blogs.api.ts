@@ -4,8 +4,9 @@ import { BlogType, Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBlog } from "@/shared/types/models.types";
 import { BlogsPaginationProps } from "@/shared/types/pagination.types";
-import { getServerAuth } from "../auth";
 import { saveBlogImage } from "../files-handler";
+import { isAuthError, requireAdmin, requireContentManager } from "./authz";
+import { sanitizeRichHtml } from "@/lib/sanitize-html";
 
 
 
@@ -16,6 +17,7 @@ export async function getAll({
     user = -1, include, where, orderBy
 }: BlogsPaginationProps): Promise<PaginatedApiResponse<IBlog[]>> {
     try {
+        const safeUserSelect = { id: true, name: true, email: true, role: true, image: true }
         const blogs = await db.blog.findMany({
             where: where ? {
                 ...where,
@@ -34,7 +36,10 @@ export async function getAll({
                 skip: page <= 1 ? 0 : ((page - 1) * perPage),
             }),
             include: (
-                include ? include : { user: true }
+                include ? {
+                    ...include,
+                    ...(include.user && { user: { select: safeUserSelect } })
+                } : { user: { select: safeUserSelect } }
             )
         })
         const blogsCount = await db.blog.count({
@@ -73,6 +78,7 @@ export async function getAll({
 
 export async function getByRef(ref: string, include?: Prisma.BlogInclude): Promise<ApiResponse<IBlog>> {
     try {
+        const safeUserSelect = { id: true, name: true, email: true, role: true, image: true }
         const blog = await db.blog.findFirst({
             where: {
                 OR: [
@@ -86,7 +92,10 @@ export async function getByRef(ref: string, include?: Prisma.BlogInclude): Promi
                 archived: false
             },
             include: (
-                include ? include : { user: true }
+                include ? {
+                    ...include,
+                    ...(include.user && { user: { select: safeUserSelect } })
+                } : { user: { select: safeUserSelect } }
             )
         })
         if (!blog) {
@@ -116,6 +125,8 @@ export async function getByRef(ref: string, include?: Prisma.BlogInclude): Promi
 
 export async function archive(id: number): Promise<ApiResponse<IBlog>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         await db.blog.update({
             where: { id: id },
             data: {
@@ -149,8 +160,8 @@ type CreateBlogReq = {
 
 export async function create(req: Request): Promise<ApiResponse<IBlog>> {
     try {
-        const session = await getServerAuth()
-        if (typeof session === "boolean" || !session?.user) throw new Error();
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
 
         const blogReq = await req.json() as CreateBlogReq
         const blogExist = await db.blog.findFirst({
@@ -167,7 +178,7 @@ export async function create(req: Request): Promise<ApiResponse<IBlog>> {
             data: {
                 title: blogReq.title,
                 slug: blogReq.slug,
-                content: blogReq.content,
+                content: sanitizeRichHtml(blogReq.content),
                 type: blogReq.type,
                 userId: Number(session.user.id),
                 image: imagePath,
@@ -206,6 +217,8 @@ type UpdateBlogReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse<IBlog>> {
     try {
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
         const blogReq = await req.json() as UpdateBlogReq
         if (blogReq.slug) {
             const blogExist = await db.blog.findFirst({
@@ -223,7 +236,7 @@ export async function update(req: Request, id: number): Promise<ApiResponse<IBlo
             data: {
                 ...(blogReq.title && { title: blogReq.title }),
                 ...(blogReq.slug && { slug: blogReq.slug }),
-                ...(blogReq.content && { content: blogReq.content }),
+                ...(blogReq.content && { content: sanitizeRichHtml(blogReq.content) }),
                 ...(blogReq.type && { type: blogReq.type }),
                 ...(blogReq.tags && { tags: blogReq.tags.join(",") }),
                 ...(blogReq.image && imagePath && { image: imagePath })

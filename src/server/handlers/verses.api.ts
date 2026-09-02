@@ -6,6 +6,7 @@ import { parse as csvParse } from "csv-parse/sync";
 import { IVerse } from "@/shared/types/models.types";
 import { VersesPaginationProps } from "@/shared/types/pagination.types";
 import { deleteBooks } from "./archives.api";
+import { isAuthError, requireAdmin, requireContentManager } from "./authz";
 
 export async function getAll({
   page = 1,
@@ -125,6 +126,8 @@ export async function getById(
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
   try {
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
     const verse = await db.verse.update({
       where: { id: id },
       data: {
@@ -158,6 +161,8 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 
 export async function archiveMany(req: Request): Promise<ApiResponse<any>> {
   try {
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
     const { ids } = (await req.json()) as { ids: number[] };
     if (!ids) throw new Error();
     let succeeded = 0;
@@ -195,6 +200,8 @@ type CreateVerseReq = {
 
 export async function create(req: Request): Promise<ApiResponse<IVerse>> {
   try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) return session;
     const verseReq = (await req.json()) as CreateVerseReq;
     if (!verseReq.chapter || !verseReq.book || !verseReq.topic)
       throw new Error();
@@ -258,6 +265,8 @@ export async function update(
   id: number
 ): Promise<ApiResponse<IVerse>> {
   try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) return session;
     const verseReq = (await req.json()) as UpdateVerseReq;
     if (!verseReq.chapter || !verseReq.book) throw new Error();
     if (verseReq.number) {
@@ -443,6 +452,8 @@ export async function importFromCSV(
   req: Request
 ): Promise<ApiResponse<IVerse[]>> {
   try {
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
     const data = await req.formData();
     const queryParameters = new URLSearchParams(req.url.split("?")[1]);
     const importMode = queryParameters.get("importMode") as

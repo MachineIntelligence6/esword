@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBook } from "@/shared/types/models.types";
 import { BooksPaginationProps } from "@/shared/types/pagination.types";
-import { getServerAuth } from "../auth";
+import { isAuthError, requireAdmin, requireContentManager } from "./authz";
 
 export async function getAll({
   page = 1,
@@ -113,8 +113,8 @@ export async function getByRef(
 
 export async function archive(id: number): Promise<ApiResponse<IBook>> {
   try {
-    const session = await getServerAuth();
-    if (typeof session === "boolean" || !session?.user) throw new Error();
+    const session = await requireAdmin();
+    if (isAuthError(session)) return session;
 
     const book = await db.book.findFirst({
       where: { id: id },
@@ -178,6 +178,8 @@ type CreateBookReq = Prisma.BookCreateInput;
 
 export async function create(req: Request): Promise<ApiResponse> {
   try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) return session;
     const bookReq = (await req.json()) as CreateBookReq;
     const bookExist = await db.book.findFirst({
       where: {
@@ -229,6 +231,8 @@ type UpdateBookReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse> {
   try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) return session;
     const bookReq = (await req.json()) as UpdateBookReq;
 
     if (bookReq.slug) {

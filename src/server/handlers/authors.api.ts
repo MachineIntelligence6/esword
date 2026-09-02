@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IAuthor } from "@/shared/types/models.types";
 import { AuthorsPaginationProps } from "@/shared/types/pagination.types";
+import { isAuthError, requireAdmin, requireContentManager } from "./authz";
 
 
 
@@ -107,6 +108,8 @@ export async function getById(id: number, include?: Prisma.AuthorInclude): Promi
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         const author = await db.author.update({
             where: { id: id },
             data: {
@@ -136,6 +139,8 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 
 export async function archiveMany(req: Request): Promise<ApiResponse<any>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         const { ids } = (await req.json() as { ids: number[] })
         if (!ids) throw new Error()
         let succeeded = 0;
@@ -174,6 +179,8 @@ type CreateAuthorReq = {
 
 export async function create(req: Request): Promise<ApiResponse<IAuthor>> {
     try {
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
         const authorReq = await req.json() as CreateAuthorReq
         const verse = await db.author.create({
             data: {
@@ -212,8 +219,9 @@ type UpdateAuthorReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse> {
     try {
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
         const authorReq = await req.json() as UpdateAuthorReq
-        console.log(authorReq)
         const author = await db.author.update({
             data: {
                 ...(authorReq.name && { name: authorReq.name }),

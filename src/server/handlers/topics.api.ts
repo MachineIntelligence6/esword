@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { ITopic } from "@/shared/types/models.types";
 import { TopicsPaginationProps } from "@/shared/types/pagination.types";
+import { isAuthError, requireAdmin, requireContentManager } from "./authz";
 
 
 
@@ -114,6 +115,8 @@ export async function getById(id: number, include?: Prisma.TopicInclude): Promis
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         let topic = await db.topic.findFirst({ where: { id: id }, include: { verses: true } })
         if (topic?.verses && topic.verses.length > 0) {
             return {
@@ -155,6 +158,8 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 
 export async function archiveMany(req: Request): Promise<ApiResponse<any>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         const { ids } = (await req.json() as { ids: number[] })
         if (!ids) throw new Error()
         let succeeded = 0;
@@ -193,6 +198,8 @@ type CreateTopicReq = {
 
 export async function create(req: Request): Promise<ApiResponse<ITopic>> {
     try {
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
         const topicReq = await req.json() as CreateTopicReq
         if (!topicReq.chapter || !topicReq.book) throw new Error();
         const topicExist = await db.topic.findFirst({
@@ -253,6 +260,8 @@ type UpdateTopicReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse<ITopic>> {
     try {
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
         const topicReq = await req.json() as UpdateTopicReq
         if (!topicReq.chapter || !topicReq.book) throw new Error();
         if (topicReq.number) {

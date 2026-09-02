@@ -2,9 +2,10 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import db from '@/server/db'
 import { Prisma, UserRole } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
-import { comparePassword, getServerAuth, hashPassword } from "../auth";
+import { comparePassword, hashPassword } from "../auth";
 import { IUser } from "@/shared/types/models.types";
 import { UserPaginationProps } from "@/shared/types/pagination.types";
+import { isAuthError, requireAdmin, requireAuth } from "./authz";
 
 
 
@@ -12,6 +13,8 @@ import { UserPaginationProps } from "@/shared/types/pagination.types";
 
 export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, role = "ALL", include, where, orderBy }: UserPaginationProps): Promise<PaginatedApiResponse<IUser[]>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         const users = await db.user.findMany({
             where: where ? {
                 ...where,
@@ -71,6 +74,8 @@ export async function getAll({ page = 1, perPage = defaults.PER_PAGE_ITEMS, role
 
 export async function getById(id: number, include?: Prisma.UserInclude): Promise<ApiResponse<IUser>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         const user = await db.user.findFirst({
             where: {
                 id: id,
@@ -111,6 +116,8 @@ export async function getById(id: number, include?: Prisma.UserInclude): Promise
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         await db.user.update({
             where: { id: id },
             data: {
@@ -171,6 +178,8 @@ type CreateUserReq = {
 
 export async function create(req: Request): Promise<ApiResponse<IUser>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         const userReq = await req.json() as CreateUserReq
         const userExist = await db.user.findFirst({ where: { email: userReq.email } })
         if (userExist) {
@@ -225,6 +234,8 @@ type UpdateUserReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse<any>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         const userReq = await req.json() as UpdateUserReq
         const password = (userReq.password && userReq.password !== "") ? await hashPassword(userReq.password) : undefined
         const user = await db.user.update({
@@ -265,8 +276,8 @@ type VerifyPasswordReq = {
 
 export async function verifyPassword(req: Request): Promise<ApiResponse<IUser>> {
     try {
-        const session = await getServerAuth()
-        if (typeof session === "boolean" || !session?.user) throw new Error("")
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
         const { password } = await req.json() as VerifyPasswordReq
         const user = await db.user.findFirst({
             where: { id: Number(session.user.id) }

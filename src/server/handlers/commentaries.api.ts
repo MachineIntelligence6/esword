@@ -4,6 +4,8 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { ICommentary } from "@/shared/types/models.types";
 import { CommentariesPaginationProps } from "@/shared/types/pagination.types";
+import { isAuthError, requireAdmin, requireContentManager } from "./authz";
+import { sanitizeRichHtml } from "@/lib/sanitize-html";
 
 
 
@@ -115,6 +117,8 @@ export async function getById(id: number, include?: Prisma.CommentaryInclude): P
 
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         await db.commentary.update({
             where: { id: id },
             data: {
@@ -139,6 +143,8 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 
 export async function archiveMany(ids: number[]): Promise<ApiResponse<any>> {
     try {
+        const session = await requireAdmin()
+        if (isAuthError(session)) return session
         let succeeded = 0;
         let failed = 0;
 
@@ -176,11 +182,13 @@ type CreateICommentaryReq = {
 
 export async function create(req: Request): Promise<ApiResponse<ICommentary>> {
     try {
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
         const commentaryReq = await req.json() as CreateICommentaryReq
         const commentary = await db.commentary.create({
             data: {
                 name: commentaryReq.name,
-                text: commentaryReq.text,
+                text: sanitizeRichHtml(commentaryReq.text),
                 authorId: commentaryReq.author,
                 verseId: commentaryReq.verse
             },
@@ -219,11 +227,13 @@ type UpdateICommentaryReq = {
 
 export async function update(req: Request, id: number): Promise<ApiResponse<ICommentary>> {
     try {
+        const session = await requireContentManager()
+        if (isAuthError(session)) return session
         const commentaryReq = await req.json() as UpdateICommentaryReq
         const commentary = await db.commentary.update({
             data: {
                 ...(commentaryReq.name && { name: commentaryReq.name }),
-                ...(commentaryReq.text && { text: commentaryReq.text }),
+                ...(commentaryReq.text && { text: sanitizeRichHtml(commentaryReq.text) }),
                 ...(commentaryReq.verse && { verseId: commentaryReq.verse }),
                 ...(commentaryReq.author && { authorId: commentaryReq.author }),
             },
