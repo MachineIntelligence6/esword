@@ -14,7 +14,7 @@ const unauthorizedRes: ApiResponse<null> = {
 
 
 export default withAuth(
-    function middleware(req: NextRequestWithAuth) {
+    function proxy(req: NextRequestWithAuth) {
         const user = (req.nextauth.token as { user: SessionUser | null }).user
         if (!user) return NextResponse.redirect(new URL("/login", req.url))
         // Dashboard Global Restrictions
@@ -27,11 +27,6 @@ export default withAuth(
             }
         }
         // Api Global Restrictions
-        if (req.nextUrl.pathname.startsWith("/api")) {
-            if (req.method.toLowerCase() === "delete" && user.role !== "ADMIN") {
-                return NextResponse.json(unauthorizedRes)
-            }
-        }
         if (req.nextUrl.pathname.startsWith("/api/activities") && user.role !== "ADMIN") {
             return NextResponse.json(unauthorizedRes)
         }
@@ -50,6 +45,6 @@ export default withAuth(
 
 export const config = {
     matcher: [
-        '/((?!images|icons|_next/static|_next/image|favicon.ico).*)',
+        '/((?!images|icons|_next/static|_next/image|favicon.ico|api/health|api/auth).*)',
     ],
 }
