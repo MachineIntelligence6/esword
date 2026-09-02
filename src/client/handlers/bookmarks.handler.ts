@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { IBookmark } from "@/shared/types/models.types";
 import { BookmarksPaginationProps } from "@/shared/types/pagination.types";
 import { Prisma } from "@prisma/client";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -12,7 +13,7 @@ export async function get({
 }: BookmarksPaginationProps): Promise<PaginatedApiResponse<IBookmark[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IBookmark[]>>(
-            `/api/bookmarks?page=${page}&perPage=${perPage}&verse=${verse}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/bookmarks${buildApiQuery({ page, perPage, verse, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {
@@ -26,7 +27,7 @@ export async function get({
 export async function getById(id: number, include: Prisma.BookmarkInclude): Promise<PaginatedApiResponse<IBookmark[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IBookmark[]>>(
-            `/api/bookmarks/${id}?include=${JSON.stringify(include)}`
+            `/api/bookmarks/${id}${buildApiQuery({ include })}`
         )
         return res.data
     } catch (error) {

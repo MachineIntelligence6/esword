@@ -4,6 +4,7 @@ import { CommentaryFormSchema } from "@/components/dashboard/forms/commentaries.
 import defaults from "@/shared/constants/defaults";
 import { ICommentary } from "@/shared/types/models.types";
 import { CommentariesPaginationProps } from "@/shared/types/pagination.types";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -14,7 +15,7 @@ export async function get({ page = 1, perPage = defaults.PER_PAGE_ITEMS,
 }: CommentariesPaginationProps): Promise<PaginatedApiResponse<ICommentary[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<ICommentary[]>>(
-            `/api/commentaries?page=${page}&perPage=${perPage}&author=${author}&verse=${verse}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/commentaries${buildApiQuery({ page, perPage, author, verse, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {

@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import defaults from "@/shared/constants/defaults";
 import {  INote } from "@/shared/types/models.types";
 import { NotesPaginationProps } from "@/shared/types/pagination.types";
+import { buildApiQuery } from "@/client/query-string";
 
 
 export async function get({
@@ -11,7 +12,7 @@ export async function get({
 }: NotesPaginationProps): Promise<PaginatedApiResponse<INote[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<INote[]>>(
-            `/api/notes?page=${page}&perPage=${perPage}&user=${user}&verse=${verse}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/notes${buildApiQuery({ page, perPage, user, verse, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {

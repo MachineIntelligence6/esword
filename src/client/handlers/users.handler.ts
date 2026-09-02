@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { UserFormSchema } from "@/components/dashboard/forms/users.form";
 import { IUser } from "@/shared/types/models.types";
 import { UserPaginationProps } from "@/shared/types/pagination.types";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -14,7 +15,7 @@ export async function get(
 ): Promise<PaginatedApiResponse<IUser[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IUser[]>>(
-            `/api/users?page=${page}&perPage=${perPage}&role=${role}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/users${buildApiQuery({ page, perPage, role, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {

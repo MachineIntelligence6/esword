@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { IBlog } from "@/shared/types/models.types";
 import { BlogsPaginationProps } from "@/shared/types/pagination.types";
 import { BlogsFormSchema } from "@/components/dashboard/forms/blogs.form";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -13,7 +14,7 @@ export async function get({
 }: BlogsPaginationProps): Promise<PaginatedApiResponse<IBlog[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IBlog[]>>(
-            `/api/blogs?page=${page}&perPage=${perPage}&book=${user}&type=${type}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/blogs${buildApiQuery({ page, perPage, book: user, type, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {

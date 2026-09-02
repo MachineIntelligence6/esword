@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { IActivity } from "@/shared/types/models.types";
 import { ActivitesPaginationProps } from "@/shared/types/pagination.types";
 import { Prisma } from "@prisma/client";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -12,7 +13,7 @@ export async function get({
 }: ActivitesPaginationProps): Promise<PaginatedApiResponse<IActivity[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IActivity[]>>(
-            `/api/activities?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/activities${buildApiQuery({ page, perPage, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {
@@ -27,7 +28,7 @@ export async function get({
 export async function getById(id: number, include?: Prisma.ActivityInclude): Promise<ApiResponse<IActivity>> {
     try {
         const res = await axios.get<ApiResponse<IActivity>>(
-            `/api/activities/${id}?include=${include}`
+            `/api/activities/${id}${buildApiQuery({ include })}`
         )
         return res.data
     } catch (error) {

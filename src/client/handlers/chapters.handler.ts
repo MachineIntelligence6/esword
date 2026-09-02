@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { ChapterFormSchema } from "@/components/dashboard/forms/chapters.form";
 import { IChapter } from "@/shared/types/models.types";
 import { ChaptersPaginationProps } from "@/shared/types/pagination.types";
+import { buildApiQuery } from "@/client/query-string";
 
 export async function get({
   page = 1,
@@ -14,9 +15,7 @@ export async function get({
 }: ChaptersPaginationProps): Promise<PaginatedApiResponse<IChapter[]>> {
   try {
     const res = await axios.get<PaginatedApiResponse<IChapter[]>>(
-      `/api/chapters?page=${page}&perPage=${perPage}&book=${book}&include=${JSON.stringify(
-        include
-      )}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+      `/api/chapters${buildApiQuery({ page, perPage, book, include, where, orderBy })}`
     );
     return res.data;
   } catch (error) {

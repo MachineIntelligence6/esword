@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { AuthorFormSchema } from "@/components/dashboard/forms/authors.form";
 import { IAuthor } from "@/shared/types/models.types";
 import { AuthorsPaginationProps } from "@/shared/types/pagination.types";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -11,7 +12,7 @@ export async function get({
 }: AuthorsPaginationProps): Promise<PaginatedApiResponse<IAuthor[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IAuthor[]>>(
-            `/api/authors?page=${page}&perPage=${perPage}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/authors${buildApiQuery({ page, perPage, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {

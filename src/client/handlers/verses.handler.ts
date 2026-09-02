@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { VerseFormSchema } from "@/components/dashboard/forms/verses.form";
 import { IHighlight, IVerse } from "@/shared/types/models.types";
 import { VersesPaginationProps } from "@/shared/types/pagination.types";
+import { buildApiQuery } from "@/client/query-string";
 
 export async function get({
   page = 1,
@@ -15,9 +16,7 @@ export async function get({
 }: VersesPaginationProps): Promise<PaginatedApiResponse<IVerse[]>> {
   try {
     const res = await axios.get<PaginatedApiResponse<IVerse[]>>(
-      `/api/verses?page=${page}&perPage=${perPage}&topic=${topic}&include=${JSON.stringify(
-        include
-      )}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+      `/api/verses${buildApiQuery({ page, perPage, topic, include, where, orderBy })}`
     );
     return res.data;
   } catch (error) {
@@ -35,7 +34,7 @@ export async function getById(
 ): Promise<ApiResponse<IVerse>> {
   try {
     const res = await axios.get<ApiResponse<IVerse>>(
-      `/api/verses/${id}?include=${JSON.stringify(include)}`
+      `/api/verses/${id}${buildApiQuery({ include })}`
     );
     return res.data;
   } catch (error) {
@@ -119,7 +118,6 @@ export async function importFromCSV(
   importMode: "update" | "overwrite"
 ): Promise<ApiResponse<IVerse[]>> {
   try {
-    console.log("import mode: ", importMode);
     const data = new FormData();
     data.append("file", file);
     const res = await axios.post<ApiResponse<IVerse[]>>(

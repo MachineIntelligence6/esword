@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { ITopic } from "@/shared/types/models.types";
 import { TopicFormSchema } from "@/components/dashboard/forms/topics.form";
 import { TopicsPaginationProps } from "@/shared/types/pagination.types";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -12,7 +13,7 @@ export async function get({
 }: TopicsPaginationProps): Promise<PaginatedApiResponse<ITopic[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<ITopic[]>>(
-            `/api/topics?page=${page}&perPage=${perPage}&chapter=${chapter}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/topics${buildApiQuery({ page, perPage, chapter, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {

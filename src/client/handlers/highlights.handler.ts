@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
 import { IHighlight } from "@/shared/types/models.types";
 import { HighlightsPaginationProps } from "@/shared/types/pagination.types";
 import { Prisma } from "@prisma/client";
+import { buildApiQuery } from "@/client/query-string";
 
 
 
@@ -12,7 +13,7 @@ export async function get({
 }: HighlightsPaginationProps): Promise<PaginatedApiResponse<IHighlight[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IHighlight[]>>(
-            `/api/highlights?page=${page}&perPage=${perPage}&verse=${verse}&include=${JSON.stringify(include)}&where=${JSON.stringify(where)}&orderBy=${JSON.stringify(orderBy)}`
+            `/api/highlights${buildApiQuery({ page, perPage, verse, include, where, orderBy })}`
         )
         return res.data
     } catch (error) {
@@ -26,7 +27,7 @@ export async function get({
 export async function getById(id: number, include: Prisma.BookmarkInclude): Promise<PaginatedApiResponse<IHighlight[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IHighlight[]>>(
-            `/api/highlights/${id}?include=${JSON.stringify(include)}`
+            `/api/highlights/${id}${buildApiQuery({ include })}`
         )
         return res.data
     } catch (error) {
