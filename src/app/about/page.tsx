@@ -2,6 +2,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import QuillEditor from "@/components/ui/editor";
 import serverApiHandlers from "@/server/handlers";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   const { data: aboutContent } =
     await serverApiHandlers.settings.getAboutContent();

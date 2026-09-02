@@ -2,6 +2,8 @@ import AboutContentForm from "@/components/dashboard/forms/aboutcontent.form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import serverApiHandlers from "@/server/handlers";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   const { data: aboutContent } =
     await serverApiHandlers.settings.getAboutContent();
