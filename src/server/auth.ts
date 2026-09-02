@@ -5,6 +5,49 @@ import db from "@/server/db"
 import bcrypt from 'bcryptjs'
 import { SessionUser } from "@/shared/types/models.types"
 
+const MIN_NEXTAUTH_SECRET_LENGTH = 32
+const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000
+const MAX_LOGIN_ATTEMPTS = 5
+const loginAttempts = new Map<string, { count: number, resetAt: number }>()
+
+export function getValidatedNextAuthSecret() {
+    const secret = process.env.NEXTAUTH_SECRET
+    if (process.env.NODE_ENV === "production") {
+        if (!secret || secret.length < MIN_NEXTAUTH_SECRET_LENGTH) {
+            throw new Error("NEXTAUTH_SECRET must be set to at least 32 characters. Generate one with: openssl rand -base64 32")
+        }
+    }
+    return secret || "development-only-nextauth-secret-change-before-production"
+}
+
+function normalizeLoginIdentifier(email?: string) {
+    return (email ?? "").trim().toLowerCase()
+}
+
+function isLoginRateLimited(identifier: string) {
+    const attempt = loginAttempts.get(identifier)
+    if (!attempt) return false
+    if (Date.now() > attempt.resetAt) {
+        loginAttempts.delete(identifier)
+        return false
+    }
+    return attempt.count >= MAX_LOGIN_ATTEMPTS
+}
+
+function recordFailedLogin(identifier: string) {
+    const now = Date.now()
+    const current = loginAttempts.get(identifier)
+    if (!current || now > current.resetAt) {
+        loginAttempts.set(identifier, { count: 1, resetAt: now + LOGIN_ATTEMPT_WINDOW_MS })
+        return
+    }
+    loginAttempts.set(identifier, { count: current.count + 1, resetAt: current.resetAt })
+}
+
+function clearFailedLogins(identifier: string) {
+    loginAttempts.delete(identifier)
+}
+
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -22,13 +65,23 @@ export const authOptions: AuthOptions = {
             },
             async authorize(credentials) {
                 const { email, password } = credentials as { email: string, password: string }
+                const loginIdentifier = normalizeLoginIdentifier(email)
+                if (isLoginRateLimited(loginIdentifier)) throw new Error("RATE_LIMITED")
                 const user = await db.user.findFirst({
                     where: {
-                        email: email,
+                        email: loginIdentifier,
+                        archived: false,
                     },
                 })
-                if (!user) throw new Error("NOT_FOUND")
-                if (!(await comparePassword(password, user.password))) throw new Error("WRONG_PASSWORD")
+                if (!user) {
+                    recordFailedLogin(loginIdentifier)
+                    throw new Error("INVALID_CREDENTIALS")
+                }
+                if (!(await comparePassword(password, user.password))) {
+                    recordFailedLogin(loginIdentifier)
+                    throw new Error("INVALID_CREDENTIALS")
+                }
+                clearFailedLogins(loginIdentifier)
                 return { ...user, id: user.id.toString(), password: "" }
             },
         }),
@@ -45,7 +98,7 @@ export const authOptions: AuthOptions = {
         signOut: "/login",
         error: "/login",
     },
-    secret: process.env.NEXTAUTH_SECRET as string,
+    secret: getValidatedNextAuthSecret(),
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
@@ -88,7 +141,7 @@ export async function getServerAuth(): Promise<Session | null | false> {
 
 export async function hashPassword(password: string) {
     try {
-        return bcrypt.hash(password, 10)
+        return bcrypt.hash(password, 12)
     } catch (error) {
         return null
     }

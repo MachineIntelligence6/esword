@@ -46,16 +46,12 @@ export default function LoginForm() {
     });
     if (res?.error) {
       const error = res.error as ApiResCode;
-      if (error === "NOT_FOUND") {
-        form.setError("email", {
-          message: definedMessages.USER_NOT_FOUND,
-        });
-      }
-      if (error === "WRONG_PASSWORD") {
-        form.setError("password", {
-          message: definedMessages.WRONG_PASSWORD,
-        });
-      }
+      form.setError("password", {
+        message:
+          error === "RATE_LIMITED"
+            ? definedMessages.RATE_LIMITED
+            : definedMessages.INVALID_CREDENTIALS,
+      });
       return;
     }
     const sesssion = await getSession();

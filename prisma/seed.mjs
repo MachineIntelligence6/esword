@@ -3,41 +3,40 @@ const prisma = new PrismaClient()
 import bcrypt from 'bcryptjs'
 
 async function main() {
+    const adminEmail = process.env.SEED_ADMIN_EMAIL
+    const adminPassword = process.env.SEED_ADMIN_PASSWORD
+    const adminName = process.env.SEED_ADMIN_NAME ?? "Admin"
+
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_PRODUCTION_SEED !== "true") {
+        throw new Error("Refusing to run seed in production. Set ALLOW_PRODUCTION_SEED=true for an intentional one-time bootstrap.")
+    }
+
+    if (!adminEmail && !adminPassword) {
+        console.log("Skipping admin seed. Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD to bootstrap an admin user.")
+        return
+    }
+
+    if (!adminEmail || !adminPassword || adminPassword.length < 12) {
+        throw new Error("SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD of at least 12 characters are required.")
+    }
+
     await prisma.user.upsert({
         create: {
-            email: "admin@gmail.com",
-            name: "Admin",
-            password: await bcrypt.hash("12345678", 10),
+            email: adminEmail,
+            name: adminName,
+            password: await bcrypt.hash(adminPassword, 12),
             role: "ADMIN"
         },
         where: {
-            email: "admin@gmail.com"
+            email: adminEmail
         },
-        update: {}
-    })
-    await prisma.user.upsert({
-        create: {
-            email: "editor@gmail.com",
-            name: "Editor",
-            password: await bcrypt.hash("12345678", 10),
-            role: "EDITOR"
-        },
-        where: {
-            email: "editor@gmail.com"
-        },
-        update: {}
-    })
-    await prisma.user.upsert({
-        create: {
-            email: "reader@gmail.com",
-            name: "Reader",
-            password: await bcrypt.hash("12345678", 10),
-            role: "VIEWER"
-        },
-        where: {
-            email: "reader@gmail.com"
-        },
-        update: {}
+        update: {
+            name: adminName,
+            password: await bcrypt.hash(adminPassword, 12),
+            role: "ADMIN",
+            archived: false,
+            archivedAt: null,
+        }
     })
 }
 
