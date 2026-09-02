@@ -361,7 +361,7 @@ type VerseComponentProps = {
   onClick?: () => void;
   verse: IVerse;
   active?: boolean;
-  versesContainerRef: RefObject<HTMLDivElement>;
+  versesContainerRef: RefObject<HTMLDivElement | null>;
   fontSize: number;
 };
 
