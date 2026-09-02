@@ -56,14 +56,25 @@ export default function UsersForm({ user, onReset }: Props) {
     const form = useForm<UserFormSchema>({
         resolver: zodResolver(userFormSchema),
         mode: "all",
-        defaultValues: emptyValues,
+        defaultValues: user
+            ? {
+                info: "",
+                name: user.name,
+                email: user.email,
+                password: "",
+                role: user.role,
+            }
+            : emptyValues,
     })
     const { formState } = form
 
 
 
     useEffect(() => {
-        if (!user) return;
+        if (!user) {
+            form.reset(emptyValues)
+            return
+        }
         form.reset({
             info: "",
             name: user.name,

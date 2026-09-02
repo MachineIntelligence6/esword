@@ -50,11 +50,12 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
     resolver: zodResolver(chapterFormSchema),
     mode: "all",
     defaultValues: {
+      info: "",
       name: chapter?.name,
-      slug: chapter?.slug,
+      slug: chapter?.slug ?? "",
       book: chapter?.bookId,
-      commentaryName: chapter?.commentaryName ?? undefined,
-      commentaryText: chapter?.commentaryText ?? undefined,
+      commentaryName: chapter?.commentaryName ?? "",
+      commentaryText: chapter?.commentaryText ?? "",
     },
   });
   const { formState } = form;
@@ -133,9 +134,15 @@ export default function ChaptersForm({ chapter }: { chapter?: IChapter }) {
                     <Input
                       type="number"
                       required
-                      {...field}
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      value={field.value ?? ""}
                       onChange={(e) => {
-                        field.onChange(e.target.valueAsNumber);
+                        const next = e.target.value;
+                        field.onChange(
+                          next === "" ? undefined : e.target.valueAsNumber
+                        );
                         updateSlug();
                       }}
                     />

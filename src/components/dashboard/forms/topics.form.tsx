@@ -36,7 +36,14 @@ type FormProps = {
 export function AddTopicForm() {
     const form = useForm<TopicFormSchema>({
         resolver: zodResolver(topicFormSchema),
-        mode: "all"
+        mode: "all",
+        defaultValues: {
+            info: "",
+            name: "",
+            number: undefined,
+            book: undefined,
+            chapter: undefined,
+        },
     })
 
 
@@ -207,8 +214,18 @@ function FormView({ form, onFormSubmit, variant, resetForm }: FormViewProps) {
                                 <FormItem>
                                     <FormLabel>Number <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="number" required {...field}
-                                            onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                        <Input
+                                            type="number"
+                                            required
+                                            name={field.name}
+                                            ref={field.ref}
+                                            onBlur={field.onBlur}
+                                            value={field.value ?? ""}
+                                            onChange={(e) => {
+                                                const next = e.target.value
+                                                field.onChange(next === "" ? undefined : e.target.valueAsNumber)
+                                            }}
+                                        />
                                     </FormControl>
                                     {
                                         fieldState.error &&

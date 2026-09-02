@@ -42,12 +42,15 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
         resolver: zodResolver(blogsFormSchema),
         mode: "all",
         defaultValues: {
-            title: blog?.title,
-            slug: blog?.slug,
-            content: blog?.content,
-            type: blog?.type,
-            image: blog?.image,
-            tags: blog?.tags?.split(",")
+            info: "",
+            title: blog?.title ?? "",
+            slug: blog?.slug ?? "",
+            content: blog?.content ?? "",
+            type: blog?.type ?? "",
+            image: blog?.image ?? null,
+            tags: blog?.tags
+                ? blog.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+                : [],
         }
     })
     const { formState } = form
@@ -74,10 +77,13 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
 
     const resetFormValues = () => {
         form.reset({
-            title: undefined,
-            slug: undefined,
-            type: undefined,
-            content: undefined
+            info: "",
+            title: "",
+            slug: "",
+            type: "",
+            content: "",
+            image: null,
+            tags: [],
         })
     }
 
@@ -190,8 +196,14 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                 <FormItem className="col-span-full">
                                     <FormLabel>Tags (Optional)</FormLabel>
                                     <FormControl>
-                                        <TagsInput classNames={{ input: "placeholder:text-slate-500" }}
-                                            placeHolder="Enter tags" {...field} />
+                                        <TagsInput
+                                            classNames={{ input: "placeholder:text-slate-500" }}
+                                            placeHolder="Enter tags"
+                                            value={field.value ?? []}
+                                            onChange={field.onChange}
+                                            onBlur={field.onBlur}
+                                            name={field.name}
+                                        />
                                     </FormControl>
                                     {
                                         fieldState.error &&

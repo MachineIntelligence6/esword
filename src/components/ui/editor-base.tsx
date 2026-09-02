@@ -46,7 +46,14 @@ class PreserveWhiteSpace {
     quill.container.style.whiteSpace = "pre-line";
   }
 }
-Quill.register("modules/preserveWhiteSpace", PreserveWhiteSpace);
+
+const quillGlobals = globalThis as typeof globalThis & {
+  __eswordPreserveWhiteSpaceRegistered?: boolean;
+};
+if (!quillGlobals.__eswordPreserveWhiteSpaceRegistered) {
+  Quill.register("modules/preserveWhiteSpace", PreserveWhiteSpace);
+  quillGlobals.__eswordPreserveWhiteSpaceRegistered = true;
+}
 
 // Define the modules for the editor
 // const getModules = (disabled?: boolean) => ({

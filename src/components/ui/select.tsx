@@ -129,9 +129,8 @@ type SelectElProps = {
 
 const SelectEl = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, placeholder, disabled, loading, onChange, value }, ref) => {
   const [filteredOpts, setFilteredOpts] = React.useState(options)
-  const handleChange = (value: string) => {
-    const option = options?.find((opt) => opt.value === value)
-    // if (!option || !onChange) return;
+  const handleChange = (next: string) => {
+    const option = options?.find((opt) => opt.value === next)
     onChange?.(option)
   }
 
@@ -144,8 +143,11 @@ const SelectEl = React.forwardRef<HTMLSelectElement, SelectElProps>(({ options, 
     setFilteredOpts(options?.filter((opt) => opt.label.toLowerCase().includes(val.toLowerCase())))
   }
 
+  // Radix Select treats "" as an invalid controlled value and won't show selection.
+  const selectValue = value ? value : undefined
+
   return (
-    <Select onValueChange={handleChange} value={value} required>
+    <Select onValueChange={handleChange} value={selectValue} required>
       <SelectTrigger className="w-full h-10" disabled={disabled}>
         <SelectValue placeholder={placeholder ?? "Select"} />
       </SelectTrigger>
@@ -305,7 +307,7 @@ const SideBarEl = React.forwardRef<HTMLSelectElement, SideBarProps>(({ options, 
   }
 
   return (
-    <Select onValueChange={handleChange} value={value} required>
+    <Select onValueChange={handleChange} value={value ? value : undefined} required>
       <SelectTrigger className="w-full pl-5 h-10 border-none shadow-none py-0" disabled={disabled}>
         <SelectValue placeholder={placeholder ?? ""} />
       </SelectTrigger>
