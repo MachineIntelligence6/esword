@@ -30,14 +30,14 @@ export default function Page() {
               alt=""
               width={11}
               height={20}
-              className="pt-5"
+              className="h-auto w-auto pt-5"
             />
             <Image
-              src="./images/0.00.svg"
+              src="/images/0.00.svg"
               alt=""
               width={115}
               height={68}
-              className="pt-8"
+              className="h-auto w-auto pt-8"
             />
           </div>
           <div>

@@ -34,16 +34,18 @@ export default function SiteHeader() {
     <header className="fixed left-0 top-0 z-50 shadow w-full max-w-[100vw] overflow-hidden">
       <nav className="flex justify-between px-3 md:px-6 items-center h-[70px] w-full bg-primary">
         <div>
-          <a href="/">
+          <Link href="/">
             <Image
               width={250}
               height={100}
               quality={100}
-              alt=""
+              loading="eager"
+              priority
+              alt="Hidden Sword"
               src="/images/logo.svg"
               className="object-contain h-auto w-[150px] md:w-[200px]"
             />
-          </a>
+          </Link>
         </div>
         <div className="flex items-center gap-2 md:gap-x-6">
           {!pathname.startsWith("/dashboard") &&
@@ -99,7 +101,6 @@ function SearchComponent() {
   });
 
   const handleFormSubmit = ({ query }: SearchFormSchema) => {
-    console.log(query);
     router.push(`/search?q=${query}`);
   };
 
