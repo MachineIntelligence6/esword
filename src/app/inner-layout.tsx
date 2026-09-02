@@ -15,7 +15,11 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
   const windowSize = useWindowSize();
 
   const copyCutPasteHandler = (e: ClipboardEvent<HTMLDivElement>) => {
-    if (pathname.startsWith("/dashboard")) return;
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/login")) return;
+
+    const target = e.target as HTMLElement | null;
+    if (target?.closest("input, textarea, [contenteditable='true']")) return;
+
     e.preventDefault();
     e.stopPropagation();
   };
