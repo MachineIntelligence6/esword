@@ -51,6 +51,7 @@ export function DataTableRowActions<TData>({
   modelName,
 }: DataTableRowActionsProps<TData>) {
   const { data: session } = useSession();
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const [alertOpen, setAlertOpen] = React.useState<TableActionPopupState>({
     state: false,
     type: "RESTORE",
@@ -100,24 +101,25 @@ export function DataTableRowActions<TData>({
   };
 
   return (
-    <div>
-      <DropdownMenu>
+    <div onClick={(e) => e.stopPropagation()}>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+          <button
+            type="button"
+            aria-label="Open row actions"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950 data-[state=open]:bg-slate-100"
           >
             <DotsHorizontalIcon className="h-4 w-4" />
-          </Button>
+          </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[160px]">
+        <DropdownMenuContent align="end" className="w-[160px]" onCloseAutoFocus={(e) => e.preventDefault()}>
           {viewAction && (
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild onSelect={() => setMenuOpen(false)}>
               {viewAction(row.original)}
             </DropdownMenuItem>
           )}
           {editAction && (
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild onSelect={() => setMenuOpen(false)}>
               {editAction(row.original)}
             </DropdownMenuItem>
           )}
@@ -127,7 +129,7 @@ export function DataTableRowActions<TData>({
           {archived
             ? restoreAction && (
                 <DropdownMenuItem
-                  onClick={() => setAlertOpen({ state: true, type: "RESTORE" })}
+                  onSelect={() => setAlertOpen({ state: true, type: "RESTORE" })}
                 >
                   Restore
                 </DropdownMenuItem>
@@ -136,7 +138,7 @@ export function DataTableRowActions<TData>({
                 <>
                   {archiveAction && (
                     <DropdownMenuItem
-                      onClick={() =>
+                      onSelect={() =>
                         setAlertOpen({ state: true, type: "ARCHIVE" })
                       }
                     >
@@ -145,7 +147,7 @@ export function DataTableRowActions<TData>({
                   )}
                   {deleteAction && (
                     <DropdownMenuItem
-                      onClick={() =>
+                      onSelect={() =>
                         setAlertOpen({ state: true, type: "DELETE" })
                       }
                     >
@@ -156,7 +158,7 @@ export function DataTableRowActions<TData>({
               )}
         </DropdownMenuContent>
       </DropdownMenu>
-      {<TableActionPopup {...actionPopupProps} />}
+      <TableActionPopup {...actionPopupProps} />
     </div>
   );
 }
