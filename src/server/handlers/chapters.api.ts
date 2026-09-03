@@ -16,18 +16,13 @@ export async function getAll({
   orderBy,
 }: ChaptersPaginationProps): Promise<PaginatedApiResponse<IChapter[]>> {
   try {
+    const chapterWhere: Prisma.ChapterWhereInput = {
+      ...(where ?? {}),
+      ...(book !== -1 && { bookId: book }),
+      archived: where?.archived ?? false,
+    };
     const chapters = await db.chapter.findMany({
-      where: where
-        ? {
-            ...where,
-            archived: where.archived ?? false,
-          }
-        : {
-            ...(book !== -1 && {
-              bookId: book,
-            }),
-            archived: false,
-          },
+      where: chapterWhere,
       orderBy: orderBy
         ? orderBy
         : {
@@ -47,17 +42,7 @@ export async function getAll({
           },
     });
     const chaptersCount = await db.chapter.count({
-      where: where
-        ? {
-            ...where,
-            archived: where.archived ?? false,
-          }
-        : {
-            ...(book !== -1 && {
-              bookId: book,
-            }),
-            archived: false,
-          },
+      where: chapterWhere,
     });
     return {
       succeed: true,

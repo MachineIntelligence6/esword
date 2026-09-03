@@ -17,20 +17,14 @@ export async function getAll({
     author = -1, include, where, orderBy
 }: CommentariesPaginationProps): Promise<PaginatedApiResponse<ICommentary[]>> {
     try {
+        const commentaryWhere: Prisma.CommentaryWhereInput = {
+            ...(where ?? {}),
+            ...(author !== -1 && { authorId: author }),
+            ...(verse !== -1 && { verseId: verse }),
+            archived: where?.archived ?? false,
+        };
         const commentaries = await db.commentary.findMany({
-            where: where ?
-                {
-                    ...where,
-                    archived: where.archived ?? false
-                } : {
-                    ...(author !== -1 && {
-                        authorId: author
-                    }),
-                    ...(verse !== -1 && {
-                        verseId: verse
-                    }),
-                    archived: false,
-                },
+            where: commentaryWhere,
             orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
@@ -46,19 +40,7 @@ export async function getAll({
             )
         })
         const commentariesCount = await db.commentary.count({
-            where: where ?
-                {
-                    ...where,
-                    archived: where.archived ?? false
-                } : {
-                    ...(author !== -1 && {
-                        authorId: author
-                    }),
-                    ...(verse !== -1 && {
-                        verseId: verse
-                    }),
-                    archived: false,
-                }
+            where: commentaryWhere,
         })
         return {
             succeed: true,

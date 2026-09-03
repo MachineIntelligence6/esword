@@ -14,16 +14,13 @@ export async function getAll({
     chapter = -1, include, where, orderBy
 }: TopicsPaginationProps): Promise<PaginatedApiResponse<ITopic[]>> {
     try {
+        const topicWhere: Prisma.TopicWhereInput = {
+            ...(where ?? {}),
+            ...(chapter !== -1 && { chapterId: chapter }),
+            archived: where?.archived ?? false,
+        };
         const topics = await db.topic.findMany({
-            where: where ? {
-                ...where,
-                archived: where.archived ?? false
-            } : {
-                ...(chapter !== -1 && {
-                    chapterId: chapter
-                }),
-                archived: false,
-            },
+            where: topicWhere,
             orderBy: orderBy ? orderBy : {
                 id: "asc"
             },
@@ -41,15 +38,7 @@ export async function getAll({
             )
         })
         const topicsCount = await db.topic.count({
-            where: where ? {
-                ...where,
-                archived: where.archived ?? false
-            } : {
-                ...(chapter !== -1 && {
-                    chapterId: chapter
-                }),
-                archived: false,
-            },
+            where: topicWhere,
         })
         return {
             succeed: true,
@@ -218,7 +207,7 @@ export async function create(req: Request): Promise<ApiResponse<ITopic>> {
             }
         }
         const chapter = await db.chapter.findFirst({ where: { id: topicReq.chapter } })
-        if (!chapter) throw new Error()
+        if (!chapter || chapter.bookId !== topicReq.book) throw new Error()
         const topic = await db.topic.create({
             data: {
                 number: topicReq.number,
@@ -264,6 +253,8 @@ export async function update(req: Request, id: number): Promise<ApiResponse<ITop
         if (isAuthError(session)) return session
         const topicReq = await req.json() as UpdateTopicReq
         if (!topicReq.chapter || !topicReq.book) throw new Error();
+        const chapter = await db.chapter.findFirst({ where: { id: topicReq.chapter } })
+        if (!chapter || chapter.bookId !== topicReq.book) throw new Error()
         if (topicReq.number) {
             const topicExist = await db.topic.findFirst({
                 where: {

@@ -17,18 +17,13 @@ export async function getAll({
   orderBy,
 }: VersesPaginationProps): Promise<PaginatedApiResponse<IVerse[]>> {
   try {
+    const verseWhere: Prisma.VerseWhereInput = {
+      ...(where ?? {}),
+      ...(topic !== -1 && { topicId: topic }),
+      archived: where?.archived ?? false,
+    };
     const verses = await db.verse.findMany({
-      where: where
-        ? {
-            ...where,
-            archived: where.archived ?? false,
-          }
-        : {
-            ...(topic !== -1 && {
-              topicId: topic,
-            }),
-            archived: false,
-          },
+      where: verseWhere,
       orderBy: orderBy
         ? orderBy
         : {
@@ -51,17 +46,7 @@ export async function getAll({
           },
     });
     const versesCount = await db.verse.count({
-      where: where
-        ? {
-            ...where,
-            archived: where.archived ?? false,
-          }
-        : {
-            ...(topic !== -1 && {
-              topicId: topic,
-            }),
-            archived: false,
-          },
+      where: verseWhere,
     });
     return {
       succeed: true,
@@ -222,8 +207,17 @@ export async function create(req: Request): Promise<ApiResponse<IVerse>> {
         code: "VERSE_NUMBER_MUST_BE_UNIQUE",
       };
     }
-    const topic = await db.topic.findFirst({ where: { id: verseReq.topic } });
-    if (!topic) throw new Error();
+    const topic = await db.topic.findFirst({
+      where: { id: verseReq.topic },
+      include: { chapter: true },
+    });
+    if (
+      !topic ||
+      topic.chapterId !== verseReq.chapter ||
+      topic.chapter.bookId !== verseReq.book
+    ) {
+      throw new Error();
+    }
     const verse = await db.verse.create({
       data: {
         number: verseReq.number,
@@ -269,6 +263,25 @@ export async function update(
     if (isAuthError(session)) return session;
     const verseReq = (await req.json()) as UpdateVerseReq;
     if (!verseReq.chapter || !verseReq.book) throw new Error();
+    const targetTopicId = verseReq.topic;
+    if (targetTopicId) {
+      const topic = await db.topic.findFirst({
+        where: { id: targetTopicId },
+        include: { chapter: true },
+      });
+      if (
+        !topic ||
+        topic.chapterId !== verseReq.chapter ||
+        topic.chapter.bookId !== verseReq.book
+      ) {
+        throw new Error();
+      }
+    } else {
+      const chapter = await db.chapter.findFirst({
+        where: { id: verseReq.chapter },
+      });
+      if (!chapter || chapter.bookId !== verseReq.book) throw new Error();
+    }
     if (verseReq.number) {
       const verseExist = await db.verse.findFirst({
         where: {
