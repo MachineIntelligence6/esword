@@ -3,17 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { getServerAuth } from "@/server/auth";
 import "@/styles/tailwind.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import SiteHeader from "./header";
 import { cn } from "@/lib/utils";
-import SiteInnerLayout from "./inner-layout";
 import { redirect } from "next/navigation";
 import HydrationZustand from "@/components/zustand-hydration";
-
-const inter = Inter({
-  subsets: ["latin"],
-  preload: true,
-});
+import { ConditionalSiteHeader } from "./chrome";
+import AppShell from "./app-shell";
 
 export const metadata: Metadata = {
   title: "Hidden Sword",
@@ -34,17 +28,13 @@ export default async function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          inter.className,
-          "max-w-full !overflow-x-hidden overflow-hidden "
-          // "max-h-screen overflow-hidden "
+          "font-sans max-w-full !overflow-x-hidden overflow-hidden antialiased"
         )}
       >
         <HydrationZustand>
           <AuthProvider session={session}>
-            <SiteHeader />
-            <div className="pt-[70px] overflow-y-auto">
-              <SiteInnerLayout>{children}</SiteInnerLayout>
-            </div>
+            <ConditionalSiteHeader />
+            <AppShell>{children}</AppShell>
             <Toaster />
           </AuthProvider>
         </HydrationZustand>
