@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 
 @tailwind components;
@@ -45,6 +47,7 @@ input.autofill-text-white:-webkit-autofill:active {
 html,
 body {
   height: 100%;
+  font-family: "Rethink Sans", Inter, system-ui, sans-serif;
 }
 
 .min-300 .ql-container {

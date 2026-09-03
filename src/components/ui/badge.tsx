@@ -3,18 +3,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/** Elisen `ui/Badge.tsx` — tags always use 4px radius (`rounded-xs`).
+ *  Rendered as <span> so it can sit safely inside paragraphs/buttons. */
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border border-slate-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:border-slate-800 dark:focus:ring-slate-800",
+  "inline-flex items-center whitespace-nowrap rounded-xs text-xs transition-colors focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950",
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-slate-900 text-slate-50 shadow hover:bg-slate-900/80 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/80",
-        secondary:
-          "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-100/80 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-800/80",
-        destructive:
-          "border-transparent bg-red-500 text-slate-50 shadow hover:bg-red-500/80 dark:bg-red-900 dark:text-red-50 dark:hover:bg-red-900/80",
-        outline: "text-slate-950 dark:text-slate-50",
+        default: "bg-slate-100 text-slate-700 font-medium px-2 py-0.5",
+        secondary: "bg-slate-100 text-slate-700 font-medium px-2 py-0.5",
+        destructive: "bg-danger-subtle text-danger font-medium px-2 py-0.5",
+        outline: "border border-slate-200 bg-white text-slate-700 font-medium px-2 py-0.5",
+        success: "bg-success-subtle text-success font-medium px-2 py-0.5",
+        warning: "bg-warning-subtle text-warning font-medium px-2 py-0.5",
+        info: "bg-info-subtle text-info font-medium px-2 py-0.5",
       },
     },
     defaultVariants: {
@@ -24,12 +26,12 @@ const badgeVariants = cva(
 )
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <span className={cn(badgeVariants({ variant }), className)} {...props} />
   )
 }
 

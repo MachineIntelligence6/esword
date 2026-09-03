@@ -8,11 +8,57 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "primary": "#71B9EA",
-        "primary-dark": "rgb(27 63 87)",
-        "silver-light": " rgb(232 236 238)",
-        "light-green": " rgb(76 130 130)",
-        "secondary": "#D4EAF9"
+        "primary": {
+          DEFAULT: "#71B9EA",
+          dark: "rgb(27 63 87)",
+          25: "#EDF5FF",
+          50: "#D4EAF9",
+          100: "#B8DCF4",
+          700: "#2B6F9A",
+          800: "#1B3F57",
+        },
+        "silver-light": "#F8FAFC",
+        "light-green": "rgb(76 130 130)",
+        "secondary": "#D4EAF9",
+        // Elisen semantic tokens (docs/DESIGN.md) — brand blue kept on accent
+        accent: {
+          DEFAULT: "#71B9EA",
+          hover: "#5AA8DC",
+          subtle: "#EDF5FF",
+        },
+        danger: {
+          DEFAULT: "#dc2626",
+          hover: "#b91c1c",
+          active: "#991b1b",
+          subtle: "#fef2f2",
+        },
+        success: {
+          DEFAULT: "#009b65",
+          subtle: "#ebfef4",
+        },
+        warning: {
+          DEFAULT: "#e28500",
+          subtle: "#fffdea",
+        },
+        info: {
+          DEFAULT: "#71B9EA",
+          subtle: "#EDF5FF",
+        },
+      },
+      boxShadow: {
+        textfield: "0 1px 2px 0 #F8FAFC",
+      },
+      borderRadius: {
+        // Elisen DESIGN.md: 8px standard surface radius; 4px for tags/compact
+        DEFAULT: "8px",
+        sm: "8px",
+        md: "8px",
+        lg: "8px",
+        xs: "4px",
+      },
+      transitionDuration: {
+        fast: "150ms",
+        base: "250ms",
       },
       keyframes: {
         "accordion-down": {
@@ -29,8 +75,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        "roman": "'Times New Roman', Times, serif"
-      }
+        sans: ['"Rethink Sans"', "Inter", "system-ui", "sans-serif"],
+        roman: ["'Times New Roman'", "Times", "serif"],
+      },
     },
   },
   plugins: [

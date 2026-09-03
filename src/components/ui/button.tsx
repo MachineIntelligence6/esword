@@ -4,27 +4,39 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/** Visual language aligned with Elisen `ui/Button.tsx` (DESIGN.md / COMPONENTS.md).
+ *  Brand fill uses eSword primary blue instead of Elisen navy. */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-70",
+  "inline-flex items-center justify-center whitespace-nowrap select-none rounded-sm text-sm font-semibold transition-colors duration-fast focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950 disabled:pointer-events-none disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
+        // Elisen primary → brand blue
         default:
-          "bg-slate-900 text-slate-50 shadow hover:bg-slate-900/90",
-        primary: "bg-primary text-white font-bold py-2 px-4 rounded w-full md:text-base text-sm",
-        destructive: "bg-red-500 text-white shadow-sm hover:bg-red-500/90 disabled:text-white",
-        outline: "border border-slate-200 bg-white shadow-sm hover:bg-slate-100 hover:text-slate-900",
-        "primary-outline": "border border-slate-200 bg-white shadow-sm hover:bg-primary hover:text-white",
+          "border border-primary bg-primary text-white hover:bg-primary-dark hover:border-primary-dark active:bg-primary-800 active:border-primary-800 disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500",
+        primary:
+          "border border-primary bg-primary text-white hover:bg-primary-dark hover:border-primary-dark disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500",
+        // Elisen secondary
+        outline:
+          "border border-slate-400 bg-transparent text-slate-950 hover:border-slate-950 active:bg-accent-subtle disabled:border-slate-200 disabled:text-slate-300",
+        "primary-outline":
+          "border border-slate-400 bg-transparent text-slate-950 hover:border-primary hover:text-primary active:bg-accent-subtle",
+        // Quiet surface control (icon buttons, menus) — not underlined tertiary text
+        ghost:
+          "border border-transparent bg-transparent text-slate-950 hover:bg-slate-100 disabled:text-slate-300",
+        link:
+          "border border-transparent bg-transparent text-slate-950 underline-offset-2 hover:text-primary hover:underline disabled:text-slate-300",
         secondary:
-          "bg-slate-100 text-slate-900 shadow-sm hover:bg-slate-100/80",
-        ghost: "hover:bg-slate-100 hover:text-slate-900",
-        link: "text-slate-900 underline-offset-4 hover:underline",
+          "border border-transparent bg-slate-100 text-slate-950 hover:bg-slate-200 disabled:text-slate-300",
+        // Elisen danger
+        destructive:
+          "border border-danger bg-danger text-white hover:bg-danger-hover hover:border-danger-hover active:bg-danger-active active:border-danger-active disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        xs: "h-7 rounded-md px-2 text-xs",
-        lg: "h-10 rounded-md px-8",
+        default: "h-9 px-3 gap-1",
+        sm: "h-8 px-3 gap-1 text-xs",
+        xs: "h-7 px-2 gap-1 text-xs",
+        lg: "h-11 px-4 gap-2",
         icon: "h-9 w-9",
       },
     },
@@ -42,12 +54,13 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, type, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size }), className)}
         ref={ref}
+        type={asChild ? type : type ?? "button"}
         {...props}
       />
     )
