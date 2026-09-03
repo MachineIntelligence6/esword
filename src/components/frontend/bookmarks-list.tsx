@@ -105,7 +105,7 @@ export default function BookmarksList() {
                         width={15}
                         height={15}
                         alt=""
-                        src="/icons/bookfill-icon.png "
+                        src="/icons/bookfill-icon.png"
                       />
                     </button>
                   </HoverCardTrigger>
