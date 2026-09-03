@@ -1,107 +1,129 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "./shared/table";
 import { DataTableRowActions } from "./shared/row-actions";
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { PaginatedApiResponse } from "@/shared/types/api.types";
-import { TablePagination, perPageCountOptions } from "./shared/pagination";
+import { useCallback } from "react";
 import { ITopic, IVerse } from "@/shared/types/models.types";
-import { useRouter } from "next/navigation";
-import { cn, debounce } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
+import { TableCellLink, TableCellText } from "./shared/table-cell";
+import { useInfiniteList } from "./shared/use-infinite-list";
 
 export default function VersesTable({
   topic,
+  topicId,
+  bookId,
+  bookIds,
+  chapterId,
+  chapterIds,
   archivedOnly,
+  hideSearch = false,
   editAction,
 }: {
   topic?: ITopic;
+  topicId?: number;
+  bookId?: number;
+  bookIds?: number[];
+  chapterId?: number;
+  chapterIds?: number[];
   archivedOnly?: boolean;
+  hideSearch?: boolean;
   editAction?: TableActionProps["editAction"];
 }) {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [tableData, setTableData] = useState<PaginatedApiResponse<
-    IVerse[]
-  > | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+  const scopedTopicId = topic?.id ?? topicId;
+  const filterChapterIds =
+    chapterIds && chapterIds.length > 0
+      ? chapterIds
+      : chapterId
+        ? [chapterId]
+        : [];
+  const filterBookIds =
+    bookIds && bookIds.length > 0 ? bookIds : bookId ? [bookId] : [];
   const searchQuery = useTableSearchStore((state) => state.searchQuery);
-  const loadData = async () => {
-    setTableData(null);
-    const res = await clientApiHandlers.verses.get({
-      page: currentPage,
-      perPage: perPage,
-      topic: topic?.id,
-      include: { topic: { include: { chapter: { include: { book: true } } } } },
-      where: {
-        ...(searchQuery && {
-          OR: [
-            { text: { contains: searchQuery } },
-            ...(isNaN(parseInt(searchQuery))
-              ? []
-              : [{ number: { equals: parseInt(searchQuery) } }]),
-            { topic: { name: { contains: searchQuery } } },
-            {
-              topic: { chapter: { commentaryText: { contains: searchQuery } } },
-            },
-            {
-              topic: {
-                chapter: { book: { abbreviation: { contains: searchQuery } } },
-              },
-            },
-            ...(isNaN(parseInt(searchQuery))
-              ? []
-              : [
-                  {
-                    topic: {
-                      chapter: { name: { equals: parseInt(searchQuery) } },
+  const chapterKey = filterChapterIds.join(",");
+  const bookKey = filterBookIds.join(",");
+
+  const fetcher = useCallback(
+    (page: number, pageSize: number) =>
+      clientApiHandlers.verses.get({
+        page,
+        perPage: pageSize,
+        topic: scopedTopicId,
+        include: {
+          topic: { include: { chapter: { include: { book: true } } } },
+          _count: { select: { commentaries: true, notes: true } },
+        },
+        where: {
+          ...(!scopedTopicId && filterChapterIds.length > 0
+            ? {
+                topic: {
+                  chapterId:
+                    filterChapterIds.length === 1
+                      ? filterChapterIds[0]
+                      : { in: filterChapterIds },
+                },
+              }
+            : !scopedTopicId && filterBookIds.length > 0
+              ? {
+                  topic: {
+                    chapter: {
+                      bookId:
+                        filterBookIds.length === 1
+                          ? filterBookIds[0]
+                          : { in: filterBookIds },
                     },
-                  } as const,
-                ]),
-            {
-              topic: { chapter: { book: { name: { contains: searchQuery } } } },
-            },
-            ...(isNaN(parseInt(searchQuery))
-              ? []
-              : [{ topicId: { equals: parseInt(searchQuery) } }]),
-            ...(isNaN(parseInt(searchQuery))
-              ? []
-              : [{ topic: { chapterId: { equals: parseInt(searchQuery) } } }]),
-          ],
-        }),
-        ...(archivedOnly && { archived: true }),
-      },
-    });
-    setTableData(res);
-  };
-
-  const debouncedLoadData = debounce(loadData, 1000);
-
-  useEffect(() => {
-    debouncedLoadData();
+                  },
+                }
+              : {}),
+          ...(searchQuery && {
+            OR: [
+              { text: { contains: searchQuery } },
+              ...(isNaN(parseInt(searchQuery))
+                ? []
+                : [{ number: { equals: parseInt(searchQuery) } }]),
+              { topic: { name: { contains: searchQuery } } },
+              {
+                topic: { chapter: { commentaryText: { contains: searchQuery } } },
+              },
+              {
+                topic: {
+                  chapter: { book: { abbreviation: { contains: searchQuery } } },
+                },
+              },
+              ...(isNaN(parseInt(searchQuery))
+                ? []
+                : [
+                    {
+                      topic: {
+                        chapter: { name: { equals: parseInt(searchQuery) } },
+                      },
+                    } as const,
+                  ]),
+              {
+                topic: { chapter: { book: { name: { contains: searchQuery } } } },
+              },
+              ...(isNaN(parseInt(searchQuery))
+                ? []
+                : [{ topicId: { equals: parseInt(searchQuery) } }]),
+              ...(isNaN(parseInt(searchQuery))
+                ? []
+                : [{ topic: { chapterId: { equals: parseInt(searchQuery) } } }]),
+            ],
+          }),
+          ...(archivedOnly && { archived: true }),
+        },
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+    [scopedTopicId, chapterKey, bookKey, searchQuery, archivedOnly]
+  );
 
-  // useEffect for currentPage and perPage without debounce
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage]);
-
-  const pagination: TablePagination = {
-    onPageChange: setCurrentPage,
-    currentPage: currentPage,
-    perPage: perPage,
-    setPerPage: setPerPage,
-    totalPages: tableData?.pagination?.totalPages ?? 1,
-  };
+  const { data, hasMore, loadMore, loadingMore } = useInfiniteList<IVerse>({
+    fetcher,
+    deps: [scopedTopicId, chapterKey, bookKey, searchQuery, archivedOnly],
+  });
 
   const tableActionProps: TableActionProps = {
     viewAction: (verse: IVerse) => (
@@ -121,47 +143,27 @@ export default function VersesTable({
   return (
     <div>
       <BaseTable
-        data={tableData?.data}
-        pagination={pagination}
-        columns={columns(tableActionProps)}
+        data={data}
+        columns={columns(tableActionProps, !!topic)}
         toolbarActions={tableActionProps}
+        hideSearch={hideSearch}
+        embedded={!!archivedOnly}
+        infiniteScroll={{
+          hasMore,
+          onLoadMore: loadMore,
+          loadingMore,
+        }}
       />
     </div>
   );
 }
 
-function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
-  return [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    // {
-    //     id: "index",
-    //     header: ({ column }) => (
-    //         <DataTableColumnHeader column={column} title="#" />
-    //     ),
-    //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
+function columns(
+  rowActions: TableActionProps,
+  hideTopicColumns: boolean
+): ColumnDef<IVerse, any>[] {
+  const cols: ColumnDef<IVerse, any>[] = [
+
     {
       id: "name",
       accessorFn: (verse) => {
@@ -173,13 +175,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
       ),
       cell: ({ row }) => {
         const chapter = row.original.topic?.chapter;
-        return (
-          <div className="flex max-w-[100px] space-x-2">
-            <span className="max-w-[100px] truncate font-medium">
-              {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original?.number}`}
-            </span>
-          </div>
-        );
+        const label = `${chapter?.book?.abbreviation} ${chapter?.name}:${row.original?.number}`;
+        return <TableCellText variant="secondary">{label}</TableCellText>;
       },
     },
     {
@@ -187,68 +184,84 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Text" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="max-w-[600px] font-normal line-clamp-2">
-              {row.getValue("text")}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      id: "topic",
-      accessorFn: (verse) => verse.topic?.name,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Topic" />
+      cell: ({ row }) => (
+        <TableCellText variant="wide" clamp={2} className="font-normal">
+          {row.getValue("text")}
+        </TableCellText>
       ),
-      cell: ({ row }) => {
-        const archived = row.original.topic?.archived ?? true;
-        return (
-          <div className="flex max-w-[200px]">
-            <Link
-              href={
-                archived ? "#" : `/dashboard/topics/${row.original.topicId}`
-              }
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
+    },
+  ];
+
+  if (!hideTopicColumns) {
+    cols.push(
+      {
+        id: "topic",
+        accessorFn: (verse) => verse.topic?.name,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Topic" />
+        ),
+        cell: ({ row }) => {
+          const archived = row.original.topic?.archived ?? true;
+          return (
+            <TableCellLink
+              href={`/dashboard/topics/${row.original.topicId}`}
+              disabled={archived}
+              variant="secondary"
             >
               {row.original.topic?.name}
-            </Link>
-          </div>
-        );
+            </TableCellLink>
+          );
+        },
       },
+      {
+        id: "chapter",
+        accessorFn: (verse) =>
+          `${verse.topic?.chapter?.book?.name}/${verse.topic?.chapter?.name}`,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Chapter" />
+        ),
+        cell: ({ row }) => {
+          const archived = row.original.topic?.chapter?.archived ?? true;
+          const label = `${row.original.topic?.chapter?.book?.name}/${row.original.topic?.chapter?.name}`;
+          return (
+            <TableCellLink
+              href={`/dashboard/chapters/${row.original.topic?.chapter?.id}`}
+              disabled={archived}
+              variant="secondary"
+              title={label}
+            >
+              {label}
+            </TableCellLink>
+          );
+        },
+      }
+    );
+  }
+
+  cols.push(
+    {
+      id: "commentaries",
+      accessorFn: (verse) => verse._count?.commentaries ?? 0,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Commentaries" />
+      ),
+      cell: ({ row }) => (
+        <TableCellText variant="compact" className="font-normal">
+          {row.original._count?.commentaries ?? 0}
+        </TableCellText>
+      ),
     },
     {
-      id: "chapter",
-      accessorFn: (verse) =>
-        `${verse.topic?.chapter?.book?.name}/${verse.topic?.chapter?.name}`,
+      id: "notes",
+      accessorFn: (verse) => verse._count?.notes ?? 0,
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Chapter" />
+        <DataTableColumnHeader column={column} title="Notes" />
       ),
-      cell: ({ row }) => {
-        const archived = row.original.topic?.chapter?.archived ?? true;
-        return (
-          <div className="flex items-center">
-            <Link
-              href={
-                archived
-                  ? "#"
-                  : `/dashboard/chapters/${row.original.topic?.chapter?.id}`
-              }
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
-            >
-              {`${row.original.topic?.chapter?.book?.name}/${row.original.topic?.chapter?.name}`}
-            </Link>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="compact" className="font-normal">
+          {row.original._count?.notes ?? 0}
+        </TableCellText>
+      ),
     },
     {
       id: "actions",
@@ -256,6 +269,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IVerse, any>[] {
         <DataTableColumnHeader column={column} title="Actions" />
       ),
       cell: ({ row }) => <DataTableRowActions row={row} {...rowActions} />,
-    },
-  ];
+    }
+  );
+
+  return cols;
 }

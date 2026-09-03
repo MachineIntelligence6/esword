@@ -1,5 +1,4 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "./shared/table";
 import { DataTableRowActions } from "./shared/row-actions";
@@ -7,91 +6,127 @@ import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
 import Link from "next/link";
-import { PaginatedApiResponse } from "@/shared/types/api.types";
-import { useEffect, useState } from "react";
-import { TablePagination, perPageCountOptions } from "./shared/pagination";
+import { useCallback } from "react";
 import { IAuthor, ICommentary, IVerse } from "@/shared/types/models.types";
-import { cn, debounce, extractTextFromHtml } from "@/lib/utils";
+import { extractTextFromHtml } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
+import { TableCellLink, TableCellText } from "./shared/table-cell";
+import { formatTableDate } from "./shared/format";
+import { useInfiniteList } from "./shared/use-infinite-list";
 
 type Props = {
   author?: IAuthor;
   verse?: IVerse;
+  bookId?: number;
+  bookIds?: number[];
+  chapterId?: number;
+  chapterIds?: number[];
   archivedOnly?: boolean;
+  hideSearch?: boolean;
   editAction?: TableActionProps["editAction"];
 };
 
 export default function CommentariesTable({
   author,
   verse,
+  bookId,
+  bookIds,
+  chapterId,
+  chapterIds,
   archivedOnly,
+  hideSearch = false,
   editAction,
 }: Props) {
-  const [tableData, setTableData] = useState<PaginatedApiResponse<
-    ICommentary[]
-  > | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+  const filterChapterIds =
+    chapterIds && chapterIds.length > 0
+      ? chapterIds
+      : chapterId
+        ? [chapterId]
+        : [];
+  const filterBookIds =
+    bookIds && bookIds.length > 0 ? bookIds : bookId ? [bookId] : [];
   const searchQuery = useTableSearchStore((state) => state.searchQuery);
+  const chapterKey = filterChapterIds.join(",");
+  const bookKey = filterBookIds.join(",");
 
-  const loadData = async () => {
-    setTableData(null);
-    const res = await clientApiHandlers.commentaries.get({
-      page: currentPage,
-      perPage: perPage,
-      include: {
-        author: true,
-        verse: {
-          include: {
-            topic: { include: { chapter: { include: { book: true } } } },
-          },
-        },
-      },
-      author: author?.id,
-      verse: verse?.id,
-      //   ...(archivedOnly && { where: { archived: true } }),
-      where: {
-        OR: [
-          { name: { contains: searchQuery } },
-          { text: { contains: searchQuery } },
-          { author: { name: { contains: searchQuery } } },
-          ...(isNaN(parseInt(searchQuery))
-            ? []
-            : [{ verse: { number: { equals: parseInt(searchQuery) } } }]),
-          { verse: { topic: { name: { contains: searchQuery } } } },
-          {
-            verse: {
-              topic: {
-                chapter: { book: { abbreviation: { contains: searchQuery } } },
-              },
+  const fetcher = useCallback(
+    (page: number, pageSize: number) =>
+      clientApiHandlers.commentaries.get({
+        page,
+        perPage: pageSize,
+        include: {
+          author: true,
+          verse: {
+            include: {
+              topic: { include: { chapter: { include: { book: true } } } },
             },
           },
-        ],
-      },
-    });
-    setTableData(res);
-  };
-
-  const debouncedLoadData = debounce(loadData, 1000);
-
-  useEffect(() => {
-    debouncedLoadData();
+        },
+        author: author?.id,
+        verse: verse?.id,
+        where: {
+          ...(filterChapterIds.length > 0
+            ? {
+                verse: {
+                  topic: {
+                    chapterId:
+                      filterChapterIds.length === 1
+                        ? filterChapterIds[0]
+                        : { in: filterChapterIds },
+                  },
+                },
+              }
+            : filterBookIds.length > 0
+              ? {
+                  verse: {
+                    topic: {
+                      chapter: {
+                        bookId:
+                          filterBookIds.length === 1
+                            ? filterBookIds[0]
+                            : { in: filterBookIds },
+                      },
+                    },
+                  },
+                }
+              : {}),
+          ...(searchQuery
+            ? {
+                OR: [
+                  { name: { contains: searchQuery } },
+                  { text: { contains: searchQuery } },
+                  { author: { name: { contains: searchQuery } } },
+                  ...(isNaN(parseInt(searchQuery))
+                    ? []
+                    : [
+                        {
+                          verse: { number: { equals: parseInt(searchQuery) } },
+                        },
+                      ]),
+                  { verse: { topic: { name: { contains: searchQuery } } } },
+                  {
+                    verse: {
+                      topic: {
+                        chapter: {
+                          book: { abbreviation: { contains: searchQuery } },
+                        },
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
+          ...(archivedOnly && { archived: true }),
+        },
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+    [author?.id, verse?.id, chapterKey, bookKey, searchQuery, archivedOnly]
+  );
 
-  // useEffect for currentPage and perPage without debounce
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage]);
-
-  const pagination: TablePagination = {
-    onPageChange: setCurrentPage,
-    currentPage: currentPage,
-    perPage: perPage,
-    setPerPage: setPerPage,
-    totalPages: tableData?.pagination?.totalPages ?? 1,
-  };
+  const { data, hasMore, loadMore, loadingMore } = useInfiniteList<ICommentary>({
+    fetcher,
+    deps: [author?.id, verse?.id, chapterKey, bookKey, searchQuery, archivedOnly],
+  });
 
   const tableActionProps: TableActionProps = {
     viewAction: (commentary: ICommentary) => (
@@ -111,10 +146,16 @@ export default function CommentariesTable({
   return (
     <div>
       <BaseTable
-        data={tableData?.data}
-        pagination={pagination}
+        data={data}
         columns={columns(tableActionProps)}
         toolbarActions={tableActionProps}
+        hideSearch={hideSearch}
+        embedded={!!archivedOnly}
+        infiniteScroll={{
+          hasMore,
+          onLoadMore: loadMore,
+          loadingMore,
+        }}
       />
     </div>
   );
@@ -122,50 +163,15 @@ export default function CommentariesTable({
 
 function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
   return [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    // {
-    //     id: "index",
-    //     header: ({ column }) => (
-    //         <DataTableColumnHeader column={column} title="#" />
-    //     ),
-    //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
+
     {
       accessorKey: "name",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Name" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex max-w-[100px] space-x-2">
-            <span className="max-w-[100px] truncate font-medium">
-              {row.getValue("name")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="primary">{row.getValue("name")}</TableCellText>
+      ),
     },
     {
       id: "text",
@@ -173,15 +179,11 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Text" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="max-w-[500px] font-normal line-clamp-2">
-              {extractTextFromHtml(row.getValue("text"))}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="wide" clamp={2} className="font-normal">
+          {extractTextFromHtml(String(row.getValue("text") ?? ""))}
+        </TableCellText>
+      ),
     },
     {
       id: "author",
@@ -192,19 +194,33 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
       cell: ({ row }) => {
         const archived = row.original.author?.archived ?? true;
         return (
-          <div className="flex items-center">
-            <Link
-              href={
-                archived ? "#" : `/dashboard/authors/${row.original.author?.id}`
-              }
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
-            >
-              {row.original.author?.name}
-            </Link>
-          </div>
+          <TableCellLink
+            href={`/dashboard/authors/${row.original.author?.id}`}
+            disabled={archived}
+            variant="secondary"
+          >
+            {row.original.author?.name}
+          </TableCellLink>
+        );
+      },
+    },
+    {
+      id: "book",
+      accessorFn: (commentary) => commentary.verse?.topic?.chapter?.book?.name,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Book" />
+      ),
+      cell: ({ row }) => {
+        const book = row.original.verse?.topic?.chapter?.book;
+        const archived = book?.archived ?? true;
+        return (
+          <TableCellLink
+            href={`/dashboard/books/${book?.id}`}
+            disabled={archived || !book?.id}
+            variant="secondary"
+          >
+            {book?.name}
+          </TableCellLink>
         );
       },
     },
@@ -220,22 +236,30 @@ function columns(rowActions: TableActionProps): ColumnDef<ICommentary, any>[] {
       cell: ({ row }) => {
         const archived = row.original.verse?.archived ?? true;
         const chapter = row.original.verse?.topic?.chapter;
+        const label = `${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`;
         return (
-          <div className="flex items-center">
-            <Link
-              href={
-                archived ? "#" : `/dashboard/verses/${row.original.verseId}`
-              }
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
-            >
-              {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`}
-            </Link>
-          </div>
+          <TableCellLink
+            href={`/dashboard/verses/${row.original.verseId}`}
+            disabled={archived}
+            variant="secondary"
+            title={label}
+          >
+            {label}
+          </TableCellLink>
         );
       },
+    },
+    {
+      id: "updatedAt",
+      accessorFn: (commentary) => formatTableDate(commentary.updatedAt),
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Updated" />
+      ),
+      cell: ({ row }) => (
+        <TableCellText variant="secondary" className="font-normal">
+          {formatTableDate(row.original.updatedAt)}
+        </TableCellText>
+      ),
     },
     {
       id: "actions",

@@ -12,7 +12,6 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   Column,
@@ -27,7 +26,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { DataTablePagination, TablePagination } from "./pagination";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -53,21 +51,30 @@ import { DataTableToolbar, ToolbarProps } from "./toolbar";
 import { useSession } from "next-auth/react";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 
+export type InfiniteScrollProps = {
+  hasMore: boolean;
+  onLoadMore: () => void;
+  loadingMore?: boolean;
+};
+
 interface DataTableProps<TData, TValue> extends ToolbarProps<TData> {
   columns: ColumnDef<TData, TValue>[];
   data?: TData[] | null;
   rowsCount?: number;
-  showPagination?: boolean;
   showToolbar?: boolean;
-  pagination: TablePagination;
+  hideSearch?: boolean;
+  /** Sit inside a parent card (e.g. Archives tabs) — no second outer border. */
+  embedded?: boolean;
+  infiniteScroll?: InfiniteScrollProps;
 }
 
 export function BaseTable<TData, TValue>({
   columns,
   data,
-  pagination,
-  showPagination = true,
   showToolbar = true,
+  hideSearch = false,
+  embedded = false,
+  infiniteScroll,
   ...toolbarProps
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
@@ -87,9 +94,8 @@ export function BaseTable<TData, TValue>({
   });
 
   const { data: session } = useSession();
-  // const [globalFilter, setGlobalFilter] = React.useState("");
   const { searchQuery } = useTableSearchStore();
-
+  const sentinelRef = React.useRef<HTMLDivElement | null>(null);
 
   const table = useReactTable({
     data: data ?? [],
@@ -101,23 +107,35 @@ export function BaseTable<TData, TValue>({
       columnFilters,
       globalFilter: searchQuery,
     },
-    enableRowSelection: true,
+    enableRowSelection: false,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    // onGlobalFilterChange: (value) => {
-    //   setGlobalFilter(value);
-    //   console.log("globalFilter", value);
-    // },
     manualPagination: true,
   });
+
+  React.useEffect(() => {
+    if (!infiniteScroll?.hasMore) return;
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          infiniteScroll.onLoadMore();
+        }
+      },
+      { root: null, rootMargin: "240px", threshold: 0 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [infiniteScroll?.hasMore, infiniteScroll?.onLoadMore, data?.length]);
 
   return (
     <div className="space-y-4 w-full">
@@ -125,12 +143,17 @@ export function BaseTable<TData, TValue>({
         <DataTableToolbar
           table={table}
           session={session}
+          hideSearch={hideSearch}
           {...toolbarProps}
-          // filterValue={globalFilter}
-          // setFilterValue={setGlobalFilter}
         />
       )}
-      <div className="rounded-md border">
+      <div
+        className={
+          embedded
+            ? "bg-white"
+            : "rounded-sm border border-slate-200 bg-white"
+        }
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -153,10 +176,7 @@ export function BaseTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => {
                     return (
                       <TableCell key={cell.id}>
@@ -173,7 +193,7 @@ export function BaseTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-slate-500"
                 >
                   No results.
                 </TableCell>
@@ -189,10 +209,27 @@ export function BaseTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+        {infiniteScroll && data && data.length > 0 && (
+          <div className="border-t border-slate-200 px-4 py-3">
+            <p className="text-center text-sm text-slate-600">
+              Showing {data.length} rows
+              {!infiniteScroll.hasMore ? "" : ""}
+            </p>
+            <div
+              ref={sentinelRef}
+              className="mt-2 flex min-h-[1.25rem] items-center justify-center gap-2"
+              aria-live="polite"
+            >
+              {infiniteScroll.loadingMore && (
+                <Spinner className="h-5 w-5 border-2" />
+              )}
+              {!infiniteScroll.hasMore && (
+                <span className="text-xs text-slate-500">All rows loaded</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-      {showPagination && data && (
-        <DataTablePagination table={table} {...pagination} />
-      )}
     </div>
   );
 }
@@ -209,45 +246,27 @@ export function DataTableColumnHeader<TData, TValue>({
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>;
+    return <div className={cn("text-sm font-semibold text-slate-500", className)}>{title}</div>;
   }
 
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ml-3 h-8 data-[state=open]:bg-accent"
-          >
-            <span>{title}</span>
-            {column.getIsSorted() === "desc" ? (
-              <ArrowDownIcon className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "asc" ? (
-              <ArrowUpIcon className="ml-2 h-4 w-4" />
-            ) : (
-              <CaretSortIcon className="ml-2 h-4 w-4" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-            <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Asc
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-            <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Desc
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Hide
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <button
+      type="button"
+      className={cn(
+        "-ml-1 inline-flex items-center gap-1 rounded-sm px-1 py-0.5 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950",
+        className
+      )}
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    >
+      <span>{title}</span>
+      {column.getIsSorted() === "desc" ? (
+        <ArrowDownIcon className="h-3.5 w-3.5" />
+      ) : column.getIsSorted() === "asc" ? (
+        <ArrowUpIcon className="h-3.5 w-3.5" />
+      ) : (
+        <CaretSortIcon className="h-3.5 w-3.5 opacity-50" />
+      )}
+    </button>
   );
 }
 
@@ -261,7 +280,7 @@ export function DataTableViewOptions<TData>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="md:ml-auto h-8 flex">
+        <Button variant="outline" size="sm" className="h-8 flex">
           <MixerHorizontalIcon className="mr-2 h-4 w-4" />
           View
         </Button>

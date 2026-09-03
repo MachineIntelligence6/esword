@@ -1,5 +1,4 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "./shared/table";
 import { DataTableRowActions } from "./shared/row-actions";
@@ -7,73 +6,64 @@ import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect, useState } from "react";
-import { PaginatedApiResponse } from "@/shared/types/api.types";
-import { TablePagination, perPageCountOptions } from "./shared/pagination";
+import { useCallback } from "react";
 import { INote, IUser, IVerse } from "@/shared/types/models.types";
 import Link from "next/link";
-import { cn, extractTextFromHtml } from "@/lib/utils";
+import { extractTextFromHtml } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
+import { TableCellLink, TableCellText } from "./shared/table-cell";
+import { formatTableDate } from "./shared/format";
+import { useInfiniteList } from "./shared/use-infinite-list";
 
 type Props = {
   user?: any;
   verse?: IVerse;
   editAction?: TableActionProps["editAction"];
+  hideSearch?: boolean;
 };
 
-export default function NotesTable({ user, verse, editAction }: Props) {
-  const [tableData, setTableData] = useState<PaginatedApiResponse<
-    INote[]
-  > | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+export default function NotesTable({ user, verse, editAction, hideSearch = false }: Props) {
   const searchQuery = useTableSearchStore((state) => state.searchQuery);
 
-  const loadData = async () => {
-    setTableData(null);
-    const res = await clientApiHandlers.notes.get({
-      page: currentPage,
-      perPage: perPage,
-      include: {
-        user: true,
-        verse: {
-          include: {
-            topic: {
-              include: {
-                chapter: {
-                  include: { book: true },
+  const fetcher = useCallback(
+    (page: number, pageSize: number) =>
+      clientApiHandlers.notes.get({
+        page,
+        perPage: pageSize,
+        include: {
+          user: true,
+          verse: {
+            include: {
+              topic: {
+                include: {
+                  chapter: {
+                    include: { book: true },
+                  },
                 },
               },
             },
           },
         },
-      },
-      user: user?.id,
-      verse: verse?.id,
-      where: {
-        OR: [
-          { text: { contains: searchQuery } },
-          { user: { name: { contains: searchQuery } } },
-        ...(isNaN(parseInt(searchQuery)) ? [] : [{ verse: { number: { equals: parseInt(searchQuery) } } }]),
-          { verse: { topic: { name: { contains: searchQuery } } } },
-        ],
-      },
-    });
-    setTableData(res);
-  };
+        user: user?.id,
+        verse: verse?.id,
+        where: {
+          OR: [
+            { text: { contains: searchQuery } },
+            { user: { name: { contains: searchQuery } } },
+            ...(isNaN(parseInt(searchQuery))
+              ? []
+              : [{ verse: { number: { equals: parseInt(searchQuery) } } }]),
+            { verse: { topic: { name: { contains: searchQuery } } } },
+          ],
+        },
+      }),
+    [user?.id, verse?.id, searchQuery]
+  );
 
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage]);
-
-  const pagination: TablePagination = {
-    onPageChange: setCurrentPage,
-    currentPage: currentPage,
-    perPage: perPage,
-    setPerPage: setPerPage,
-    totalPages: tableData?.pagination?.totalPages ?? 1,
-  };
+  const { data, hasMore, loadMore, loadingMore } = useInfiniteList<INote>({
+    fetcher,
+    deps: [user?.id, verse?.id, searchQuery],
+  });
 
   const tableColumns = columns({
     viewAction: (note: INote) => (
@@ -93,9 +83,14 @@ export default function NotesTable({ user, verse, editAction }: Props) {
   return (
     <div>
       <BaseTable
-        data={tableData?.data}
-        pagination={pagination}
+        data={data}
         columns={tableColumns}
+        hideSearch={hideSearch}
+        infiniteScroll={{
+          hasMore,
+          onLoadMore: loadMore,
+          loadingMore,
+        }}
       />
     </div>
   );
@@ -103,27 +98,7 @@ export default function NotesTable({ user, verse, editAction }: Props) {
 
 function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
   return [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+
     // {
     //     id: "index",
     //     header: ({ column }) => (
@@ -139,15 +114,11 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Text" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="max-w-[500px] line-clamp-1 font-medium">
-              {extractTextFromHtml(row.original.text)}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="wide" clamp={2}>
+          {extractTextFromHtml(row.original.text)}
+        </TableCellText>
+      ),
     },
     {
       id: "user",
@@ -158,17 +129,37 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
       cell: ({ row }) => {
         const archived = row.original.user?.archived ?? true;
         return (
-          <div className="flex items-center">
-            <Link
-              href={archived ? "#" : `/dashboard/users/${row.original.userId}`}
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
-            >
-              {row.original.user?.name}
-            </Link>
-          </div>
+          <TableCellLink
+            href={`/dashboard/users/${row.original.userId}`}
+            disabled={archived}
+            variant="secondary"
+          >
+            {row.original.user?.name}
+          </TableCellLink>
+        );
+      },
+    },
+    {
+      id: "book",
+      accessorFn: (note) => {
+        const book = note.verse?.topic?.chapter?.book;
+        return book?.abbreviation ?? book?.name;
+      },
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Book" />
+      ),
+      cell: ({ row }) => {
+        const book = row.original.verse?.topic?.chapter?.book;
+        const label = book?.abbreviation ?? book?.name;
+        const archived = book?.archived ?? true;
+        return (
+          <TableCellLink
+            href={`/dashboard/books/${book?.id}`}
+            disabled={archived || !book?.id}
+            variant="secondary"
+          >
+            {label}
+          </TableCellLink>
         );
       },
     },
@@ -184,22 +175,30 @@ function columns(rowActions: TableActionProps): ColumnDef<INote, any>[] {
       cell: ({ row }) => {
         const archived = row.original.verse?.archived ?? true;
         const chapter = row.original.verse?.topic?.chapter;
+        const label = `${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`;
         return (
-          <div className="flex items-center">
-            <Link
-              href={
-                archived ? "#" : `/dashboard/verses/${row.original.verseId}`
-              }
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
-            >
-              {`${chapter?.book?.abbreviation} ${chapter?.name}:${row.original.verse?.number}`}
-            </Link>
-          </div>
+          <TableCellLink
+            href={`/dashboard/verses/${row.original.verseId}`}
+            disabled={archived}
+            variant="secondary"
+            title={label}
+          >
+            {label}
+          </TableCellLink>
         );
       },
+    },
+    {
+      id: "createdAt",
+      accessorFn: (note) => formatTableDate(note.createdAt),
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Created" />
+      ),
+      cell: ({ row }) => (
+        <TableCellText variant="secondary" className="font-normal">
+          {formatTableDate(row.original.createdAt)}
+        </TableCellText>
+      ),
     },
     {
       id: "actions",

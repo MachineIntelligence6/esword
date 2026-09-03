@@ -7,11 +7,13 @@ import {
   AddTopicForm,
   EditTopicForm,
 } from "@/components/dashboard/forms/topics.form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FormSidePanel } from "@/components/dashboard/form-side-panel";
+import { useParentListFilters } from "@/components/dashboard/tables/shared/parent-filters";
+import { ListPageShell } from "@/components/dashboard/list-page-shell";
 
 export default function Page() {
+  const { bookIds, chapterIds } = useParentListFilters();
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<ITopic | null>(null);
 
@@ -31,29 +33,28 @@ export default function Page() {
   };
 
   return (
-    <div>
-      <Card className="min-h-[600px]">
-        <CardHeader className="border-b-8 border-silver-light py-4">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="font-bold text-2xl">All Topics</CardTitle>
-            <Button type="button" onClick={openAdd}>
-              Add New
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="px-3 py-5 md:p-5">
-          <TopicsTable
-            editAction={(topic: ITopic) => (
-              <span
-                className="cursor-pointer"
-                onClick={() => openEdit(topic)}
-              >
-                Edit
-              </span>
-            )}
-          />
-        </CardContent>
-      </Card>
+    <>
+      <ListPageShell
+        title="Topics"
+        showParentFilters
+        showChapterFilter
+        addAction={
+          <Button type="button" onClick={openAdd}>
+            Add New
+          </Button>
+        }
+      >
+        <TopicsTable
+          bookIds={bookIds}
+          chapterIds={chapterIds}
+          hideSearch
+          editAction={(topic: ITopic) => (
+            <span className="cursor-pointer" onClick={() => openEdit(topic)}>
+              Edit
+            </span>
+          )}
+        />
+      </ListPageShell>
 
       <FormSidePanel
         open={panelOpen}
@@ -74,6 +75,6 @@ export default function Page() {
           <AddTopicForm key="new-topic" />
         )}
       </FormSidePanel>
-    </div>
+    </>
   );
 }

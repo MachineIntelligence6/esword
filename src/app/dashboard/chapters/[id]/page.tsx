@@ -92,7 +92,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 <Card>
                     <CardHeader className="border-b-8 border-silver-light py-4">
                         <CardTitle className="font-bold text-2xl">
-                            All Topics
+                            Topics in Chapter {chapter?.name}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-5">

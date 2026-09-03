@@ -1,71 +1,93 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "./shared/table";
 import { DataTableRowActions } from "./shared/row-actions";
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
-import { TablePagination, perPageCountOptions } from "./shared/pagination";
-import { useEffect, useState } from "react";
-import { PaginatedApiResponse } from "@/shared/types/api.types";
+import { useCallback } from "react";
 import clientApiHandlers from "@/client/handlers";
 import { IChapter, ITopic } from "@/shared/types/models.types";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
+import { TableCellLink, TableCellText } from "./shared/table-cell";
+import { useInfiniteList } from "./shared/use-infinite-list";
 
 type Props = Omit<TableActionProps, "modelName"> & {
   chapter?: IChapter;
+  chapterId?: number;
+  chapterIds?: number[];
+  bookId?: number;
+  bookIds?: number[];
   archivedOnly?: boolean;
+  hideSearch?: boolean;
 };
 
 export default function TopicsTable({
   chapter,
+  chapterId,
+  chapterIds,
+  bookId,
+  bookIds,
   archivedOnly,
+  hideSearch = false,
   ...props
 }: Props) {
-  const [tableData, setTableData] = useState<PaginatedApiResponse<
-    ITopic[]
-  > | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+  const scopedChapterId = chapter?.id ?? chapterId;
+  const filterChapterIds =
+    scopedChapterId
+      ? [scopedChapterId]
+      : chapterIds && chapterIds.length > 0
+        ? chapterIds
+        : [];
+  const filterBookIds =
+    bookIds && bookIds.length > 0 ? bookIds : bookId ? [bookId] : [];
   const { searchQuery } = useTableSearchStore();
+  const chapterKey = filterChapterIds.join(",");
+  const bookKey = filterBookIds.join(",");
 
-  const loadData = async () => {
-    setTableData(null);
-    const res = await clientApiHandlers.topics.get({
-      page: currentPage,
-      perPage: perPage,
-      chapter: chapter?.id,
-      include: { chapter: { include: { book: true } } },
-      where: {
-        ...(searchQuery && {
-          OR: [
-            { name: { contains: searchQuery } },
-            ...(isNaN(parseInt(searchQuery))
-              ? []
-              : [{ number: { equals: parseInt(searchQuery) } }]),
-            { chapter: { book: { name: { contains: searchQuery } } } },
-          ],
-        }),
-        ...(archivedOnly && { archived: true }),
-      },
-    });
-    setTableData(res);
-  };
-
-  useEffect(() => {
-    loadData();
+  const fetcher = useCallback(
+    (page: number, pageSize: number) =>
+      clientApiHandlers.topics.get({
+        page,
+        perPage: pageSize,
+        chapter: filterChapterIds.length === 1 ? filterChapterIds[0] : undefined,
+        include: {
+          chapter: { include: { book: true } },
+          _count: { select: { verses: true } },
+        },
+        where: {
+          ...(filterChapterIds.length > 1
+            ? { chapterId: { in: filterChapterIds } }
+            : filterChapterIds.length === 0 && filterBookIds.length > 0
+              ? {
+                  chapter: {
+                    bookId:
+                      filterBookIds.length === 1
+                        ? filterBookIds[0]
+                        : { in: filterBookIds },
+                  },
+                }
+              : {}),
+          ...(searchQuery && {
+            OR: [
+              { name: { contains: searchQuery } },
+              ...(isNaN(parseInt(searchQuery))
+                ? []
+                : [{ number: { equals: parseInt(searchQuery) } }]),
+              { chapter: { book: { name: { contains: searchQuery } } } },
+            ],
+          }),
+          ...(archivedOnly && { archived: true }),
+        },
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage, searchQuery]);
+    [chapterKey, bookKey, searchQuery, archivedOnly]
+  );
 
-  const pagination: TablePagination = {
-    onPageChange: setCurrentPage,
-    currentPage: currentPage,
-    perPage: perPage,
-    setPerPage: setPerPage,
-    totalPages: tableData?.pagination?.totalPages ?? 1,
-  };
+  const { data, hasMore, loadMore, loadingMore } = useInfiniteList<ITopic>({
+    fetcher,
+    deps: [chapterKey, bookKey, searchQuery, archivedOnly],
+  });
 
   const tableActionProps: TableActionProps = {
     ...props,
@@ -80,77 +102,63 @@ export default function TopicsTable({
 
   return (
     <BaseTable
-      data={tableData?.data}
-      columns={columns(tableActionProps)}
-      pagination={pagination}
+      data={data}
+      columns={columns(tableActionProps, !!chapter)}
       toolbarActions={tableActionProps}
+      hideSearch={hideSearch}
+      embedded={!!archivedOnly}
+      infiniteScroll={{
+        hasMore,
+        onLoadMore: loadMore,
+        loadingMore,
+      }}
     />
   );
 }
 
-function columns(rowActions: TableActionProps): ColumnDef<ITopic, any>[] {
+function columns(
+  rowActions: TableActionProps,
+  hideChapterColumn: boolean
+): ColumnDef<ITopic, any>[] {
   const tableCols: ColumnDef<ITopic, any>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    // {
-    //     id: "index",
-    //     header: ({ column }) => (
-    //         <DataTableColumnHeader column={column} title="#" />
-    //     ),
-    //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
+
     {
       accessorKey: "name",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Name" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex max-w-[100px] space-x-2">
-            <span className="max-w-[100px] truncate font-medium">
-              {row.getValue("name")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="primary">{row.getValue("name")}</TableCellText>
+      ),
     },
     {
       accessorKey: "number",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Number" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="max-w-[100px] truncate font-normal">
-              {row.getValue("number")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="compact" className="font-normal">
+          {row.getValue("number")}
+        </TableCellText>
+      ),
     },
-    {
+  ];
+
+  tableCols.push({
+    id: "verses",
+    accessorFn: (topic) => topic._count?.verses ?? 0,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Verses" />
+    ),
+    cell: ({ row }) => (
+      <TableCellText variant="compact" className="font-normal">
+        {row.original._count?.verses ?? 0}
+      </TableCellText>
+    ),
+  });
+
+  if (!hideChapterColumn) {
+    tableCols.push({
       id: "chapter",
       accessorFn: (topic) =>
         `${topic.chapter?.book?.name} / ${topic.chapter?.name}`,
@@ -159,24 +167,21 @@ function columns(rowActions: TableActionProps): ColumnDef<ITopic, any>[] {
       ),
       cell: ({ row }) => {
         const archived = row.original.chapter?.archived ?? true;
+        const label = `${row.original.chapter?.book?.name} / ${row.original.chapter?.name}`;
         return (
-          <div className="flex items-center">
-            <Link
-              href={
-                archived ? "#" : `/dashboard/chapters/${row.original.chapterId}`
-              }
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
-            >
-              {`${row.original.chapter?.book?.name} / ${row.original.chapter?.name}`}
-            </Link>
-          </div>
+          <TableCellLink
+            href={`/dashboard/chapters/${row.original.chapterId}`}
+            disabled={archived}
+            variant="secondary"
+            title={label}
+          >
+            {label}
+          </TableCellLink>
         );
       },
-    },
-  ];
+    });
+  }
+
   if (
     rowActions.deleteAction ||
     rowActions.viewAction ||

@@ -1,74 +1,52 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "./shared/table";
 import { DataTableRowActions } from "./shared/row-actions";
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
-import { useEffect, useState } from "react";
-import { PaginatedApiResponse } from "@/shared/types/api.types";
-import { TablePagination, perPageCountOptions } from "./shared/pagination";
+import { useCallback } from "react";
 import clientApiHandlers from "@/client/handlers";
 import { IAuthor } from "@/shared/types/models.types";
 import Link from "next/link";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
-import { debounce } from "@/lib/utils";
+import { TableCellText } from "./shared/table-cell";
+import { useInfiniteList } from "./shared/use-infinite-list";
 
 type Props = Omit<TableActionProps, "modelName"> & {
-  showPagination?: boolean;
   showToolbar?: boolean;
   archivedOnly?: boolean;
+  hideSearch?: boolean;
 };
 
 export default function AuthorsTable({
-  showPagination,
   showToolbar,
   archivedOnly,
+  hideSearch = false,
   ...props
 }: Props) {
-  const [tableData, setTableData] = useState<PaginatedApiResponse<
-    IAuthor[]
-  > | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(perPageCountOptions[0]);
   const searchQuery = useTableSearchStore((state) => state.searchQuery);
 
-  const loadData = async () => {
-    setTableData(null);
-    const res = await clientApiHandlers.authors.get({
-      page: currentPage,
-      perPage: perPage,
-      //   ...(archivedOnly && { where: { archived: true } }),
-      where: {
-        OR: [
-          { name: { contains: searchQuery } },
-          { description: { contains: searchQuery } },
-        ],
-      },
-    });
-    setTableData(res);
-  };
+  const fetcher = useCallback(
+    (page: number, pageSize: number) =>
+      clientApiHandlers.authors.get({
+        page,
+        perPage: pageSize,
+        include: { _count: { select: { commentaries: true } } },
+        where: {
+          ...(archivedOnly && { archived: true }),
+          OR: [
+            { name: { contains: searchQuery } },
+            { description: { contains: searchQuery } },
+          ],
+        },
+      }),
+    [searchQuery, archivedOnly]
+  );
 
-  const debouncedLoadData = debounce(loadData, 1000);
-
-  useEffect(() => {
-    debouncedLoadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
-
-  // useEffect for currentPage and perPage without debounce
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage]);
-
-  const pagination: TablePagination = {
-    onPageChange: setCurrentPage,
-    currentPage: currentPage,
-    perPage: perPage,
-    setPerPage: setPerPage,
-    totalPages: tableData?.pagination?.totalPages ?? 1,
-  };
+  const { data, hasMore, loadMore, loadingMore } = useInfiniteList<IAuthor>({
+    fetcher,
+    deps: [searchQuery, archivedOnly],
+  });
 
   const tableActionProps: TableActionProps = {
     ...props,
@@ -83,39 +61,24 @@ export default function AuthorsTable({
 
   return (
     <BaseTable
-      data={tableData?.data}
+      data={data}
       columns={columns(tableActionProps)}
       toolbarActions={tableActionProps}
-      pagination={pagination}
-      showPagination={showPagination}
       showToolbar={showToolbar}
+      hideSearch={hideSearch}
+      embedded={!!archivedOnly}
+      infiniteScroll={{
+        hasMore,
+        onLoadMore: loadMore,
+        loadingMore,
+      }}
     />
   );
 }
 
 function columns(rowActions: TableActionProps): ColumnDef<IAuthor, any>[] {
   const tableCols: ColumnDef<IAuthor, any>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+
     // {
     //     id: "index",
     //     header: ({ column }) => (
@@ -130,30 +93,32 @@ function columns(rowActions: TableActionProps): ColumnDef<IAuthor, any>[] {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Name" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex max-w-[100px] space-x-2">
-            <span className="max-w-[100px] truncate font-medium">
-              {row.getValue("name")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="primary">{row.getValue("name")}</TableCellText>
+      ),
     },
     {
       accessorKey: "description",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Description" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="max-w-[300px] line-clamp-3 font-medium">
-              {row.getValue("description")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="wide" clamp={3}>
+          {row.getValue("description")}
+        </TableCellText>
+      ),
+    },
+    {
+      id: "commentaries",
+      accessorFn: (author) => author._count?.commentaries ?? 0,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Commentaries" />
+      ),
+      cell: ({ row }) => (
+        <TableCellText variant="compact" className="font-normal">
+          {row.original._count?.commentaries ?? 0}
+        </TableCellText>
+      ),
     },
   ];
   if (

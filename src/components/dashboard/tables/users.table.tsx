@@ -1,77 +1,67 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "./shared/table";
 import { DataTableRowActions } from "./shared/row-actions";
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import { TablePagination, perPageCountOptions } from "./shared/pagination";
-import { useEffect, useState } from "react";
-import { PaginatedApiResponse } from "@/shared/types/api.types";
+import { useCallback } from "react";
 import { IUser } from "@/shared/types/models.types";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
+import { TableCellText } from "./shared/table-cell";
+import { formatTableDate } from "./shared/format";
+import { useInfiniteList } from "./shared/use-infinite-list";
 
 type Props = Omit<TableActionProps, "modelName"> & {
   archivedOnly?: boolean;
+  hideSearch?: boolean;
 };
 
-export default function UsersTable({ archivedOnly, ...props }: Props) {
+export default function UsersTable({ archivedOnly, hideSearch = false, ...props }: Props) {
   const { data: session } = useSession();
-  const [tableData, setTableData] = useState<PaginatedApiResponse<
-    IUser[]
-  > | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(perPageCountOptions[0]);
   const searchQuery = useTableSearchStore((state) => state.searchQuery);
 
-  const loadData = async () => {
-    if (!session) return;
-    setTableData(null);
-    const res = await clientApiHandlers.users.get({
-      page: currentPage,
-      perPage: perPage,
-      ...(session.user.role !== "ADMIN" && {
-        where: { role: { not: "ADMIN" } },
-      }),
-      ...(archivedOnly && { where: { archived: true } }),
-      ...(searchQuery && {
-        where: {
-          OR: [
-            { name: { contains: searchQuery } },
-            { email: { contains: searchQuery } },
-            {
-              role: {
-                in: [
-                  searchQuery.toUpperCase() === "ADMIN"
-                    ? "ADMIN"
-                    : searchQuery.toUpperCase() === "EDITOR"
-                    ? "EDITOR"
-                    : "VIEWER",
-                ],
+  const fetcher = useCallback(
+    (page: number, pageSize: number) => {
+      if (!session) throw new Error("Session required");
+      return clientApiHandlers.users.get({
+        page,
+        perPage: pageSize,
+        ...(session.user.role !== "ADMIN" && {
+          where: { role: { not: "ADMIN" } },
+        }),
+        ...(archivedOnly && { where: { archived: true } }),
+        ...(searchQuery && {
+          where: {
+            OR: [
+              { name: { contains: searchQuery } },
+              { email: { contains: searchQuery } },
+              {
+                role: {
+                  in: [
+                    searchQuery.toUpperCase() === "ADMIN"
+                      ? "ADMIN"
+                      : searchQuery.toUpperCase() === "EDITOR"
+                        ? "EDITOR"
+                        : "VIEWER",
+                  ],
+                },
               },
-            },
-          ],
-        },
-      }),
-    });
-    setTableData(res);
-  };
+            ],
+          },
+        }),
+      });
+    },
+    [session, searchQuery, archivedOnly]
+  );
 
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage]);
-
-  const pagination: TablePagination = {
-    onPageChange: setCurrentPage,
-    currentPage: currentPage,
-    perPage: perPage,
-    setPerPage: setPerPage,
-    totalPages: tableData?.pagination?.totalPages ?? 1,
-  };
+  const { data, hasMore, loadMore, loadingMore } = useInfiniteList<IUser>({
+    fetcher,
+    deps: [session, searchQuery, archivedOnly],
+    enabled: !!session,
+  });
 
   const tableActionProps: TableActionProps = {
     ...props,
@@ -86,37 +76,23 @@ export default function UsersTable({ archivedOnly, ...props }: Props) {
 
   return (
     <BaseTable
-      data={tableData?.data}
+      data={data}
       columns={columns(tableActionProps)}
-      pagination={pagination}
       toolbarActions={tableActionProps}
+      hideSearch={hideSearch}
+      embedded={!!archivedOnly}
+      infiniteScroll={{
+        hasMore,
+        onLoadMore: loadMore,
+        loadingMore,
+      }}
     />
   );
 }
 
 function columns(rowActions: TableActionProps): ColumnDef<IUser, any>[] {
   const tableCols: ColumnDef<IUser, any>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+
     // {
     //     id: "index",
     //     header: ({ column }) => (
@@ -131,45 +107,39 @@ function columns(rowActions: TableActionProps): ColumnDef<IUser, any>[] {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Name" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex max-w-[100px] space-x-2">
-            <span className="max-w-[100px] truncate font-medium">
-              {row.getValue("name")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="primary">{row.getValue("name")}</TableCellText>
+      ),
     },
     {
       accessorKey: "email",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Email" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="max-w-[300px] line-clamp-3 font-medium">
-              {row.getValue("email")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="primary">{row.getValue("email")}</TableCellText>
+      ),
     },
     {
       accessorKey: "role",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Role" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="max-w-[300px] line-clamp-3 font-medium">
-              {row.getValue("role")}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="secondary">{row.getValue("role")}</TableCellText>
+      ),
+    },
+    {
+      id: "createdAt",
+      accessorFn: (user) => formatTableDate(user.createdAt),
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Created" />
+      ),
+      cell: ({ row }) => (
+        <TableCellText variant="secondary" className="font-normal">
+          {formatTableDate(row.original.createdAt)}
+        </TableCellText>
+      ),
     },
   ];
   if (

@@ -4,9 +4,9 @@ import { useState } from "react";
 import AuthorsTable from "@/components/dashboard/tables/authors.table";
 import AuthorsForm from "@/components/dashboard/forms/authors.form";
 import { IAuthor } from "@/shared/types/models.types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FormSidePanel } from "@/components/dashboard/form-side-panel";
+import { ListPageShell } from "@/components/dashboard/list-page-shell";
 
 export default function Page() {
   const [panelOpen, setPanelOpen] = useState(false);
@@ -28,29 +28,24 @@ export default function Page() {
   };
 
   return (
-    <div>
-      <Card className="min-h-[600px]">
-        <CardHeader className="border-b-8 border-silver-light py-4">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="font-bold text-2xl">Authors</CardTitle>
-            <Button type="button" onClick={openAdd}>
-              Add New
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-5">
-          <AuthorsTable
-            editAction={(author: IAuthor) => (
-              <span
-                className="cursor-pointer"
-                onClick={() => openEdit(author)}
-              >
-                Edit
-              </span>
-            )}
-          />
-        </CardContent>
-      </Card>
+    <>
+      <ListPageShell
+        title="Authors"
+        addAction={
+          <Button type="button" onClick={openAdd}>
+            Add New
+          </Button>
+        }
+      >
+        <AuthorsTable
+          hideSearch
+          editAction={(author: IAuthor) => (
+            <span className="cursor-pointer" onClick={() => openEdit(author)}>
+              Edit
+            </span>
+          )}
+        />
+      </ListPageShell>
 
       <FormSidePanel
         open={panelOpen}
@@ -66,6 +61,6 @@ export default function Page() {
           onReset={closePanel}
         />
       </FormSidePanel>
-    </div>
+    </>
   );
 }

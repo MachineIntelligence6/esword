@@ -4,9 +4,9 @@ import BooksTable from "@/components/dashboard/tables/books.table";
 import BooksForm from "@/components/dashboard/forms/books.form";
 import { useState } from "react";
 import { IBook } from "@/shared/types/models.types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FormSidePanel } from "@/components/dashboard/form-side-panel";
+import { ListPageShell } from "@/components/dashboard/list-page-shell";
 
 export default function Page() {
   const [panelOpen, setPanelOpen] = useState(false);
@@ -28,29 +28,24 @@ export default function Page() {
   };
 
   return (
-    <div>
-      <Card className="min-h-[600px]">
-        <CardHeader className="border-b-8 border-silver-light py-4">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="font-bold text-2xl">Books</CardTitle>
-            <Button type="button" onClick={openAdd}>
-              Add New
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="px-3 py-5 md:p-5">
-          <BooksTable
-            editAction={(book) => (
-              <span
-                className="cursor-pointer"
-                onClick={() => openEdit(book)}
-              >
-                Edit
-              </span>
-            )}
-          />
-        </CardContent>
-      </Card>
+    <>
+      <ListPageShell
+        title="Books"
+        addAction={
+          <Button type="button" onClick={openAdd}>
+            Add New
+          </Button>
+        }
+      >
+        <BooksTable
+          hideSearch
+          editAction={(book) => (
+            <span className="cursor-pointer" onClick={() => openEdit(book)}>
+              Edit
+            </span>
+          )}
+        />
+      </ListPageShell>
 
       <FormSidePanel
         open={panelOpen}
@@ -66,6 +61,6 @@ export default function Page() {
           onReset={closePanel}
         />
       </FormSidePanel>
-    </div>
+    </>
   );
 }

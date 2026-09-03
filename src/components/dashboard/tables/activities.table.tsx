@@ -1,65 +1,47 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "./shared/table";
 import { DataTableRowActions } from "./shared/row-actions";
 import { TableActionProps } from "./shared/types";
 import { BaseTable } from "./shared/table";
 import clientApiHandlers from "@/client/handlers";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { PaginatedApiResponse } from "@/shared/types/api.types";
-import { TablePagination, perPageCountOptions } from "./shared/pagination";
+import { useCallback } from "react";
 import { IActivity, IBook } from "@/shared/types/models.types";
-import { cn } from "@/lib/utils";
 import { useTableSearchStore } from "@/lib/zustand/tableSearch";
+import { TableCellLink, TableCellText } from "./shared/table-cell";
+import { useInfiniteList } from "./shared/use-infinite-list";
 
 type Props = {
   book?: IBook;
   archivedOnly?: boolean;
+  hideSearch?: boolean;
 };
 
-export default function ActivitiesTable({ archivedOnly }: Props) {
-  const [tableData, setTableData] = useState<PaginatedApiResponse<
-    IActivity[]
-  > | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(perPageCountOptions[0]);
+export default function ActivitiesTable({ archivedOnly, hideSearch = false }: Props) {
   const { searchQuery } = useTableSearchStore();
 
-  const loadData = async () => {
-    setTableData(null);
-    const res = await clientApiHandlers.activities.get({
-      page: currentPage,
-      perPage: perPage,
-      where: {
-        ...(searchQuery && {
-          OR: [
-            { description: { contains: searchQuery } },
-            { user: { name: { contains: searchQuery } } },
-          ],
-        }),
-      },
-    });
-    setTableData(res);
-  };
+  const fetcher = useCallback(
+    (page: number, pageSize: number) =>
+      clientApiHandlers.activities.get({
+        page,
+        perPage: pageSize,
+        include: { user: true },
+        where: {
+          ...(searchQuery && {
+            OR: [
+              { description: { contains: searchQuery } },
+              { user: { name: { contains: searchQuery } } },
+            ],
+          }),
+        },
+      }),
+    [searchQuery]
+  );
 
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage]);
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
-
-  const pagination: TablePagination = {
-    onPageChange: setCurrentPage,
-    currentPage: currentPage,
-    perPage: perPage,
-    setPerPage: setPerPage,
-    totalPages: tableData?.pagination?.totalPages ?? 1,
-  };
+  const { data, hasMore, loadMore, loadingMore } = useInfiniteList<IActivity>({
+    fetcher,
+    deps: [searchQuery],
+  });
 
   const tableColumns = columns({
     archiveAction: true,
@@ -71,9 +53,15 @@ export default function ActivitiesTable({ archivedOnly }: Props) {
   return (
     <div>
       <BaseTable
-        data={tableData?.data}
+        data={data}
         columns={tableColumns}
-        pagination={pagination}
+        hideSearch={hideSearch}
+        embedded={!!archivedOnly}
+        infiniteScroll={{
+          hasMore,
+          onLoadMore: loadMore,
+          loadingMore,
+        }}
       />
     </div>
   );
@@ -94,27 +82,7 @@ function generateActivityRefUrl(activity: IActivity) {
 
 function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
   return [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+
     // {
     //     id: "index",
     //     header: ({ column }) => (
@@ -130,15 +98,11 @@ function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Date/Time" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex space-x-2">
-            <span className="max-w-[200px] truncate font-medium">
-              {new Date(row.original.timestamp).toLocaleString()}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellText variant="secondary">
+          {new Date(row.original.timestamp).toLocaleString()}
+        </TableCellText>
+      ),
     },
     {
       id: "user",
@@ -149,37 +113,49 @@ function columns(rowActions: TableActionProps): ColumnDef<IActivity, any>[] {
       cell: ({ row }) => {
         const archived = row.original.user?.archived ?? true;
         return (
-          <div className="flex max-w-[100px] space-x-2">
-            <Link
-              href={archived ? "#" : `/dashboard/users/${row.original.userId}`}
-              className={cn(
-                "max-w-[100px] truncate font-medium",
-                archived ? "text-gray-700" : "text-primary"
-              )}
-            >
-              {row.original.user?.name}
-            </Link>
-          </div>
+          <TableCellLink
+            href={`/dashboard/users/${row.original.userId}`}
+            disabled={archived}
+            variant="secondary"
+          >
+            {row.original.user?.name}
+          </TableCellLink>
         );
       },
+    },
+    {
+      accessorKey: "action",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Action" />
+      ),
+      cell: ({ row }) => (
+        <TableCellText variant="compact">{row.getValue("action")}</TableCellText>
+      ),
+    },
+    {
+      accessorKey: "model",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Model" />
+      ),
+      cell: ({ row }) => (
+        <TableCellText variant="compact">{row.getValue("model")}</TableCellText>
+      ),
     },
     {
       accessorKey: "description",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Description" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <Link
-              href={generateActivityRefUrl(row.original)}
-              className="max-w-[500px] text-primary font-normal line-clamp-2"
-            >
-              {row.getValue("description")}
-            </Link>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableCellLink
+          href={generateActivityRefUrl(row.original)}
+          variant="wide"
+          clamp={2}
+          className="font-normal"
+        >
+          {row.getValue("description")}
+        </TableCellLink>
+      ),
     },
     {
       id: "actions",
