@@ -28,7 +28,10 @@ export function useInfiniteList<T>({
   const loadingRef = useRef(false);
   const depsKey = JSON.stringify(deps);
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
+
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  }, [fetcher]);
 
   const loadPage = useCallback(
     async (pageNum: number, append: boolean) => {
