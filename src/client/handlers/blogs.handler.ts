@@ -5,16 +5,25 @@ import { BlogsPaginationProps } from "@/shared/types/pagination.types";
 import { BlogsFormSchema } from "@/components/dashboard/forms/blogs.form";
 import { buildApiQuery } from "@/client/query-string";
 
-
-
-
 export async function get({
     page = 1, perPage, user = -1,
+    book = -1, chapter = -1, verse = -1,
     include, where, orderBy, type
 }: BlogsPaginationProps): Promise<PaginatedApiResponse<IBlog[]>> {
     try {
         const res = await axios.get<PaginatedApiResponse<IBlog[]>>(
-            `/api/blogs${buildApiQuery({ page, perPage, book: user, type, include, where, orderBy })}`
+            `/api/blogs${buildApiQuery({
+                page,
+                perPage,
+                user,
+                book,
+                chapter,
+                verse,
+                type,
+                include,
+                where,
+                orderBy,
+            })}`
         )
         return res.data
     } catch (error) {
@@ -39,8 +48,6 @@ export async function getById(id: number): Promise<ApiResponse<IBlog>> {
         }
     }
 }
-
-
 
 export async function create(data: BlogsFormSchema): Promise<ApiResponse<IBlog>> {
     try {
@@ -68,8 +75,6 @@ export async function update(id: number, update: BlogsFormSchema): Promise<ApiRe
     }
 }
 
-
-
 export async function archive(id: number): Promise<ApiResponse<null>> {
     try {
         const res = await axios.delete<ApiResponse<null>>(`/api/blogs/${id}`)
@@ -82,7 +87,3 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
         }
     }
 }
-
-
-
-

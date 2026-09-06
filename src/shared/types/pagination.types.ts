@@ -44,6 +44,9 @@ export type ChaptersPaginationProps = BasePaginationProps<Prisma.ChapterInclude,
 export type BlogsPaginationProps = BasePaginationProps<Prisma.BlogInclude, Prisma.BlogWhereInput, Prisma.BlogOrderByWithRelationInput> & {
     user?: number;
     type?: BlogType;
+    book?: number;
+    chapter?: number;
+    verse?: number;
 }
 
 export type UserPaginationProps = BasePaginationProps<Prisma.UserInclude, Prisma.UserWhereInput, Prisma.UserOrderByWithRelationInput> & {

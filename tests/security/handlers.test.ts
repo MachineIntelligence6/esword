@@ -171,11 +171,14 @@ describe("security handler boundaries", () => {
 
     expect(dbMock.blog.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        include: {
+        include: expect.objectContaining({
           user: {
             select: expect.not.objectContaining({ password: true }),
           },
-        },
+          book: true,
+          chapter: true,
+          verse: true,
+        }),
       })
     );
   });

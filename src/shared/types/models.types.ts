@@ -41,7 +41,10 @@ export type INote = Note & {
     verse?: IVerse;
 }
 export type IBlog = Blog & {
-    user?: IUser;
+    user?: Partial<IUser> | null;
+    book?: IBook | null;
+    chapter?: IChapter | null;
+    verse?: IVerse | null;
 }
 
 export type IAuthor = Author & {

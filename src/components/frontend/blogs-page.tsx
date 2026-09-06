@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import BookmarksList from "./bookmarks-list";
 import { useBlogsStore } from "@/lib/zustand/blogsStore";
+import { useReadBookStore } from "@/lib/zustand/readBookStore";
 import { useEffect } from "react";
 import { IBlog } from "@/shared/types/models.types";
 import { cn, extractTextFromHtml } from "@/lib/utils";
@@ -30,46 +31,104 @@ type Props = {
   variant: BlogType;
 };
 
+function scopeLabel(blog: IBlog): string {
+  const parts: string[] = [];
+  if (blog.book?.abbreviation || blog.book?.name) {
+    parts.push(blog.book.abbreviation || blog.book.name);
+  }
+  if (blog.chapter?.name != null) {
+    parts.push(`Ch. ${blog.chapter.name}`);
+  }
+  if (blog.verse?.number != null) {
+    parts.push(`v. ${blog.verse.number}`);
+  }
+  if (parts.length === 0) return "Book-level";
+  if (!blog.chapterId && !blog.verseId) return `${parts[0]} · Book`;
+  return parts.join(" · ");
+}
+
 export default function BlogsPageComponent({ variant }: Props) {
   const { activeBlog, blogsList, loadingBlogs, loadBlogsData } =
     useBlogsStore();
+  const { activeBook, activeChapter, activeVerse, loadInitialData } =
+    useReadBookStore();
+
   useEffect(() => {
-    loadBlogsData(variant, 1);
-  }, [variant, loadBlogsData]);
+    if (!activeBook.id) {
+      void loadInitialData();
+    }
+  }, [activeBook.id, loadInitialData]);
+
+  useEffect(() => {
+    void loadBlogsData(variant, 1, {
+      bookId: activeBook.id ?? null,
+      chapterId: activeChapter.id ?? null,
+      verseId: activeVerse.id ?? null,
+    });
+  }, [
+    variant,
+    activeBook.id,
+    activeChapter.id,
+    activeVerse.id,
+    loadBlogsData,
+  ]);
+
+  const label = variant === "PROBLEM" ? "Problems" : "Manuscripts";
+  const bookName = activeBook.data?.name;
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-white min-w-0 flex-1">
       <div className="grid-cols-11 lg:grid ">
         <div className="block bg-primary lg:hidden">
           <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
               <AccordionTrigger className=" bg-silver-light py-3 font-inter lg:pl-3 pl-5 pr-[19px] flex justify-between w-full border-b-2">
                 <h3 className="text-xs font-bold capitalize text-primary-dark">
-                  {variant}S
+                  {label}
+                  {bookName ? ` · ${bookName}` : ""}
                 </h3>
                 <ChevronDownIcon className="w-4 h-4 transition-transform duration-200 shrink-0 text-stone-500 dark:text-stone-400 " />
               </AccordionTrigger>
               <AccordionContent className="p-0 overflow-auto ">
-                <BlogsContent variant={variant} />
+                <BlogsContent variant={variant} label={label} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </div>
-        <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px]  border-r-2 w-full bg-silver-light col-span-7 capitalize ">
-          {activeBlog?.title}
+        <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px]  border-r-2 w-full bg-silver-light col-span-7 capitalize line-clamp-1">
+          {activeBlog?.title ??
+            (bookName
+              ? `${label} for ${bookName}`
+              : `Select a book to view ${label.toLowerCase()}`)}
         </h3>
         <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:px-[10px] lg:border-0 border-b w-full bg-silver-light col-span-4 lg:block capitalize hidden">
-          {variant}S
+          {label}
+          {bookName ? ` · ${bookName}` : ""}
         </h3>
       </div>
       <div className="lg:grid grid-cols-11 max-h-[calc(100vh_-_100px)] overflow-y-auto  ">
         <div className="col-span-7 w-full text-primary-dark text-base font-normal font-roman lg:border-r-[10px]  ">
           <div className="flex">
             <div className="w-full p-4 space-y-3 overflow-y-auto">
-              {/* Active Blog Content  */}
-              {!loadingBlogs && blogsList ? (
-                activeBlog && (
-                  <QuillEditor disabled value={activeBlog?.content} />
+              {!activeBook.id ? (
+                <p className="text-sm text-primary-dark/70 py-10 text-center">
+                  Select a book from the sidebar to see related{" "}
+                  {label.toLowerCase()}.
+                </p>
+              ) : !loadingBlogs && blogsList ? (
+                activeBlog ? (
+                  <div className="space-y-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-primary-dark/60">
+                      {scopeLabel(activeBlog)}
+                    </p>
+                    <QuillEditor disabled value={activeBlog?.content} />
+                  </div>
+                ) : (
+                  <p className="text-sm text-primary-dark/70 py-10 text-center">
+                    No {label.toLowerCase()} for this selection yet. Book-level
+                    entries appear when browsing the book; chapter or verse
+                    entries appear when those are selected.
+                  </p>
                 )
               ) : (
                 <BlogContentLoadingPlaceholder />
@@ -79,7 +138,7 @@ export default function BlogsPageComponent({ variant }: Props) {
           </div>
         </div>
         <div className="hidden w-full h-screen col-span-4 overflow-auto bg-primary lg:block ">
-          <BlogsContent variant={variant} />
+          <BlogsContent variant={variant} label={label} />
         </div>
       </div>
     </div>
@@ -88,28 +147,39 @@ export default function BlogsPageComponent({ variant }: Props) {
 
 type BlogsContentProps = {
   variant: BlogType;
+  label: string;
 };
 
-function BlogsContent({ variant }: BlogsContentProps) {
-  const { blogsList, loadingBlogs, setActiveBlog } = useBlogsStore();
+function BlogsContent({ variant, label }: BlogsContentProps) {
+  const { blogsList, loadingBlogs, setActiveBlog, activeBlog } = useBlogsStore();
+  const { activeBook } = useReadBookStore();
 
   return (
     <div className="relative min-h-full overflow-hidden overflow-y-auto">
       <div className="p-5  space-y-4 pb-20 lg:pb-0 lg:max-h-[calc(100vh_-_100px)] overflow-y-auto overflow-hidden">
-        {!loadingBlogs && blogsList ? (
+        {!activeBook.id ? (
+          <div className="flex items-center justify-center h-80">
+            <p className="text-white text-center px-4">
+              Select a book to load {label.toLowerCase()}.
+            </p>
+          </div>
+        ) : !loadingBlogs && blogsList ? (
           blogsList.length > 0 ? (
             <div className="space-y-2 md:space-y-5">
-              {blogsList?.map((blog) => (
+              {blogsList.map((blog) => (
                 <BlogListItem
                   key={blog.id}
                   blog={blog}
+                  active={activeBlog?.id === blog.id}
                   onClick={() => setActiveBlog(blog)}
                 />
               ))}
             </div>
           ) : (
             <div className="flex items-center justify-center h-80">
-              <p className="text-white">No data found.</p>
+              <p className="text-white text-center px-4">
+                No {label.toLowerCase()} for this book context.
+              </p>
             </div>
           )
         ) : (
@@ -137,28 +207,34 @@ function formatDate(date: Date) {
 
 type BlogListItemProps = {
   blog: IBlog;
-  className?: string;
+  active?: boolean;
   onClick?: () => void;
 };
 
-export function BlogListItem({ blog, onClick }: BlogListItemProps) {
+export function BlogListItem({ blog, active, onClick }: BlogListItemProps) {
   return (
     <Card
-      className="w-full bg-white cursor-pointer"
+      className={cn(
+        "w-full bg-white cursor-pointer transition-shadow",
+        active && "ring-2 ring-white/80"
+      )}
       role="button"
       onClick={onClick}
     >
       <CardContent className="p-4 py-2">
         <div className="md:space-y-1">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-primary-dark/55 line-clamp-1">
+            {scopeLabel(blog)}
+          </p>
           <div className="flex items-center justify-between gap-1">
-            <h1 className="text-xs font-bold line-clamp-1 font-roman text-primary-dark/80 xl:text-lg">
+            <h1 className="text-xs font-bold line-clamp-2 font-roman text-primary-dark/80 xl:text-lg">
               {blog.title}
             </h1>
-            <p className="font-normal text-[7px] text-primary-dark xl:text-[9px] min-w-fit">
+            <p className="font-normal text-[7px] text-primary-dark xl:text-[9px] min-w-fit shrink-0">
               ({formatDate(new Date(blog.createdAt))})
             </p>
           </div>
-          <div className="overflow-hidden text-sm font-normal font-roman overflow-ellipsis line-clamp-1">
+          <div className="overflow-hidden text-sm font-normal font-roman overflow-ellipsis line-clamp-2">
             {extractTextFromHtml(blog.content)}
           </div>
         </div>
@@ -178,10 +254,17 @@ export function BlogsPagination({ variant }: BlogsPaginationProps) {
     currentPage,
     loadingBlogs,
     blogsList,
+    contextBookId,
+    contextChapterId,
+    contextVerseId,
   } = useBlogsStore();
   const totalPages = blogsPagination?.totalPages ?? 0;
   const onPageChange = (page: number) => {
-    loadBlogsData(variant, page);
+    loadBlogsData(variant, page, {
+      bookId: contextBookId,
+      chapterId: contextChapterId,
+      verseId: contextVerseId,
+    });
   };
 
   const getVisiblePages = () => {
@@ -219,8 +302,8 @@ export function BlogsPagination({ variant }: BlogsPaginationProps) {
           <Button
             variant="primary-outline"
             className="flex w-8 h-8 p-0"
-            onClick={() => onPageChange(0)}
-            disabled={currentPage <= 1 || loadingBlogs}
+            onClick={() => onPageChange(1)}
+            disabled={currentPage <= 1 || loadingBlogs || !contextBookId}
           >
             <span className="sr-only">Go to first page</span>
             <DoubleArrowLeftIcon className="w-4 h-4" />
@@ -231,7 +314,7 @@ export function BlogsPagination({ variant }: BlogsPaginationProps) {
             onClick={() =>
               onPageChange(currentPage > 1 ? currentPage - 1 : currentPage)
             }
-            disabled={currentPage <= 1 || loadingBlogs}
+            disabled={currentPage <= 1 || loadingBlogs || !contextBookId}
           >
             <span className="sr-only">Go to previous page</span>
             <ChevronLeftIcon className="w-4 h-4" />
@@ -268,7 +351,7 @@ export function BlogsPagination({ variant }: BlogsPaginationProps) {
                 currentPage < totalPages ? currentPage + 1 : currentPage
               )
             }
-            disabled={currentPage >= totalPages || loadingBlogs}
+            disabled={currentPage >= totalPages || loadingBlogs || !contextBookId}
           >
             <span className="sr-only">Go to next page</span>
             <ChevronRightIcon className="w-4 h-4" />
@@ -277,7 +360,7 @@ export function BlogsPagination({ variant }: BlogsPaginationProps) {
             variant="primary-outline"
             className="flex w-8 h-8 p-0 "
             onClick={() => onPageChange(totalPages)}
-            disabled={currentPage >= totalPages || loadingBlogs}
+            disabled={currentPage >= totalPages || loadingBlogs || !contextBookId}
           >
             <span className="sr-only">Go to last page</span>
             <DoubleArrowRightIcon className="w-4 h-4" />

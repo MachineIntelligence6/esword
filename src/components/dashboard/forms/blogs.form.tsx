@@ -11,14 +11,12 @@ import Spinner from "@/components/spinner";
 import { z } from 'zod'
 import { useRouter } from "next/navigation";
 import { SelectEl } from "../../ui/select";
-import { useEffect, useState } from "react";
-import { IBlog, IBook } from "@/shared/types/models.types";
+import { useEffect, useMemo, useState } from "react";
+import { IBlog, IBook, IChapter, IVerse } from "@/shared/types/models.types";
 import { BlogType } from "@prisma/client";
 import QuillEditor from "@/components/ui/editor";
 import Image from "next/image";
 import { TagsInput } from "react-tag-input-component";
-
-
 
 export const blogsFormSchema = z.object({
     info: z.string().nullable().default(""),
@@ -28,12 +26,12 @@ export const blogsFormSchema = z.object({
     image: z.string().nullable().default(null),
     type: z.string({ required_error: "This field is required." }),
     tags: z.array(z.string(), { required_error: "This field is required." }).optional().default([]),
+    book: z.number({ required_error: "Book is required." }).min(1, { message: "Book is required." }),
+    chapter: z.number().optional().nullable(),
+    verse: z.number().optional().nullable(),
 })
 
-
 export type BlogsFormSchema = z.infer<typeof blogsFormSchema>
-
-
 
 export default function BlogsForm({ blog }: { blog?: IBlog }) {
     const router = useRouter()
@@ -51,20 +49,47 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
             tags: blog?.tags
                 ? blog.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
                 : [],
+            book: blog?.bookId,
+            chapter: blog?.chapterId ?? null,
+            verse: blog?.verseId ?? null,
         }
     })
-    const { formState } = form
-
-
+    const { formState, watch, setValue } = form
+    const selectedBookId = watch("book")
+    const selectedChapterId = watch("chapter")
 
     useEffect(() => {
-        clientApiHandlers.books.get({ page: 1, perPage: -1 })
-            .then((res) => {
-                setBooks(res.data ?? [])
-            })
+        clientApiHandlers.books.get({
+            page: 1,
+            perPage: -1,
+            include: {
+                chapters: {
+                    where: { archived: false },
+                    include: {
+                        topics: {
+                            where: { archived: false },
+                            include: {
+                                verses: { where: { archived: false } },
+                            },
+                        },
+                    },
+                },
+            },
+        }).then((res) => {
+            setBooks(res.data ?? [])
+        })
     }, [])
 
+    const chapters: IChapter[] = useMemo(() => {
+        if (!selectedBookId || !books) return []
+        return books.find((b) => b.id === selectedBookId)?.chapters ?? []
+    }, [books, selectedBookId])
 
+    const verses: IVerse[] = useMemo(() => {
+        if (!selectedChapterId) return []
+        const chapter = chapters.find((ch) => ch.id === selectedChapterId)
+        return (chapter?.topics ?? []).flatMap((t) => t.verses ?? [])
+    }, [chapters, selectedChapterId])
 
     const updateSlug = () => {
         const titleVal = form.getValues("title")
@@ -72,8 +97,6 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
         const slug = titleVal.toLowerCase().replaceAll(" ", "_").replaceAll("/", "_")
         form.setValue("slug", slug, { shouldValidate: true })
     }
-
-
 
     const resetFormValues = () => {
         form.reset({
@@ -84,43 +107,40 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
             content: "",
             image: null,
             tags: [],
+            book: undefined,
+            chapter: null,
+            verse: null,
         })
     }
 
-
-
+    const mapError = (code?: string) => {
+        if (code === "SLUG_MUST_BE_UNIQUE") {
+            form.setError("slug", { message: definedMessages.SLUG_MUST_BE_UNIQUE })
+            return
+        }
+        if (code === "INVALID_RELATIONSHIP") {
+            form.setError("info", { message: definedMessages.INVALID_RELATIONSHIP })
+            return
+        }
+        if (code === "VALIDATION_ERROR") {
+            form.setError("info", { message: definedMessages.VALIDATION_ERROR })
+            return
+        }
+        form.setError("info", { message: definedMessages.UNKNOWN_ERROR })
+    }
 
     const handleAddNew = async (data: BlogsFormSchema) => {
         const res = await clientApiHandlers.blogs.create(data)
         if (res.succeed && res.data) return router.push("/dashboard/blogs")
-        if (res.code === "SLUG_MUST_BE_UNIQUE") {
-            form.setError("slug", {
-                message: definedMessages.SLUG_MUST_BE_UNIQUE
-            })
-        }
-        if (res.code === "UNKNOWN_ERROR") {
-            form.setError("info", {
-                message: definedMessages.UNKNOWN_ERROR
-            })
-        }
+        mapError(res.code)
     }
 
     const handleUpdate = async (data: BlogsFormSchema) => {
         if (!blog) return;
         const res = await clientApiHandlers.blogs.update(blog.id, data)
         if (res.succeed && res.data) return router.push("/dashboard/blogs")
-        if (res.code === "SLUG_MUST_BE_UNIQUE") {
-            form.setError("slug", {
-                message: definedMessages.SLUG_MUST_BE_UNIQUE
-            })
-        }
-        if (res.code === "UNKNOWN_ERROR") {
-            form.setError("info", {
-                message: definedMessages.UNKNOWN_ERROR
-            })
-        }
+        mapError(res.code)
     }
-
 
     return (
         <Card className="w-full rounded-md">
@@ -143,10 +163,7 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                                 updateSlug()
                                             }} />
                                     </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
+                                    {fieldState.error && <FormMessage />}
                                 </FormItem>
                             )}
                         />
@@ -159,10 +176,7 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                     <FormControl>
                                         <Input type="text" required  {...field} />
                                     </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
+                                    {fieldState.error && <FormMessage />}
                                 </FormItem>
                             )}
                         />
@@ -171,21 +185,102 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                             name="type"
                             render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel>Blog Type <span className="text-red-500">*</span></FormLabel>
+                                    <FormLabel>Type <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <SelectEl
                                             value={field.value}
                                             placeholder="Select Type"
                                             onChange={(opt) => field.onChange(opt?.value)}
                                             ref={field.ref}
-                                            loading={!books}
-                                            options={[BlogType.MANUSCRIPT, BlogType.PROBLEM]?.map((type) => ({ label: type, value: type, rawValue: type }))}
+                                            options={[BlogType.MANUSCRIPT, BlogType.PROBLEM].map((type) => ({
+                                                label: type,
+                                                value: type,
+                                                rawValue: type,
+                                            }))}
                                         />
                                     </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
+                                    {fieldState.error && <FormMessage />}
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="book"
+                            render={({ field, fieldState }) => (
+                                <FormItem>
+                                    <FormLabel>Book <span className="text-red-500">*</span></FormLabel>
+                                    <FormControl>
+                                        <SelectEl
+                                            value={field.value ? String(field.value) : undefined}
+                                            placeholder="Select Book"
+                                            loading={!books}
+                                            onChange={(opt) => {
+                                                field.onChange(opt?.rawValue ? Number(opt.rawValue) : undefined)
+                                                setValue("chapter", null)
+                                                setValue("verse", null)
+                                            }}
+                                            ref={field.ref}
+                                            options={(books ?? []).map((book) => ({
+                                                label: book.name,
+                                                value: String(book.id),
+                                                rawValue: book.id,
+                                            }))}
+                                        />
+                                    </FormControl>
+                                    {fieldState.error && <FormMessage />}
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="chapter"
+                            render={({ field, fieldState }) => (
+                                <FormItem>
+                                    <FormLabel>Chapter (optional)</FormLabel>
+                                    <FormControl>
+                                        <SelectEl
+                                            value={field.value ? String(field.value) : undefined}
+                                            placeholder={selectedBookId ? "Entire book / select chapter" : "Select a book first"}
+                                            disabled={!selectedBookId}
+                                            onChange={(opt) => {
+                                                field.onChange(opt?.rawValue ? Number(opt.rawValue) : null)
+                                                setValue("verse", null)
+                                            }}
+                                            ref={field.ref}
+                                            options={chapters.map((ch) => ({
+                                                label: `Chapter ${ch.name}`,
+                                                value: String(ch.id),
+                                                rawValue: ch.id,
+                                            }))}
+                                        />
+                                    </FormControl>
+                                    {fieldState.error && <FormMessage />}
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="verse"
+                            render={({ field, fieldState }) => (
+                                <FormItem>
+                                    <FormLabel>Verse (optional)</FormLabel>
+                                    <FormControl>
+                                        <SelectEl
+                                            value={field.value ? String(field.value) : undefined}
+                                            placeholder={selectedChapterId ? "Entire chapter / select verse" : "Select a chapter first"}
+                                            disabled={!selectedChapterId}
+                                            onChange={(opt) => {
+                                                field.onChange(opt?.rawValue ? Number(opt.rawValue) : null)
+                                            }}
+                                            ref={field.ref}
+                                            options={verses.map((v) => ({
+                                                label: `Verse ${v.number}`,
+                                                value: String(v.id),
+                                                rawValue: v.id,
+                                            }))}
+                                        />
+                                    </FormControl>
+                                    {fieldState.error && <FormMessage />}
                                 </FormItem>
                             )}
                         />
@@ -205,10 +300,7 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                             name={field.name}
                                         />
                                     </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
+                                    {fieldState.error && <FormMessage />}
                                 </FormItem>
                             )}
                         />
@@ -220,7 +312,6 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                     <FormLabel>Featured Image</FormLabel>
                                     <FormControl>
                                         <FileInput
-                                            required
                                             onFileChange={(value) => {
                                                 field.onChange(value)
                                             }}>
@@ -232,15 +323,12 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                                                             width={500} height={300} alt=""
                                                             className="w-auto h-full object-contain object-center" />
                                                         :
-                                                        <p className="text-center">Click here to select featured image for blog.</p>
+                                                        <p className="text-center">Click here to select featured image.</p>
                                                 }
                                             </div>
                                         </FileInput>
                                     </FormControl>
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
+                                    {fieldState.error && <FormMessage />}
                                 </FormItem>
                             )}
                         />
@@ -261,18 +349,15 @@ export default function BlogsForm({ blog }: { blog?: IBlog }) {
                             control={form.control}
                             name="info"
                             render={({ fieldState }) => (
-                                <FormItem className="mt-5">
-                                    {
-                                        fieldState.error &&
-                                        <FormMessage />
-                                    }
+                                <FormItem className="mt-5 col-span-full">
+                                    {fieldState.error && <FormMessage />}
                                 </FormItem>
                             )}
                         />
-
                     </CardContent>
                     <CardFooter className="flex justify-between">
                         <Button variant="outline"
+                            type="button"
                             onClick={() => formState.isDirty ? resetFormValues() : window.history.back()}
                         >
                             Cancel

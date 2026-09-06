@@ -26,7 +26,7 @@ export default function BlogsTable({ user, archivedOnly, hideSearch = false, edi
             clientApiHandlers.blogs.get({
                 page,
                 perPage: pageSize,
-                include: { user: true },
+                include: { user: true, book: true, chapter: true, verse: true },
                 user: user?.id,
                 ...(archivedOnly && {
                     where: {
@@ -125,6 +125,35 @@ function columns(rowActions: TableActionProps): ColumnDef<IBlog, any>[] {
                     {String(row.original.type).replace(/_/g, " ").toLowerCase()}
                 </Badge>
             ),
+        },
+        {
+            id: "scope",
+            accessorFn: (blog) => {
+                const parts: string[] = []
+                if (blog.book?.abbreviation || blog.book?.name) {
+                    parts.push(blog.book.abbreviation || blog.book.name)
+                }
+                if (blog.chapter?.name != null) parts.push(`Ch.${blog.chapter.name}`)
+                if (blog.verse?.number != null) parts.push(`v.${blog.verse.number}`)
+                return parts.join(" ") || "—"
+            },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Scope" />
+            ),
+            cell: ({ row }) => {
+                const blog = row.original
+                const parts: string[] = []
+                if (blog.book?.abbreviation || blog.book?.name) {
+                    parts.push(blog.book.abbreviation || blog.book.name)
+                }
+                if (blog.chapter?.name != null) parts.push(`Ch.${blog.chapter.name}`)
+                if (blog.verse?.number != null) parts.push(`v.${blog.verse.number}`)
+                return (
+                    <TableCellText variant="compact" className="font-normal">
+                        {parts.join(" · ") || "—"}
+                    </TableCellText>
+                )
+            },
         },
         {
             accessorKey: "status",

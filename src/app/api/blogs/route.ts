@@ -10,12 +10,17 @@ export const GET = async (req: Request) => {
     const page = parseIntegerParam(params, "page", 1, { min: 1 })
     const perPage = parseIntegerParam(params, "perPage", defaults.PER_PAGE_ITEMS, { min: -1 })
     const user = parseIntegerParam(params, "user", -1, { min: -1 })
+    const book = parseIntegerParam(params, "book", -1, { min: -1 })
+    const chapter = parseIntegerParam(params, "chapter", -1, { min: -1 })
+    const verse = parseIntegerParam(params, "verse", -1, { min: -1 })
     const type = (params.get("type") as BlogType | undefined)
     const include = parseJsonParam<Prisma.BlogInclude>(params, "include")
     const where = parseJsonParam<Prisma.BlogWhereInput>(params, "where")
     const orderBy = parseJsonParam<Prisma.BlogOrderByWithRelationInput>(params, "orderBy")
 
-    const res = await serverApiHandlers.blogs.getAll({ page, perPage, user, include, where, orderBy, type })
+    const res = await serverApiHandlers.blogs.getAll({
+        page, perPage, user, book, chapter, verse, include, where, orderBy, type,
+    })
     return NextResponse.json(res)
 }
 

@@ -185,6 +185,22 @@ function commentaryHtml(authorName, ref) {
   return `<p><strong>${authorName}</strong> on ${ref}: This demo commentary expands the meaning of the passage for study. It is intentionally longer so dashboard tables and the reader panel show wrapped content.</p><p>Key idea: read carefully, compare related passages, and apply with humility.</p>`;
 }
 
+const ABOUT_DEMO_HTML = `
+<h2>Welcome to Apocryphal Writings</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<h3>Our Mission</h3>
+<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper.</p>
+<ul>
+  <li>Curabitur ullamcorper ultricies nisi — nam eget dui.</li>
+  <li>Etiam rhoncus — maecenas tempus, tellus eget.</li>
+  <li>Aenean vulputate eleifend tellus — aenean leo ligula.</li>
+</ul>
+<h3>Study Resources</h3>
+<p>Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim.</p>
+<p><em>This is demo placeholder content for the About page. Replace it anytime from Dashboard → About Page.</em></p>
+`.trim();
+
 async function clearContent() {
   await prisma.highlight.deleteMany();
   await prisma.bookmark.deleteMany();
@@ -228,6 +244,7 @@ async function seedDemo() {
   let totalVerses = 0;
   let totalCommentaries = 0;
   const firstVerses = [];
+  const catalogBooks = [];
 
   console.log(`Seeding ${catalog.length} books…`);
 
@@ -305,6 +322,8 @@ async function seedDemo() {
       },
     });
 
+    catalogBooks.push(book);
+
     if (firstVerses.length < 8) {
       for (const chapter of book.chapters) {
         for (const topic of chapter.topics) {
@@ -344,36 +363,91 @@ async function seedDemo() {
     }
   }
 
+  const genesis = catalogBooks[0];
+  const exodus = catalogBooks[1] ?? catalogBooks[0];
+  const firstChapter = genesis?.chapters?.[0] ?? null;
+  const firstVerse =
+    firstChapter?.topics?.[0]?.verses?.[0] ?? firstVerses[0] ?? null;
+
   await prisma.blog.createMany({
     data: [
       {
-        slug: "demo-welcome-manuscript",
-        title: "Demo Welcome: How to browse the seeded library",
+        slug: "genesis-manuscript-overview",
+        title: "Genesis Manuscript Overview",
         content:
-          "<p>This manuscript-style post is seeded so the Blogs list has content. Explore the ~100-book demo library with filters and infinite scroll.</p>",
+          "<p>Scholarly overview of Genesis manuscript traditions for this demo library. This entry is <strong>book-level</strong> and appears whenever Genesis is selected.</p>",
         type: "MANUSCRIPT",
         status: "PUBLISHED",
-        tags: "demo,welcome,guide",
+        tags: "manuscript,genesis,overview",
         userId: admin.id,
+        bookId: genesis.id,
+        chapterId: null,
+        verseId: null,
       },
       {
-        slug: "demo-textual-problem",
-        title: "Demo Problem: Comparing long titles and wrapped cells",
+        slug: "genesis-ch1-manuscript-notes",
+        title: "Genesis 1 — Opening Manuscript Notes",
         content:
-          "<p>A problem-type blog entry used to verify truncation, tags, and side panels with longer titles in the admin UI.</p>",
+          "<p>Chapter-level manuscript notes for Genesis chapter 1. Visible when Chapter 1 is selected, alongside book-level manuscripts.</p>",
+        type: "MANUSCRIPT",
+        status: "PUBLISHED",
+        tags: "manuscript,genesis,chapter",
+        userId: admin.id,
+        bookId: genesis.id,
+        chapterId: firstChapter?.id ?? null,
+        verseId: null,
+      },
+      {
+        slug: "genesis-textual-problem-book",
+        title: "Genesis — Text Tradition Problem",
+        content:
+          "<p>Book-level problem entry describing a textual difficulty spanning Genesis. Appears for the whole book.</p>",
         type: "PROBLEM",
         status: "PUBLISHED",
-        tags: "demo,ui,filters",
+        tags: "problem,genesis",
         userId: admin.id,
+        bookId: genesis.id,
+        chapterId: null,
+        verseId: null,
       },
       {
-        slug: "demo-draft-post",
-        title: "Demo Draft: Not published yet",
-        content: "<p>Draft blog for status column checks.</p>",
-        type: "MANUSCRIPT",
-        status: "DRAFT",
-        tags: "draft",
+        slug: "genesis-ch1-v1-problem",
+        title: "Genesis 1:1 — Opening Phrase Variant",
+        content:
+          "<p>Verse-level problem for Genesis 1:1. Prioritized when that verse is active; otherwise chapter/book problems still appear.</p>",
+        type: "PROBLEM",
+        status: "PUBLISHED",
+        tags: "problem,genesis,verse",
         userId: admin.id,
+        bookId: genesis.id,
+        chapterId: firstChapter?.id ?? null,
+        verseId: firstVerse?.id ?? null,
+      },
+      {
+        slug: "exodus-manuscript-overview",
+        title: "Exodus Manuscript Overview",
+        content:
+          "<p>Book-level manuscript notes for Exodus so switching books replaces Genesis entries.</p>",
+        type: "MANUSCRIPT",
+        status: "PUBLISHED",
+        tags: "manuscript,exodus",
+        userId: admin.id,
+        bookId: exodus.id,
+        chapterId: null,
+        verseId: null,
+      },
+      {
+        slug: "exodus-problem-overview",
+        title: "Exodus — Transmission Problem",
+        content:
+          "<p>Book-level problem for Exodus used to verify book filtering.</p>",
+        type: "PROBLEM",
+        status: "PUBLISHED",
+        tags: "problem,exodus",
+        userId: admin.id,
+        bookId: exodus.id,
+        chapterId: null,
+        verseId: null,
       },
     ],
   });
@@ -395,6 +469,19 @@ async function seedDemo() {
     ],
   });
 
+  await prisma.aboutContent.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      title: "About Us",
+      content: ABOUT_DEMO_HTML,
+    },
+    update: {
+      title: "About Us",
+      content: ABOUT_DEMO_HTML,
+    },
+  });
+
   console.log("Demo seed complete:");
   console.log({
     books: catalog.length,
@@ -404,7 +491,8 @@ async function seedDemo() {
     commentaries: totalCommentaries,
     authors: authors.length,
     notes: Math.min(5, firstVerses.length),
-    blogs: 3,
+    blogs: 6,
+    aboutContent: true,
   });
 }
 
