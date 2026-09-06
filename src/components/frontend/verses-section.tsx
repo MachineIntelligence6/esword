@@ -26,6 +26,7 @@ import {
 import { Separator } from "../ui/separator";
 import BookmarksList from "./bookmarks-list";
 import useWindowSize from "../hooks/use-window-size";
+import { VerseReference } from "./verse-reference";
 
 export function VersesSection() {
   return (
@@ -406,7 +407,11 @@ function VerseComponent({
       onClick={onClick}
     >
       <p className={"text-light-green min-w-max"}>
-        {`${verse.topic?.chapter?.book?.abbreviation} ${verse.topic?.chapter?.name}:${verse.number}`}
+        <VerseReference
+          abbreviation={verse.topic?.chapter?.book?.abbreviation}
+          chapter={verse.topic?.chapter?.name}
+          verse={verse.number}
+        />
       </p>
       <p className="text-primary-dark [&>mark]:bg-yellow-500 [&>mark]:text-white">
         <span
