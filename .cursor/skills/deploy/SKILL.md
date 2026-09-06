@@ -1,74 +1,63 @@
 ---
 name: deploy
 description: >-
-  Ship esword to GitHub main and/or a production host. Use when the user says
-  deploy, release, push to production, ship it, or asks another agent to deploy.
+  Ship esword to GitHub main and/or production host apocryphalwritings.org.
+  Use when the user says deploy, release, push to production, ship it, or asks
+  another agent to deploy.
 ---
 
 # Deploy esword
 
-## Default meaning of "deploy"
+## Production host (preferred when user says "deploy to the server")
 
-Unless the user names a host/SSH target, **deploy = ship `main` to GitHub and wait for CI green**.
+| Item | Value |
+|------|-------|
+| SSH | `ssh -i ~/.ssh/id_ed25519 mi6support@2.29.28.247` |
+| App dir | `/var/www/esword` |
+| Process | PM2 app name `esword` (`next start -H 127.0.0.1 -p 3000`) |
+| Public URL | https://apocryphalwritings.org |
+| Health | https://apocryphalwritings.org/api/health |
+| DB backup dir | `~/backups/esword/` |
 
-Remote: `https://github.com/MachineIntelligence6/esword.git`  
-Branch: `main`  
-CI: `.github/workflows/ci.yml` (npm ci → audit → lint → tsc → security tests → build)
-
-There is **no** Vercel/Fly/server hook in-repo. Production cutover needs explicit host/SSH details from the user.
-
-## Ship to GitHub (do this first)
-
-1. Confirm clean intent: only commit deployable app changes. Never commit `.env`, `.idea/`, or secrets.
-2. Optional local gate:
-   ```bash
-   npm ci
-   npm run lint
-   npx tsc --noEmit
-   npm run test:security
-   npm run build
-   ```
-   Build needs `DATABASE_URL`, `NEXTAUTH_SECRET` (≥32 chars), `NEXTAUTH_URL` (dummy values OK for compile).
-3. Commit with a why-focused message (HEREDOC).
-4. Push:
-   ```bash
-   git push -u origin HEAD
-   ```
-5. Watch CI and fix failures before claiming deploy done:
-   ```bash
-   gh run list --workflow=ci.yml --branch main --limit 1
-   gh run watch <id> --exit-status
-   ```
-6. Report: commit SHAs, CI URL, and that production host still needs a pull if applicable.
-
-`.npmrc` sets `legacy-peer-deps=true` — required for `npm ci` on React 19.
-
-## Production host (only if user provides access)
-
-Follow `DEPLOY.md`. Short sequence on the server after env is set:
+One-shot from a laptop that has the key:
 
 ```bash
-git fetch origin && git checkout main && git pull --ff-only
-npm ci
-npm run build
-npm run migrate   # prisma db push — back up DB first
-npm run start     # or process manager restart
-curl -fsS "$NEXTAUTH_URL/api/health"
+ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes mi6support@2.29.28.247 \
+  'bash -s' < scripts/deploy-production.sh
 ```
 
+Or on the server after code is present:
+
+```bash
+bash /var/www/esword/scripts/deploy-production.sh
+```
+
+The script: backs up MySQL + preserves `.env`/`blogs-images`/`logs` → clones `main` → rsyncs into `/var/www/esword` → `npm ci` → `migrate` → `build` → `pm2 restart esword` → health checks.
+
 Rules:
-- Do **not** seed production unless asked (`ALLOW_PRODUCTION_SEED=true` one-shot only).
+- Never print or commit `.env` / DB passwords.
+- Do **not** seed production unless asked.
 - Do **not** run `migrate-force` / `ALLOW_FORCE_RESET` unless explicitly requested.
-- Keep `public/blogs-images` persistent across releases.
-- If schema changed, back up MySQL before `npm run migrate`.
 
-## Book export smoke (after app is up)
+## GitHub-only ship (no SSH)
 
-Dashboard → Books → row ⋯ → Export → Remedies text / CSV / JSON.  
-API: `GET /api/books/{id}/export?format=remedies|csv|json` (ADMIN/EDITOR).
+If the user only wants code on GitHub:
+
+1. Commit safe changes (never `.env` / `.idea` / secrets).
+2. `git push origin main`
+3. `gh run watch $(gh run list --workflow=ci.yml --branch main --limit 1 --json databaseId -q '.[0].databaseId') --exit-status`
+
+`.npmrc` has `legacy-peer-deps=true` (required for `npm ci` on React 19).
+
+## Smoke after production deploy
+
+- `curl -fsS https://apocryphalwritings.org/api/health` → `{"status":"ok",...}`
+- Logged-in dashboard → Books → ⋯ → Export (remedies / csv / json)
+- Unauthenticated `GET /api/books/1/export?format=remedies` should redirect to login (middleware)
 
 ## Done criteria
 
-- [ ] Changes on `origin/main`
-- [ ] Latest CI run on that SHA is **success**
-- [ ] If a host was provided: health check passes and export menu works
+- [ ] Production health OK on https://apocryphalwritings.org/api/health
+- [ ] PM2 `esword` online
+- [ ] Deployed SHA matches intended `main` commit
+- [ ] Optional: GitHub CI green for that SHA

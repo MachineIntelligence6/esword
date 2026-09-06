@@ -7,8 +7,11 @@ Use this after Phases 1–4 are complete and before production cutover.
 When an agent is asked to **deploy**:
 
 1. Read and follow `.cursor/skills/deploy/SKILL.md`.
-2. Default target is **GitHub `main` + green CI** (no in-repo cloud host).
-3. Only cut over a production server when the user supplies host/SSH (or equivalent) access.
+2. **Production server (default when host is known):**
+   - SSH: `ssh -i ~/.ssh/id_ed25519 mi6support@2.29.28.247`
+   - Run: `bash /var/www/esword/scripts/deploy-production.sh`
+     (or pipe that script over SSH from the repo)
+3. Verify https://apocryphalwritings.org/api/health returns ok.
 
 ## Before first local run
 
