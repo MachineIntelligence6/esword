@@ -12,6 +12,9 @@ import { useTableSearchStore } from "@/lib/zustand/tableSearch";
 import { TableCellLink, TableCellText } from "./shared/table-cell";
 import { formatTableDate } from "./shared/format";
 import { useInfiniteList } from "./shared/use-infinite-list";
+import { BOOK_EXPORT_FORMATS, BookExportFormat } from "@/lib/book-export";
+import { toast } from "@/components/ui/use-toast";
+import definedMessages from "@/shared/constants/messages";
 
 type Props = Omit<TableActionProps, "modelName"> & {
   showToolbar?: boolean;
@@ -54,25 +57,25 @@ export default function BooksTable({
     fetcher,
     deps: [searchQuery, archivedOnly],
   });
-  // const handleRestore = async (books: IBook[]) => {
-  //     const res = await clientApiHandlers.archives.restore({
-  //         ids: books.map((b) => b.id),
-  //         model: "Book"
-  //     })
-  //     console.log(res)
-  //     if (res.succeed) {
-  //         toast({
-  //             title: "Book(s) restored successfully.",
-  //         })
-  //         router.push("/dashboard/books")
-  //     } else {
-  //         toast({
-  //             title: "Error",
-  //             variant: "destructive",
-  //             description: definedMessages.UNKNOWN_ERROR
-  //         })
-  //     }
-  // }
+
+  const handleExport = useCallback(
+    async (book: IBook, format: BookExportFormat) => {
+      const res = await clientApiHandlers.books.exportBook(book, format);
+      if (res.succeed) {
+        toast({
+          title: "Export ready",
+          description: `${book.name} downloaded as ${format}.`,
+        });
+        return;
+      }
+      toast({
+        title: "Export failed",
+        variant: "destructive",
+        description: definedMessages.UNKNOWN_ERROR,
+      });
+    },
+    []
+  );
 
   const tableActionProps: TableActionProps = {
     ...props,
@@ -82,6 +85,8 @@ export default function BooksTable({
     archiveAction: true,
     deleteAction: true,
     restoreAction: archivedOnly,
+    exportFormats: archivedOnly ? undefined : BOOK_EXPORT_FORMATS,
+    onExport: archivedOnly ? undefined : handleExport,
     modelName: "Book",
   };
 
@@ -104,16 +109,6 @@ export default function BooksTable({
 
 function columns(rowActions: TableActionProps): ColumnDef<IBook, any>[] {
   const tableCols: ColumnDef<IBook, any>[] = [
-
-    // {
-    //     id: "index",
-    //     header: ({ column }) => (
-    //         <DataTableColumnHeader column={column} title="#" />
-    //     ),
-    //     cell: ({ row }) => <div className="w-[30px]">{row.index + 1}</div>,
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -187,7 +182,8 @@ function columns(rowActions: TableActionProps): ColumnDef<IBook, any>[] {
   if (
     rowActions.deleteAction ||
     rowActions.viewAction ||
-    rowActions.editAction
+    rowActions.editAction ||
+    rowActions.exportFormats?.length
   ) {
     tableCols.push({
       id: "actions",

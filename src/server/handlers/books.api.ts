@@ -4,6 +4,13 @@ import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBook } from "@/shared/types/models.types";
 import { BooksPaginationProps } from "@/shared/types/pagination.types";
+import {
+  BookExportFormat,
+  ExportableBook,
+  bookExportFilename,
+  formatBookExport,
+  getBookExportFormat,
+} from "@/lib/book-export";
 import { isAuthError, requireAdmin, requireContentManager } from "./authz";
 
 export async function getAll({
@@ -228,6 +235,97 @@ type UpdateBookReq = {
   archived?: boolean;
   priority?: number;
 };
+
+export type BookExportResult =
+  | {
+      succeed: true;
+      filename: string;
+      mimeType: string;
+      body: string;
+    }
+  | {
+      succeed: false;
+      code: ApiResponse["code"];
+    };
+
+async function loadBookForExport(
+  ref: string
+): Promise<ExportableBook | null> {
+  const id = Number.parseInt(ref, 10);
+  const book = await db.book.findFirst({
+    where: {
+      OR: [{ slug: ref }, ...(Number.isFinite(id) ? [{ id }] : [])],
+      archived: false,
+    },
+    include: {
+      chapters: {
+        where: { archived: false },
+        orderBy: { name: "asc" },
+        include: {
+          topics: {
+            where: { archived: false },
+            orderBy: { number: "asc" },
+            include: {
+              verses: {
+                where: { archived: false },
+                orderBy: { number: "asc" },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!book) return null;
+
+  return {
+    name: book.name,
+    slug: book.slug,
+    abbreviation: book.abbreviation,
+    chapters: book.chapters.map((chapter) => ({
+      name: chapter.name,
+      commentaryName: chapter.commentaryName,
+      topics: chapter.topics.map((topic) => ({
+        number: topic.number,
+        name: topic.name,
+        verses: topic.verses.map((verse) => ({
+          number: verse.number,
+          text: verse.text,
+        })),
+      })),
+    })),
+  };
+}
+
+export async function exportByRef(
+  ref: string,
+  format: BookExportFormat
+): Promise<BookExportResult> {
+  try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) {
+      return { succeed: false, code: session.code ?? "UNAUTHORIZED" };
+    }
+
+    const book = await loadBookForExport(ref);
+    if (!book) {
+      return { succeed: false, code: "NOT_FOUND" };
+    }
+
+    const formatMeta = getBookExportFormat(format);
+    return {
+      succeed: true,
+      filename: bookExportFilename(book, format),
+      mimeType: formatMeta.mimeType,
+      body: formatBookExport(book, format),
+    };
+  } catch (error) {
+    console.error(error);
+    return { succeed: false, code: "UNKNOWN_ERROR" };
+  }
+}
+
 
 export async function update(req: Request, id: number): Promise<ApiResponse> {
   try {

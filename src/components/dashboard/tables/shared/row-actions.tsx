@@ -15,6 +15,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TableActionProps } from "../shared/types";
@@ -48,16 +51,20 @@ export function DataTableRowActions<TData>({
   archiveAction,
   deleteAction,
   restoreAction,
+  exportFormats,
+  onExport,
   modelName,
 }: DataTableRowActionsProps<TData>) {
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
   const [alertOpen, setAlertOpen] = React.useState<TableActionPopupState>({
     state: false,
     type: "RESTORE",
   });
   const archived = (row.original as any).archived;
   const deleteEnabled = session?.user && session.user.role === "ADMIN";
+  const canExport = !!exportFormats?.length && !!onExport && !archived;
 
   const warningMessage = () => {
     if (alertOpen.type === "RESTORE")
@@ -112,7 +119,7 @@ export function DataTableRowActions<TData>({
             <DotsHorizontalIcon className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[160px]" onCloseAutoFocus={(e) => e.preventDefault()}>
+        <DropdownMenuContent align="end" className="w-[180px]" onCloseAutoFocus={(e) => e.preventDefault()}>
           {viewAction && (
             <DropdownMenuItem asChild onSelect={() => setMenuOpen(false)}>
               {viewAction(row.original)}
@@ -123,7 +130,34 @@ export function DataTableRowActions<TData>({
               {editAction(row.original)}
             </DropdownMenuItem>
           )}
-          {(editAction || viewAction) && deleteEnabled && (
+          {canExport && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger disabled={exporting}>
+                {exporting ? "Exporting…" : "Export"}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-[200px]">
+                {exportFormats.map((format) => (
+                  <DropdownMenuItem
+                    key={format.id}
+                    disabled={exporting}
+                    onSelect={async (event) => {
+                      event.preventDefault();
+                      setExporting(true);
+                      try {
+                        await onExport(row.original, format.id);
+                        setMenuOpen(false);
+                      } finally {
+                        setExporting(false);
+                      }
+                    }}
+                  >
+                    {format.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          )}
+          {(editAction || viewAction || canExport) && deleteEnabled && (
             <DropdownMenuSeparator />
           )}
           {archived

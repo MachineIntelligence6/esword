@@ -1,0 +1,54 @@
+SAMPLE FORMAT
+
+CHAPTER: 1
+TITLE: The Beginning of Natural Remedies
+
+VERSE: 1
+The Book of the Remedies which the wise men of old did seal...
+
+VERSE: 2
+For in those days, the wicked spirits began to afflict...
+
+VERSE: 3
+And they began to lead astray and to deceive...
+
+
+CHAPTER: 2
+TITLE: On the Wisdom of Physicians
+
+SECTION: The Seven Gates of the Face
+
+VERSE: 1
+And there were created in the face of man seven gates.
+
+VERSE: 2
+The first gate is the right eye, and the second the left eye.
+
+SECTION: The Twelve Governors
+
+VERSE: 3
+The first is the liver, the second the gall, and the third the spleen.
+
+
+CHAPTER: 3
+TITLE: The Bones and the Sinews
+
+VERSE: 1
+Concerning the foundations of the sons of men...
+
+VERSE: 2
+For the beginning of creation was made of water...
+
+
+FORMATTING RULES
+
+1. Begin every chapter with: CHAPTER:
+2. Add the chapter title using: TITLE:
+3. Mark headings within a chapter using: SECTION:
+4. Begin every verse with: VERSE:
+5. Restart verse numbering from 1 in every chapter.
+6. Remove all CHAPTER BREAK text.
+7. Keep cautions and editorial notes inside square brackets.
+8. Do not change the original wording, spelling, punctuation, or special characters.
+9. Do not place more than one verse under the same VERSE number.
+10. If a chapter, section, or verse boundary is uncertain, add [REVIEW REQUIRED] instead of guessing.
