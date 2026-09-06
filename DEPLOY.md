@@ -2,6 +2,14 @@
 
 Use this after Phases 1–4 are complete and before production cutover.
 
+## Agent quick path
+
+When an agent is asked to **deploy**:
+
+1. Read and follow `.cursor/skills/deploy/SKILL.md`.
+2. Default target is **GitHub `main` + green CI** (no in-repo cloud host).
+3. Only cut over a production server when the user supplies host/SSH (or equivalent) access.
+
 ## Before first local run
 
 1. Copy `.env.example` to `.env`.
