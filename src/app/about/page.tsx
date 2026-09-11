@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
-import QuillEditor from "@/components/ui/editor";
+import { StaticContentPage } from "@/components/frontend/static-content-page";
+import { sanitizeRichHtml } from "@/lib/sanitize-html";
 import serverApiHandlers from "@/server/handlers";
 
 export const dynamic = "force-dynamic";
@@ -7,19 +7,23 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   const { data: aboutContent } =
     await serverApiHandlers.settings.getAboutContent();
+  const title = aboutContent?.title?.trim() || "About";
+  const html = sanitizeRichHtml(aboutContent?.content);
 
   return (
-    <div className="w-full h-full">
-      <h3 className="text-xs font-bold py-3 lg:pl-3 px-5 lg:border-0 border-b  w-full bg-silver-light uppercase">
-        {aboutContent?.title ?? "ABOUT US"}
-      </h3>
-      <div className="bg-primary flex  justify-center p-7">
-        <Card className="bg-white w-full overflow-auto">
-          <CardContent className="p-5 pb-8 h-auto flex flex-col gap-4 md:gap-16 ">
-            <QuillEditor disabled value={aboutContent?.content} />
-          </CardContent>
-        </Card>
+    <StaticContentPage title={title} cardClassName="max-w-3xl">
+      <div className="px-6 py-8 md:px-10 md:py-10">
+        {html ? (
+          <div
+            className="about-content space-y-4 text-base leading-7 text-primary-dark [&_a]:text-primary [&_a]:underline [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        ) : (
+          <p className="text-sm text-primary-dark/70">
+            About content has not been published yet.
+          </p>
+        )}
       </div>
-    </div>
+    </StaticContentPage>
   );
 }
