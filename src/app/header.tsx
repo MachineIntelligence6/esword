@@ -49,7 +49,9 @@ export default function SiteHeader() {
         </div>
         <div className="flex items-center gap-2 md:gap-x-6">
           {!pathname.startsWith("/dashboard") &&
-            !pathname.startsWith("/login") && (
+            !pathname.startsWith("/login") &&
+            !pathname.startsWith("/forgot-password") &&
+            !pathname.startsWith("/forgotpassowrd") && (
               <div className="flex px-5 text-sm text-white lg:gap-x-11 md:gap-x-6 md:px-3 gap-x-1">
                 <div className="flex xl:hidden">
                   <Dropdown />

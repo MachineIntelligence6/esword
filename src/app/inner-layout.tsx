@@ -14,8 +14,14 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const windowSize = useWindowSize();
 
+  const isAuthPage =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/forgotpassowrd");
+
   const copyCutPasteHandler = (e: ClipboardEvent<HTMLDivElement>) => {
-    if (pathname.startsWith("/dashboard") || pathname.startsWith("/login")) return;
+    if (isAuthPage) return;
 
     const target = e.target as HTMLElement | null;
     if (target?.closest("input, textarea, [contenteditable='true']")) return;
@@ -50,7 +56,7 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
       onCut={copyCutPasteHandler}
       onCopy={copyCutPasteHandler}
     >
-      {pathname.startsWith("/dashboard") || pathname.startsWith("/login") ? (
+      {isAuthPage ? (
         children
       ) : (
         <div className="flex lg:flex-row flex-col max-h-[calc(100vh_-_100px)] lg:max-h-[calc(100vh_-_70px)] overflow-y-auto lg:overflow-hidden"

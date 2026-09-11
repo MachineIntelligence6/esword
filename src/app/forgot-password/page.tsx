@@ -15,9 +15,6 @@ export default async function Page() {
           <h3 className="font-inter font-bold text-2xl text-primary-dark text-center">
             Reset password
           </h3>
-          <p className="mt-2 px-5 text-center text-sm text-slate-600 md:px-10">
-            Enter your account email, a new password, and the site recovery key.
-          </p>
           <div className="flex justify-center flex-col w-full py-3">
             <div className="md:px-10 px-5 w-full">
               <ForgotPasswordForm />
