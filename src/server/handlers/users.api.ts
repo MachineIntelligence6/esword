@@ -176,12 +176,27 @@ type CreateUserReq = {
     role: UserRole;
 }
 
+function normalizeEmail(email: string) {
+    return email.trim().toLowerCase()
+}
+
+function isUsablePassword(password: string | null | undefined): password is string {
+    return typeof password === "string" && password.length >= 8
+}
+
 export async function create(req: Request): Promise<ApiResponse<IUser>> {
     try {
         const session = await requireAdmin()
         if (isAuthError(session)) return session
         const userReq = await req.json() as CreateUserReq
-        const userExist = await db.user.findFirst({ where: { email: userReq.email } })
+        const email = normalizeEmail(userReq.email ?? "")
+        if (!email || !isUsablePassword(userReq.password)) {
+            return {
+                succeed: false,
+                code: "VALIDATION_ERROR"
+            }
+        }
+        const userExist = await db.user.findFirst({ where: { email } })
         if (userExist) {
             return {
                 succeed: false,
@@ -189,11 +204,11 @@ export async function create(req: Request): Promise<ApiResponse<IUser>> {
             }
         }
         const password = await hashPassword(userReq.password)
-        if (!password) throw new Error("");
+        if (!password) throw new Error("Failed to hash password");
         const user = await db.user.create({
             data: {
                 name: userReq.name,
-                email: userReq.email,
+                email,
                 password: password,
                 role: userReq.role
             },
@@ -237,12 +252,37 @@ export async function update(req: Request, id: number): Promise<ApiResponse<any>
         const session = await requireAdmin()
         if (isAuthError(session)) return session
         const userReq = await req.json() as UpdateUserReq
-        const password = (userReq.password && userReq.password !== "") ? await hashPassword(userReq.password) : undefined
+        const wantsPasswordChange = typeof userReq.password === "string" && userReq.password !== ""
+        if (wantsPasswordChange && !isUsablePassword(userReq.password)) {
+            return {
+                succeed: false,
+                code: "VALIDATION_ERROR"
+            }
+        }
+        const password = wantsPasswordChange ? await hashPassword(userReq.password!) : undefined
+        if (wantsPasswordChange && !password) {
+            throw new Error("Failed to hash password")
+        }
+        const email = userReq.email ? normalizeEmail(userReq.email) : undefined
+        if (email) {
+            const existing = await db.user.findFirst({
+                where: {
+                    email,
+                    NOT: { id }
+                }
+            })
+            if (existing) {
+                return {
+                    succeed: false,
+                    code: "EMAIL_ALREADY_EXISTS"
+                }
+            }
+        }
         const user = await db.user.update({
             data: {
                 ...(userReq.name && { name: userReq.name }),
-                ...(userReq.email && { email: userReq.email }),
-                ...(password && { password: password }),
+                ...(email && { email }),
+                ...(password && { password }),
                 ...(userReq.role && { role: userReq.role }),
             },
             where: {

@@ -126,7 +126,7 @@ export default function LoginForm() {
             <div>
               <Link
                 className="text-primary-dark font-semibold font-inter"
-                href="/forgotpassowrd"
+                href="/forgot-password"
               >
                 Forgot Password?
               </Link>

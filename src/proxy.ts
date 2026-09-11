@@ -45,6 +45,7 @@ export default withAuth(
 
 export const config = {
     matcher: [
-        '/((?!images|icons|_next/static|_next/image|favicon.ico|api/health|api/auth).*)',
+        // Keep login + password recovery public. Everything else stays auth-gated.
+        '/((?!login|forgot-password|forgotpassowrd|images|icons|_next/static|_next/image|favicon.ico|api/health|api/auth).*)',
     ],
 }

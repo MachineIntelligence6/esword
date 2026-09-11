@@ -9,6 +9,7 @@ Production requires:
 - `DATABASE_URL`
 - `NEXTAUTH_SECRET` with at least 32 characters, generated for example with `openssl rand -base64 32`
 - `NEXTAUTH_URL`
+- `ACCOUNT_RECOVERY_SECRET` with at least 16 characters (used by `/forgot-password` when email delivery is not configured)
 
 Optional one-time admin bootstrap variables:
 
@@ -20,6 +21,7 @@ Optional one-time admin bootstrap variables:
 Dangerous reset opt-in:
 
 - `ALLOW_FORCE_RESET=true` is required before `npm run migrate-force`
+- `ALLOW_PASSWORD_RESET=true` is required before `node scripts/reset-user-password.mjs` in production
 
 ## One-Time Admin Creation
 
@@ -30,6 +32,19 @@ Dangerous reset opt-in:
 5. Sign in and rotate the bootstrap password through the application if the account will remain active.
 
 The seed script must not print passwords or use default credentials.
+
+## Password Recovery
+
+The login page links to `/forgot-password`. Without SMTP, resets require the shared `ACCOUNT_RECOVERY_SECRET` from the server environment.
+
+Ops fallback when the web recovery form is unavailable:
+
+```bash
+ALLOW_PASSWORD_RESET=true RESET_USER_EMAIL='admin@example.com' RESET_USER_PASSWORD='...' \
+  node scripts/reset-user-password.mjs
+```
+
+Then remove `ALLOW_PASSWORD_RESET` and the temporary password from the environment.
 
 ## Historical Secret Remediation
 
