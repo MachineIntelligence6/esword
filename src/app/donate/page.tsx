@@ -5,8 +5,8 @@ import Image from "next/image";
 
 export default function Page() {
   return (
-    <StaticContentPage title="Donate" cardClassName="max-w-md">
-      <div className="flex flex-col items-center px-6 pb-8 pt-10 text-center">
+    <StaticContentPage title="Donate">
+      <div className="mx-auto flex w-full max-w-md flex-col items-center rounded-lg border border-silver-light bg-white px-6 pb-8 pt-10 text-center">
         <p className="text-2xl font-bold text-primary-dark">Donate to</p>
         <p className="pb-3 text-base font-normal text-primary-dark">
           Hidden Sword

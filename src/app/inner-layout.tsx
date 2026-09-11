@@ -31,17 +31,22 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
   };
 
   const renderSidebar = () => {
-    if (!windowSize) return null;
+    // Always render books/chapters; don't wait on window measurement or the
+    // sidebar disappears and these pages look like a full-bleed login screen.
+    if (windowSize && windowSize.width < 1024) {
+      return <SiteSidebar />;
+    }
 
-    return windowSize.width < 1024 ? (
-      <SiteSidebar />
-    ) : (
+    return (
       <Resizable
-        defaultSize={{ height: windowSize.height, width: 250 }}
+        defaultSize={{
+          height: windowSize?.height ?? 800,
+          width: 250,
+        }}
         maxWidth={400}
         minWidth={230}
         bounds="parent"
-        className="overflow-hidden"
+        className="hidden overflow-hidden lg:block"
         handleClasses={{ right: "bg-silver-light" }}
       >
         <SiteSidebar />
