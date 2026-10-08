@@ -267,3 +267,8 @@ html.dark .skeleton stop:nth-child(even) {
 html.dark img[alt="Highlight"] {
   filter: invert(1) brightness(0.9);
 }
+
+/* Loading spinner: clay accent instead of grey-blue in dark mode */
+html.dark .border-slate-600 {
+  border-color: #d97757;
+}
