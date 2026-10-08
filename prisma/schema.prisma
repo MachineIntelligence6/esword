@@ -206,6 +206,28 @@ model Settings {
   aboutContent String @map("about_content")
 }
 
+model DonationSettings {
+  id                 Int     @id @default(1)
+  pageTitle          String  @default("Donate") @map("page_title")
+  heading            String  @default("Donate to") @map("heading")
+  orgName            String  @default("Hidden Sword") @map("org_name")
+  message            String  @db.Text
+  currency           String  @default("USD")
+  suggestedAmount    Float   @default(50) @map("suggested_amount")
+  buttonLabel        String  @default("Donation with Paypal") @map("button_label")
+  paypalUrl          String  @map("paypal_url") @db.Text
+  monthlyOption      Boolean @default(true) @map("monthly_option")
+  popupEnabled       Boolean @default(false) @map("popup_enabled")
+  popupTitle         String  @default("Support Hidden Sword") @map("popup_title")
+  popupMessage       String  @map("popup_message") @db.Text
+  popupAmount        Float   @default(50) @map("popup_amount")
+  popupButtonLabel   String  @default("Donate") @map("popup_button_label")
+  popupDelaySeconds  Int     @default(10) @map("popup_delay_seconds")
+  popupFrequencyDays Int     @default(7) @map("popup_frequency_days")
+
+  @@map("donation_settings")
+}
+
 model Blog {
   id         Int        @id @default(autoincrement())
   slug       String     @unique

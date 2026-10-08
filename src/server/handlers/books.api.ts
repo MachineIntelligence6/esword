@@ -374,3 +374,28 @@ export async function update(req: Request, id: number): Promise<ApiResponse> {
     };
   }
 }
+
+export async function reorder(req: Request): Promise<ApiResponse> {
+  try {
+    const session = await requireContentManager();
+    if (isAuthError(session)) return session;
+    const { ids } = (await req.json()) as { ids?: unknown };
+    if (
+      !Array.isArray(ids) ||
+      ids.length === 0 ||
+      !ids.every((id) => Number.isInteger(id)) ||
+      new Set(ids).size !== ids.length
+    ) {
+      return { succeed: false, code: "VALIDATION_ERROR", data: null };
+    }
+    await db.$transaction(
+      (ids as number[]).map((id, index) =>
+        db.book.update({ where: { id }, data: { priority: index + 1 } })
+      )
+    );
+    return { succeed: true, code: "SUCCESS", data: null };
+  } catch (error) {
+    console.error(error);
+    return { succeed: false, code: "UNKNOWN_ERROR", data: null };
+  }
+}

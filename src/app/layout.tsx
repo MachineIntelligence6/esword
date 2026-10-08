@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 import HydrationZustand from "@/components/zustand-hydration";
 import { ConditionalSiteHeader } from "./chrome";
 import AppShell from "./app-shell";
+import DonationPopup from "@/components/frontend/donation-popup";
+import { themeInitScript } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: "Hidden Sword",
@@ -25,7 +27,10 @@ export default async function RootLayout({
   if (typeof session === "boolean" && session === false)
     return redirect("/api/auth/logout");
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={cn(
           "font-sans max-w-full !overflow-x-hidden overflow-hidden antialiased"
@@ -35,6 +40,7 @@ export default async function RootLayout({
           <AuthProvider session={session}>
             <ConditionalSiteHeader />
             <AppShell>{children}</AppShell>
+            <DonationPopup />
             <Toaster />
           </AuthProvider>
         </HydrationZustand>

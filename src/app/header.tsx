@@ -25,6 +25,7 @@ import { useForm } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import { ResponsiveSidebarButtton } from "./dashboard/sidebar";
 import { useEffect, useState } from "react";
+import { useTheme } from "@/components/hooks/use-theme";
 
 export default function SiteHeader() {
   const { data: session } = useSession();
@@ -201,6 +202,7 @@ function Dropdown() {
 export function UserDropdownMenu({ session }: { session: Session }) {
   const pathname = usePathname();
   const router = useRouter();
+  const theme = useTheme();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -233,6 +235,18 @@ export function UserDropdownMenu({ session }: { session: Session }) {
             <DropdownMenuSeparator />
           </>
         )}
+        <DropdownMenuItem onClick={() => router.push("/account")}>
+          Account &amp; password
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            theme.cycle();
+          }}
+        >
+          Theme: {theme.label}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <LogoutButton />
       </DropdownMenuContent>
     </DropdownMenu>

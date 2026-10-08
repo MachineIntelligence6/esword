@@ -20,6 +20,12 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/forgotpassowrd");
 
+  // Pages that are not about reading books: no books/chapters sidebar.
+  const hideSidebar =
+    pathname.startsWith("/donate") ||
+    pathname.startsWith("/about") ||
+    pathname.startsWith("/account");
+
   const copyCutPasteHandler = (e: ClipboardEvent<HTMLDivElement>) => {
     if (isAuthPage) return;
 
@@ -40,13 +46,13 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
     return (
       <Resizable
         defaultSize={{
-          height: windowSize?.height ?? 800,
+          height: "100%",
           width: 250,
         }}
         maxWidth={400}
         minWidth={230}
         bounds="parent"
-        className="hidden overflow-hidden lg:block"
+        className="hidden overflow-hidden lg:block !h-full"
         handleClasses={{ right: "bg-silver-light" }}
       >
         <SiteSidebar />
@@ -64,10 +70,10 @@ const SiteInnerLayout: React.FC<SiteInnerLayoutProps> = ({ children }) => {
       {isAuthPage ? (
         children
       ) : (
-        <div className="flex lg:flex-row flex-col max-h-[calc(100vh_-_100px)] lg:max-h-[calc(100vh_-_70px)] overflow-y-auto lg:overflow-hidden"
+        <div className="flex lg:flex-row flex-col max-h-[calc(100vh_-_100px)] lg:max-h-[calc(100vh_-_70px)] lg:h-[calc(100vh_-_70px)] overflow-y-auto lg:overflow-hidden"
           style={{ maxHeight: windowSize ? `${windowSize.height - 70}px` : '100vh' }}
         >
-          {renderSidebar()}
+          {!hideSidebar && renderSidebar()}
           {children}
         </div>
       )}

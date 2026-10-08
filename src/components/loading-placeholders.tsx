@@ -8,7 +8,7 @@ export function BooksLoadingPlaceholder() {
       viewBox="0 0 200 1000"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden max-w-full p-2 h-auto"
+      className="skeleton w-full overflow-x-hidden max-w-full p-2 h-auto"
     >
       <rect y="0" rx="2" ry="2" width="200" height="40" />
       <rect y="50" rx="2" ry="2" width="200" height="40" />
@@ -42,7 +42,7 @@ export function ChaptersLoadingPlaceholder() {
       viewBox="0 0 100 2000"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden p-2 h-full max-h-full"
+      className="skeleton w-full overflow-x-hidden p-2 h-full max-h-full"
     >
       <rect y="0" rx="2" ry="2" width="100" height="80" />
       <rect y="90" rx="2" ry="2" width="100" height="80" />
@@ -73,7 +73,7 @@ export function BookmarksLoadingPlaceholder() {
       viewBox="0 0 60 600"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden p-1 h-full max-h-full"
+      className="skeleton w-full overflow-x-hidden p-1 h-full max-h-full"
     >
       <rect y="0" rx="2" ry="2" width="60" height="60" />
       <rect y="80" rx="2" ry="2" width="60" height="60" />
@@ -97,7 +97,7 @@ export function TopicLoadingPlaceholder() {
       viewBox="0 0 800 30"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden p-2 h-auto max-h-full"
+      className="skeleton w-full overflow-x-hidden p-2 h-auto max-h-full"
     >
       <rect x="250" y="0" rx="2" ry="2" width="300" height="25" />
     </ContentLoader>
@@ -113,7 +113,7 @@ export function VersesLoadingPlaceholder() {
       viewBox="0 0 800 230"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden p-2 h-auto max-h-full"
+      className="skeleton w-full overflow-x-hidden p-2 h-auto max-h-full"
     >
       <rect x="10" y="0" rx="2" ry="2" width="40" height="15" />
       <rect x="60" y="0" rx="2" ry="2" width="600" height="15" />
@@ -145,7 +145,7 @@ export function CommentaryLoadingPlaceholder() {
       viewBox="0 0 600 300"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden p-2 h-auto max-h-full"
+      className="skeleton w-full overflow-x-hidden p-2 h-auto max-h-full"
     >
       <rect x="235" y="10" rx="2" ry="2" width="130" height="25" />
       <rect x="200" y="60" rx="2" ry="2" width="200" height="18" />
@@ -173,7 +173,7 @@ export function AuthorsLoadingPlaceholder() {
       viewBox="0 0 600 50"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden p-2 h-auto max-h-full"
+      className="skeleton w-full overflow-x-hidden p-2 h-auto max-h-full"
     >
       <rect x="0" y="10" rx="2" ry="2" width="100" height="30" />
       <rect x="120" y="10" rx="2" ry="2" width="100" height="30" />
@@ -191,7 +191,7 @@ export function SearchLoadingPlaceholder() {
       viewBox="0 0 500 35"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden h-auto max-h-full"
+      className="skeleton w-full overflow-x-hidden h-auto max-h-full"
     >
       <rect x="0" y="0" rx="0" ry="0" width="500" height="5" />
       <rect x="0" y="8" rx="0" ry="0" width="300" height="5" />
@@ -210,7 +210,7 @@ export function BlogLoadingPlaceholder() {
       viewBox="0 0 500 45"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden h-auto max-h-full"
+      className="skeleton w-full overflow-x-hidden h-auto max-h-full"
     >
       <rect x="0" y="0" rx="4" ry="4" width="400" height="15" />
       <rect x="420" y="4" rx="4" ry="4" width="100" height="7" />
@@ -227,7 +227,7 @@ export function BlogContentLoadingPlaceholder() {
       viewBox="0 0 800 600"
       backgroundColor="#f3f3f3"
       foregroundColor="#ecebeb"
-      className="w-full overflow-x-hidden h-auto max-h-full"
+      className="skeleton w-full overflow-x-hidden h-auto max-h-full"
     >
       <rect x="0" y="13" rx="4" ry="4" width="800" height="10" />
       <rect x="0" y="26" rx="4" ry="4" width="700" height="10" />

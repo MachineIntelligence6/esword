@@ -9,6 +9,7 @@ import { Session } from "next-auth";
 import { Cross1Icon, ExitIcon, HomeIcon, PersonIcon, TextAlignJustifyIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { ReactNode, useEffect, useMemo, useState } from "react";
+import { useTheme } from "@/components/hooks/use-theme";
 import { useSidebarStore } from "@/lib/zustand/sidebarStore";
 import { signOut } from "next-auth/react";
 import {
@@ -92,6 +93,7 @@ export const navGroups: NavGroup[] = [
         children: [
             { path: "/dashboard/blogs", label: "Blogs" },
             { path: "/dashboard/about", label: "About Page" },
+            { path: "/dashboard/donation", label: "Donation" },
         ],
     },
     {
@@ -131,15 +133,16 @@ function ProfileMenu({
     session,
     collapsed,
     onHome,
-    onSettings,
+    onChangePassword,
     onLogout,
 }: {
     session: Session;
     collapsed: boolean;
     onHome: () => void;
-    onSettings: () => void;
+    onChangePassword: () => void;
     onLogout: () => void;
 }) {
+    const theme = useTheme();
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -180,8 +183,16 @@ function ProfileMenu({
                     <HomeIcon className="mr-2 h-4 w-4" />
                     Home
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={onSettings}>
-                    Settings
+                <DropdownMenuItem onClick={onChangePassword}>
+                    Change password
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onSelect={(e) => {
+                        e.preventDefault();
+                        theme.cycle();
+                    }}
+                >
+                    Theme: {theme.label}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onLogout}>
@@ -453,7 +464,7 @@ export default function DashboardSidebar({ session, className, variant = "deskto
                     session={session}
                     collapsed={collapsed}
                     onHome={() => router.push("/")}
-                    onSettings={() => router.push("/dashboard/settings")}
+                    onChangePassword={() => router.push("/dashboard/account")}
                     onLogout={handleLogout}
                 />
             </div>

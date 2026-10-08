@@ -18,6 +18,7 @@ const editorAccessiblePaths = [
   /^\/dashboard\/notes$/,
   /^\/dashboard\/notes\/.*$/,
   /^\/dashboard\/settings$/,
+  /^\/dashboard\/account$/,
 ];
 
 export const canUserAccessPath = (user: SessionUser, path: string) => {

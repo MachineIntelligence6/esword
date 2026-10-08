@@ -38,3 +38,7 @@ next-env.d.ts
 sample.csv
 src.zip
 .env
+
+# server info and DB backups
+/server.json
+/backups/

@@ -84,3 +84,13 @@ export async function archive(id: number): Promise<ApiResponse<null>> {
 
 
 
+
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<null>> {
+    try {
+        const res = await axios.post<ApiResponse<null>>(`/api/users/change-password`, { currentPassword, newPassword })
+        return res.data
+    } catch (error) {
+        return { succeed: false, code: "UNKNOWN_ERROR", data: null }
+    }
+}

@@ -211,8 +211,9 @@ function VersesSectionContent() {
               onClick={toggleHighlight}
             >
               <Image
-                width={18}
-                height={18}
+                width={20}
+                height={20}
+                className="h-5 w-5"
                 src="./images/ph_text-aa-fill.svg"
                 alt="Highlight"
               />

@@ -327,6 +327,17 @@ export async function update(
   }
 }
 
+// Chapter cells are normally numbers. The Psalms file uses the Hebrew/alef symbol
+// (ℵ / א) for the introduction, which is stored as chapter 0.
+const ALEF_CHARS = new Set(["\u2135", "\u05D0"]);
+
+function parseCsvChapter(raw: string | undefined): number | null {
+  const value = (raw ?? "").trim();
+  if (/^\d+$/.test(value)) return Number(value);
+  if (ALEF_CHARS.has(value)) return 0;
+  return null;
+}
+
 type CsvIVerse = {
   book: string;
   bookAbbr: string;
@@ -479,193 +490,153 @@ export async function importFromCSV(
         succeed: false,
         code: "FILE_NOT_FOUND",
       };
-    const csvInputData = await blob.text();
-    const csvRecords: any[] = csvParse(csvInputData, {
+    // Strip a UTF-8 BOM and normalise so Hebrew/Unicode text is stored consistently.
+    const csvInputData = (await blob.text()).replace(/^\uFEFF/, "").normalize("NFC");
+    const csvRecords: string[][] = csvParse(csvInputData, {
       delimiter: "$",
-      from_line: 2,
       relaxQuotes: true,
+      relaxColumnCount: true,
       skip_empty_lines: true,
     });
-    const csvIVerses: CsvIVerse[] = csvRecords.map((record: any[]) => ({
-      book: record[0],
-      bookAbbr: record[1],
-      chapter: Number(record[2]),
-      topic: record[3],
-      number: Number(record[4]),
-      text: record[5],
+    // The first row is a header ("BOOK$ABBREVIATION$..."), possibly with a stray leading "$".
+    const rows = csvRecords.slice(1).map((record, i) => ({
+      record: record.length > 6 && record[0] === "" ? record.slice(1) : record,
+      line: i + 2,
     }));
 
-    const createdIVerses: IVerse[] = [];
+    const rowErrors: string[] = [];
+    const csvIVerses: CsvIVerse[] = [];
+    for (const { record, line } of rows) {
+      const chapter = parseCsvChapter(record[2]);
+      const number = Number(record[4]?.trim());
+      if (chapter === null || !Number.isInteger(number) || !record[0]?.trim()) {
+        rowErrors.push(`line ${line}: chapter "${record[2]}", verse "${record[4]}"`);
+        continue;
+      }
+      csvIVerses.push({
+        book: record[0].trim(),
+        bookAbbr: record[1]?.trim() ?? "",
+        chapter,
+        topic: record[3]?.trim() ?? "",
+        number,
+        text: record[5] ?? "",
+      });
+    }
+    // Reject before touching the database (overwrite mode deletes books first).
+    if (rowErrors.length > 0) {
+      console.error(`CSV import rejected, ${rowErrors.length} bad rows:`, rowErrors.slice(0, 20));
+      return { succeed: false, code: "VALIDATION_ERROR", data: null };
+    }
+
+    if (importMode !== "overwrite" && importMode !== "update") {
+      return { succeed: false, code: "VALIDATION_ERROR" };
+    }
 
     if (importMode === "overwrite") {
       const books = await db.book.findMany({
-        where: {
-          name: {
-            in: csvIVerses.map((verse) => verse.book),
-          },
-        },
+        where: { name: { in: Array.from(new Set(csvIVerses.map((v) => v.book))) } },
       });
-      const bookIds = books.map((book) => book.id);
-      await deleteBooks(bookIds);
+      await deleteBooks(books.map((book) => book.id));
+    }
 
-      const createdIVerses: IVerse[] = [];
+    // Resolve books, chapters and topics once each (not once per verse), then
+    // write verses in batches. A per-row version took ~2.5 min for 3,000 rows,
+    // longer than proxy timeouts allow.
+    const bookCache = new Map<string, { id: number; slug: string }>();
+    const chapterCache = new Map<string, number>();
+    const topicCache = new Map<string, number>(); // `${chapterId}|${name}` -> topic id
+    const nextTopicNumber = new Map<number, number>(); // chapterId -> next number
+    const wanted = new Map<string, { topicId: number; number: number; text: string }>();
 
-      for (let csvIVerse of csvIVerses) {
-        const book = await db.book.upsert({
-          where: { name: csvIVerse.book.trim() },
+    for (const row of csvIVerses) {
+      let book = bookCache.get(row.book);
+      if (!book) {
+        book = await db.book.upsert({
+          where: { name: row.book },
           create: {
-            name: csvIVerse.book.trim(),
-            abbreviation: csvIVerse.bookAbbr,
-            slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_"),
+            name: row.book,
+            abbreviation: row.bookAbbr,
+            slug: row.book.toLowerCase().replaceAll(" ", "_"),
           },
           update: {},
         });
-        const chapterSlug = `${book.slug}_${csvIVerse.chapter}`;
-        const chapter = await db.chapter.upsert({
-          where: { slug: chapterSlug },
-          create: {
-            name: csvIVerse.chapter,
-            slug: chapterSlug,
-            bookId: book.id,
-          },
-          update: {},
-        });
-        const dbLastTopic = await db.topic.findFirst({
-          orderBy: {
-            number: "desc",
-          },
-          where: {
-            chapterId: chapter.id,
-          },
-        });
-        const topicNumber = dbLastTopic ? dbLastTopic.number + 1 : 1;
-        let topic = await db.topic.findFirst({
-          where: {
-            OR: [{ name: csvIVerse.topic }, { number: topicNumber }],
-            chapter: {
-              id: chapter.id,
-              bookId: chapter.bookId,
-            },
-          },
-        });
-        if (!topic || topic?.name !== csvIVerse.topic) {
-          topic = await db.topic.create({
-            data: {
-              name: csvIVerse.topic,
-              number:
-                topic?.number === topicNumber ? topicNumber + 1 : topicNumber,
-              chapterId: chapter.id,
-            },
-          });
-        }
-        let verse = await db.verse.findFirst({
-          where: {
-            number: csvIVerse.number,
-            topic: {
-              id: topic.id,
-              chapter: {
-                id: chapter.id,
-                bookId: chapter.bookId,
-              },
-            },
-          },
-        });
-        if (!verse) {
-          verse = await db.verse.create({
-            data: {
-              number: csvIVerse.number,
-              text: csvIVerse.text,
-              topicId: topic.id,
-            },
-          });
-          createdIVerses.push(verse);
-        }
+        bookCache.set(row.book, book);
       }
-    } else if (importMode === "update") {
-      const createdIVerses: IVerse[] = [];
-
-      for (let csvIVerse of csvIVerses) {
-        const book = await db.book.upsert({
-          where: { name: csvIVerse.book.trim() },
-          create: {
-            name: csvIVerse.book.trim(),
-            abbreviation: csvIVerse.bookAbbr,
-            slug: csvIVerse.book.toLowerCase().replaceAll(" ", "_"),
-          },
-          update: {},
-        });
-        const chapterSlug = `${book.slug}_${csvIVerse.chapter}`;
+      const chapterSlug = `${book.slug}_${row.chapter}`;
+      let chapterId = chapterCache.get(chapterSlug);
+      if (chapterId === undefined) {
         const chapter = await db.chapter.upsert({
           where: { slug: chapterSlug },
-          create: {
-            name: csvIVerse.chapter,
-            slug: chapterSlug,
-            bookId: book.id,
-          },
+          create: { name: row.chapter, slug: chapterSlug, bookId: book.id },
           update: {},
         });
-        const dbLastTopic = await db.topic.findFirst({
-          orderBy: {
-            number: "desc",
-          },
-          where: {
-            chapterId: chapter.id,
-          },
-        });
-        const topicNumber = dbLastTopic ? dbLastTopic.number + 1 : 1;
-        let topic = await db.topic.findFirst({
-          where: {
-            OR: [{ name: csvIVerse.topic }, { number: topicNumber }],
-            chapter: {
-              id: chapter.id,
-              bookId: chapter.bookId,
-            },
-          },
-        });
-        if (!topic || topic?.name !== csvIVerse.topic) {
-          topic = await db.topic.create({
-            data: {
-              name: csvIVerse.topic,
-              number:
-                topic?.number === topicNumber ? topicNumber + 1 : topicNumber,
-              chapterId: chapter.id,
-            },
-          });
+        chapterId = chapter.id;
+        chapterCache.set(chapterSlug, chapterId);
+        const topics = await db.topic.findMany({ where: { chapterId } });
+        let max = 0;
+        for (const t of topics) {
+          max = Math.max(max, t.number);
+          if (!topicCache.has(`${chapterId}|${t.name}`)) {
+            topicCache.set(`${chapterId}|${t.name}`, t.id);
+          }
         }
-        let verse = await db.verse.findFirst({
-          where: {
-            number: csvIVerse.number,
-            topic: {
-              id: topic.id,
-              chapter: {
-                id: chapter.id,
-                bookId: chapter.bookId,
-              },
-            },
-          },
+        nextTopicNumber.set(chapterId, max + 1);
+      }
+      const topicKey = `${chapterId}|${row.topic}`;
+      let topicId = topicCache.get(topicKey);
+      if (topicId === undefined) {
+        const number = nextTopicNumber.get(chapterId)!;
+        const topic = await db.topic.create({
+          data: { name: row.topic, number, chapterId },
         });
-        if (!verse) {
-          verse = await db.verse.create({
-            data: {
-              number: csvIVerse.number,
-              text: csvIVerse.text,
-              topicId: topic.id,
-            },
-          });
-          createdIVerses.push(verse);
-        } else {
-          verse = await db.verse.update({
-            data: {
-              text: csvIVerse.text,
-            },
-            where: {
-              id: verse.id,
-            },
-          });
-          createdIVerses.push(verse);
-        }
+        nextTopicNumber.set(chapterId, number + 1);
+        topicId = topic.id;
+        topicCache.set(topicKey, topicId);
+      }
+      // Duplicate rows for the same topic+verse: first occurrence wins in
+      // overwrite mode, last wins in update mode (matches the old behaviour).
+      const key = `${topicId}|${row.number}`;
+      if (importMode === "update" || !wanted.has(key)) {
+        wanted.set(key, { topicId, number: row.number, text: row.text });
       }
     }
+
+    const topicIds = Array.from(new Set(Array.from(wanted.values()).map((v) => v.topicId)));
+    const existing = new Map<string, { id: number; text: string }>();
+    for (let i = 0; i < topicIds.length; i += 500) {
+      const found = await db.verse.findMany({
+        where: { topicId: { in: topicIds.slice(i, i + 500) } },
+        select: { id: true, topicId: true, number: true, text: true },
+      });
+      for (const v of found) {
+        const key = `${v.topicId}|${v.number}`;
+        if (!existing.has(key)) existing.set(key, { id: v.id, text: v.text });
+      }
+    }
+
+    const toCreate: { topicId: number; number: number; text: string }[] = [];
+    const toUpdate: { id: number; text: string }[] = [];
+    wanted.forEach((v, key) => {
+      const old = existing.get(key);
+      if (!old) toCreate.push(v);
+      else if (importMode === "update" && old.text !== v.text) {
+        toUpdate.push({ id: old.id, text: v.text });
+      }
+    });
+    for (let i = 0; i < toCreate.length; i += 500) {
+      await db.verse.createMany({ data: toCreate.slice(i, i + 500) });
+    }
+    for (let i = 0; i < toUpdate.length; i += 50) {
+      await Promise.all(
+        toUpdate
+          .slice(i, i + 50)
+          .map((v) => db.verse.update({ where: { id: v.id }, data: { text: v.text } }))
+      );
+    }
+    const createdIVerses: IVerse[] = [];
+    console.log(
+      `CSV import (${importMode}): ${toCreate.length} created, ${toUpdate.length} updated, ${wanted.size - toCreate.length - toUpdate.length} unchanged`
+    );
 
     return {
       succeed: true,

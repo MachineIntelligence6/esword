@@ -342,3 +342,57 @@ export async function verifyPassword(req: Request): Promise<ApiResponse<IUser>> 
         }
     }
 }
+
+
+type ChangePasswordReq = {
+    currentPassword?: string
+    newPassword?: string
+}
+
+// Throttle wrong-current-password guesses per user (in-memory, per server process).
+const CHANGE_PASSWORD_MAX_FAILURES = 5
+const CHANGE_PASSWORD_WINDOW_MS = 15 * 60 * 1000
+const changePasswordFailures = new Map<number, { count: number; resetAt: number }>()
+
+export async function changePassword(req: Request): Promise<ApiResponse<null>> {
+    try {
+        const session = await requireAuth()
+        if (isAuthError(session)) return session
+        const userId = Number(session.user.id)
+        const { currentPassword, newPassword } = await req.json() as ChangePasswordReq
+
+        if (typeof currentPassword !== "string" || !currentPassword || !isUsablePassword(newPassword)) {
+            return { succeed: false, code: "VALIDATION_ERROR", data: null }
+        }
+        if (newPassword === currentPassword) {
+            return { succeed: false, code: "VALIDATION_ERROR", data: null }
+        }
+
+        const failure = changePasswordFailures.get(userId)
+        if (failure && failure.resetAt > Date.now() && failure.count >= CHANGE_PASSWORD_MAX_FAILURES) {
+            return { succeed: false, code: "RATE_LIMITED", data: null }
+        }
+
+        const user = await db.user.findFirst({ where: { id: userId, archived: false } })
+        if (!user) return { succeed: false, code: "UNAUTHORIZED", data: null }
+
+        const matches = await comparePassword(currentPassword, user.password)
+        if (!matches) {
+            const active = failure && failure.resetAt > Date.now() ? failure : null
+            changePasswordFailures.set(userId, {
+                count: (active?.count ?? 0) + 1,
+                resetAt: active?.resetAt ?? Date.now() + CHANGE_PASSWORD_WINDOW_MS,
+            })
+            return { succeed: false, code: "WRONG_PASSWORD", data: null }
+        }
+
+        const hashed = await hashPassword(newPassword)
+        if (!hashed) throw new Error("Failed to hash password")
+        await db.user.update({ where: { id: userId }, data: { password: hashed } })
+        changePasswordFailures.delete(userId)
+        return { succeed: true, code: "SUCCESS", data: null }
+    } catch (error) {
+        console.error(error)
+        return { succeed: false, code: "UNKNOWN_ERROR", data: null }
+    }
+}

@@ -135,3 +135,12 @@ export async function exportBook(
     };
   }
 }
+
+export async function reorder(ids: number[]): Promise<ApiResponse> {
+  try {
+    const res = await axios.put<ApiResponse>("/api/books/reorder", { ids });
+    return res.data;
+  } catch (error) {
+    return { succeed: false, code: "UNKNOWN_ERROR", data: null };
+  }
+}

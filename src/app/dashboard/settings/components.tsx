@@ -65,7 +65,9 @@ export function ImportIVersesComponent() {
       toast({
         title: "Import failed",
         description:
-          "Could not process the file. Check the sample format and try again.",
+          res.code === "VALIDATION_ERROR"
+            ? "Some rows have an invalid chapter or verse number. Chapters must be numbers (or ℵ for the intro, chapter 0) and verse numbers must be numbers."
+            : "Could not process the file. Check the sample format and try again.",
         variant: "destructive",
       });
     }

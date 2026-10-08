@@ -66,3 +66,204 @@ body {
   @apply !flex !items-center !min-h-[40px] w-full !rounded-md !border !border-slate-200 !bg-white !px-3 !py-2 !text-sm !shadow-sm;
   @apply focus-visible:!outline-none focus-visible:!ring-1 focus-visible:!ring-slate-400 disabled:!cursor-not-allowed disabled:!opacity-50;
 }
+
+/* ---- Dark theme ----------------------------------------------------------
+   Warm neutral greys with a clay accent (no blue), in the style of Claude's dark
+   mode. Tailwind's `dark:` variants switch on with the `dark` class on <html>;
+   this block maps the colours that are hard-coded across the app and the
+   slate-based shadcn dark variants. See src/lib/theme.ts for how the class is set.
+     page #262624 · chrome #1f1e1d · surface #30302e · subtle #2b2a28
+     raised/selected #3d3d3a · border #3d3d3a · text #faf9f5 / #c2c0b6 / #9c9a92
+     accent clay #c6613f (fill) / #d97757 (text, hover) */
+html.dark {
+  color-scheme: dark;
+}
+html.dark body {
+  background-color: #262624;
+  color: #faf9f5;
+}
+
+/* Surfaces */
+html.dark .bg-white,
+html.dark .dark\:bg-slate-950,
+html.dark .dark\:bg-slate-900 {
+  background-color: #30302e;
+}
+html.dark .bg-silver-light,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #2b2a28;
+}
+html.dark .bg-slate-200,
+html.dark .bg-secondary,
+html.dark .dark\:bg-slate-800,
+html.dark .dark\:focus\:bg-slate-800:focus,
+html.dark .dark\:hover\:bg-slate-800:hover,
+html.dark .hover\:bg-secondary:hover,
+html.dark .hover\:bg-slate-100:hover,
+html.dark .hover\:bg-slate-50:hover {
+  background-color: #3d3d3a;
+}
+html.dark .bg-accent-subtle,
+html.dark .bg-primary-25,
+html.dark .bg-primary-50,
+html.dark .bg-primary-100 {
+  background-color: #3a2e29;
+}
+
+/* Large brand-coloured areas become neutral chrome; small controls stay clay */
+html.dark div.bg-primary,
+html.dark nav.bg-primary,
+html.dark aside.bg-primary,
+html.dark section.bg-primary {
+  background-color: #1f1e1d;
+  border-color: #3d3d3a;
+}
+html.dark button.bg-primary,
+html.dark a.bg-primary,
+html.dark input.bg-primary,
+html.dark .\!bg-primary {
+  background-color: #c6613f !important;
+  border-color: #c6613f;
+}
+html.dark .hover\:bg-primary-dark:hover,
+html.dark .active\:bg-primary-800:active {
+  background-color: #d97757;
+}
+html.dark .hover\:border-primary-dark:hover,
+html.dark .active\:border-primary-800:active,
+html.dark .border-primary,
+html.dark .hover\:border-primary:hover {
+  border-color: #d97757;
+}
+
+/* Text */
+html.dark .text-primary-dark,
+html.dark .text-slate-950,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .dark\:text-slate-50,
+html.dark .dark\:focus\:text-slate-50:focus {
+  color: #faf9f5;
+}
+html.dark .text-primary-dark\/80,
+html.dark .text-primary-dark\/70,
+html.dark .text-primary-dark\/60,
+html.dark .text-primary-dark\/55,
+html.dark .text-slate-600,
+html.dark .text-gray-700 {
+  color: #c2c0b6;
+}
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-gray-500,
+html.dark .dark\:text-slate-400,
+html.dark .dark\:text-stone-400 {
+  color: #9c9a92;
+}
+html.dark .text-primary,
+html.dark .hover\:text-primary:hover,
+html.dark .hover\:text-primary-dark:hover,
+html.dark [class*="[&_a]:text-primary"] a {
+  color: #d97757;
+}
+html.dark div.bg-primary .text-primary,
+html.dark nav.bg-primary .text-primary {
+  color: #faf9f5;
+}
+
+/* Borders */
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-silver-light,
+html.dark .dark\:border-slate-800,
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-silver-light > :not([hidden]) ~ :not([hidden]) {
+  border-color: #3d3d3a;
+}
+
+/* Scrollbars */
+html.dark *::-webkit-scrollbar {
+  background: #2b2a28;
+}
+html.dark *::-webkit-scrollbar-thumb {
+  background: #4a4945;
+}
+
+/* Form fields (zero specificity so component classes still win) */
+:where(html.dark) :where(input, textarea, select) {
+  background-color: #30302e;
+  color: #faf9f5;
+  border-color: #3d3d3a;
+}
+:where(html.dark) :where(input, textarea)::placeholder {
+  color: #9c9a92;
+}
+html.dark .rti--container {
+  background-color: #30302e !important;
+  border-color: #3d3d3a !important;
+}
+
+/* Rich text editor */
+html.dark .ql-toolbar,
+html.dark .ql-container {
+  border-color: #3d3d3a !important;
+}
+html.dark .ql-toolbar {
+  background-color: #2b2a28;
+}
+html.dark .ql-editor {
+  color: #faf9f5;
+}
+html.dark .ql-toolbar .ql-stroke {
+  stroke: #c2c0b6;
+}
+html.dark .ql-toolbar .ql-fill {
+  fill: #c2c0b6;
+}
+html.dark .ql-toolbar .ql-picker {
+  color: #c2c0b6;
+}
+
+/* Remaining slate/blue leftovers */
+html.dark .disabled\:text-slate-400:disabled,
+html.dark .disabled\:text-slate-500:disabled,
+html.dark .disabled\:text-slate-300:disabled,
+html.dark button:disabled {
+  color: #9c9a92;
+}
+html.dark .disabled\:bg-slate-100:disabled {
+  background-color: #2b2a28;
+}
+html.dark .disabled\:border-slate-200:disabled {
+  border-color: #3d3d3a;
+}
+html.dark .ql-snow .ql-tooltip,
+html.dark .ql-snow .ql-tooltip input {
+  background-color: #30302e;
+  border-color: #3d3d3a;
+  color: #faf9f5;
+}
+html.dark .ql-snow a,
+html.dark .ql-snow .ql-tooltip a {
+  color: #d97757;
+}
+html.dark button.bg-primary:disabled {
+  background-color: #3d3d3a !important;
+  border-color: #3d3d3a;
+  color: #9c9a92;
+}
+
+/* Loading skeletons (react-content-loader) hard-code light greys */
+html.dark .skeleton stop:nth-child(odd) {
+  stop-color: #35342f;
+}
+html.dark .skeleton stop:nth-child(even) {
+  stop-color: #45443f;
+}
+
+/* Toolbar icon is an <img> SVG filled with navy; make it light on dark surfaces */
+html.dark img[alt="Highlight"] {
+  filter: invert(1) brightness(0.9);
+}
