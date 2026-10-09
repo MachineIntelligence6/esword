@@ -272,3 +272,13 @@ html.dark img[alt="Highlight"] {
 html.dark .border-slate-600 {
   border-color: #d97757;
 }
+
+/* Interactive borders (hover/focus) hard-code slate-950, which stayed
+   near-black in dark mode — e.g. the avatar menu button and outline buttons
+   went black on hover instead of showing the clay accent. */
+html.dark .hover\:border-slate-950:hover,
+html.dark .focus\:border-slate-950:focus,
+html.dark .focus-within\:border-slate-950:focus-within,
+html.dark .focus-visible\:border-slate-950:focus-visible {
+  border-color: #d97757;
+}
