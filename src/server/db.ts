@@ -1,16 +1,45 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { ActivityActionType, ActivityModelType, Prisma, PrismaClient } from "@prisma/client";
 import { getServerAuth } from "./auth";
 import { scrubPasswords } from "./scrub-passwords";
+import { describeActivity } from "./activity-log";
 
 const basePrisma = new PrismaClient()
 
 const activityModels = [
     "Book", "Chapter",
     "Topic", "Verse",
-    "Author", "Author",
+    "Author", "Commentary",
     "Note", "User", "Blog",
     "AboutContent"
 ]
+
+// Set while a handler logs one summary entry for a whole job (e.g. a CSV
+// import) so its individual writes don't each add a row to the activity log.
+const activityLogMuted = new AsyncLocalStorage<boolean>()
+
+export function withoutActivityLog<T>(fn: () => Promise<T>): Promise<T> {
+    return activityLogMuted.run(true, fn)
+}
+
+export async function logActivity(entry: {
+    action: ActivityActionType,
+    model: ActivityModelType,
+    description: (userName: string) => string,
+    ref?: number | null,
+}) {
+    const session = await getServerAuth();
+    if (!session) return;
+    await basePrisma.activity.create({
+        data: {
+            action: entry.action,
+            model: entry.model,
+            description: entry.description(session.user.name),
+            ref: entry.ref ?? null,
+            userId: Number(session.user.id),
+        }
+    })
+}
 
 
 const activityOperations = [
@@ -73,14 +102,16 @@ basePrisma.$use(async (params, next) => {
     }
     const { model, action, args } = params
     if (model && activityModels.includes(model.toString()) && activityOperations.includes(action)) {
+        if (activityLogMuted.getStore()) return result;
+        // Bulk ops return `{ count }`. Nothing matched means nothing changed
+        // (e.g. archiving a verse's commentaries when it has none).
+        const bulkCount: number | undefined = action.endsWith("Many") ? result?.count : undefined
+        if (bulkCount === 0) return result;
         const session = await getServerAuth();
         let activityAction = getActivityAction(action, args)
         let activityModel = getActivityModel(model)
         if (!session || !activityAction || !activityModel) return result;
-        let description = `${session.user.name} ${activityAction.toLowerCase()}d ${activityAction === "CREATE" ? "new " : ""}${model.toLowerCase()}${(activityAction === "CREATE" || activityAction === "UPDATE") ? "" : "(s)"}`;
-        if (model === "AboutContent") {
-            description = `${session.user.name} updated about page content`
-        }
+        const description = describeActivity(session.user.name, activityAction, model, bulkCount)
         // `result` is the actual row Prisma just wrote (create/update/upsert/delete
         // all return it), so its id is always correct — unlike `args.where.id`,
         // which is undefined whenever the write is keyed by something else (e.g.
