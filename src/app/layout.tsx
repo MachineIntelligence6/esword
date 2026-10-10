@@ -14,6 +14,16 @@ import { themeInitScript } from "@/lib/theme";
 export const metadata: Metadata = {
   title: "Hidden Sword",
   description: "",
+  icons: {
+    // The browser tab icon follows the OS/browser's own color scheme, same
+    // as our CSS dark mode's `prefers-color-scheme` queries — independent of
+    // the in-app Auto/Light/Dark toggle, which browsers don't expose to
+    // favicon selection.
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-dark.ico", media: "(prefers-color-scheme: dark)" },
+    ],
+  },
 };
 
 export const dynamic = "force-dynamic";
