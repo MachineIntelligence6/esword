@@ -72,11 +72,18 @@ basePrisma.$use(async (params, next) => {
         let activityAction = getActivityAction(action, args)
         let activityModel = getActivityModel(model)
         if (!session || !activityAction || !activityModel) return result;
-        let description = `${session.user.name} ${activityAction.toLowerCase()}d ${activityAction === "CREATE" ? "new" : ""} ${model.toLowerCase()}${(activityAction === "CREATE" || activityAction === "UPDATE") ? "" : "(s)"}`;
+        let description = `${session.user.name} ${activityAction.toLowerCase()}d ${activityAction === "CREATE" ? "new " : ""}${model.toLowerCase()}${(activityAction === "CREATE" || activityAction === "UPDATE") ? "" : "(s)"}`;
         if (model === "AboutContent") {
             description = `${session.user.name} updated about page content`
         }
-        const refId: number | undefined | null = (activityAction === "CREATE") ? result.id : (args as any)?.where?.id
+        // `result` is the actual row Prisma just wrote (create/update/upsert/delete
+        // all return it), so its id is always correct — unlike `args.where.id`,
+        // which is undefined whenever the write is keyed by something else (e.g.
+        // a chapter upserted by `slug`, a book upserted by `name`). Bulk ops
+        // (updateMany/deleteMany) return `{ count }` with no id, so those still
+        // fall back to `args.where.id` and usually end up with no ref, which is
+        // expected since there's no single record to point at.
+        const refId: number | undefined | null = result?.id ?? (args as any)?.where?.id
 
         await basePrisma.activity.create({
             data: {
