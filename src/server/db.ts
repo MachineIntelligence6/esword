@@ -1,5 +1,6 @@
 import { ActivityActionType, ActivityModelType, Prisma, PrismaClient } from "@prisma/client";
 import { getServerAuth } from "./auth";
+import { scrubPasswords } from "./scrub-passwords";
 
 const basePrisma = new PrismaClient()
 
@@ -66,6 +67,10 @@ basePrisma.$use(async (params, next) => {
         }
     }
     const result = await next(params);
+    if (result && typeof result === "object") {
+        // Keep the hash only on the top-level rows of a direct User read.
+        scrubPasswords(result, params.model === "User")
+    }
     const { model, action, args } = params
     if (model && activityModels.includes(model.toString()) && activityOperations.includes(action)) {
         const session = await getServerAuth();
