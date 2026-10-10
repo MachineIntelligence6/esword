@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DonationSettings } from "@prisma/client";
 import clientApiHandlers from "@/client/handlers";
@@ -70,9 +71,9 @@ export default function DonationPopup() {
         </DialogHeader>
         <p className="text-4xl font-bold text-primary-dark">{amount}</p>
         <Button variant="primary" className="h-11 w-full" asChild>
-          <a href="/donate" onClick={() => setOpen(false)}>
+          <Link href="/donate" onClick={() => setOpen(false)}>
             {settings.popupButtonLabel}
-          </a>
+          </Link>
         </Button>
         <button
           type="button"

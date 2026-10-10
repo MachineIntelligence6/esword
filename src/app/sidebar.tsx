@@ -7,29 +7,49 @@ import { SideBarEl } from "@/components/ui/select";
 import { TooltipEl } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
-import { IBook } from "@/shared/types/models.types";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { IBook, IChapter } from "@/shared/types/models.types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo } from "react";
+
+// The URL (?book=slug&chapter=N) says what is open, so back/forward and a
+// refresh land on the same chapter. On the reader page a click opens the
+// chapter directly (no page reload, no wait for a router re-render) and the
+// History API updates the URL; the URL effect below then finds it already
+// open. From other pages (search, problems, ...) the router navigates to the
+// reader client-side.
+function useOpenInReader() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const navigateTo = useReadBookStore((state) => state.navigateTo);
+  return useCallback(
+    (book: Pick<IBook, "slug">, chapter?: Pick<IChapter, "name">) => {
+      const params = new URLSearchParams({ book: book.slug });
+      if (chapter) params.set("chapter", String(chapter.name));
+      const url = `/?${params.toString()}`;
+      if (pathname !== "/") return router.push(url);
+      navigateTo(book.slug, chapter?.name);
+      if (window.location.search !== `?${params.toString()}`) {
+        window.history.pushState(null, "", url);
+      }
+    },
+    [pathname, router, navigateTo]
+  );
+}
 
 export default function SiteSidebar() {
   const searchParams = useSearchParams();
-  const { loadInitialData } = useReadBookStore();
-
-  const doInitialLoadWork = async () => {
-    const book = searchParams.get("book") ?? undefined;
-    const chapter = parseInt(searchParams.get("chapter") ?? "-1");
-    const verse = parseInt(searchParams.get("verse") ?? "-1");
-    await loadInitialData(
-      book,
-      chapter === -1 ? undefined : chapter,
-      verse === -1 ? undefined : verse
-    );
-  };
+  const navigateTo = useReadBookStore((state) => state.navigateTo);
 
   useEffect(() => {
-    doInitialLoadWork();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+    const book = searchParams.get("book") ?? undefined;
+    const chapter = parseInt(searchParams.get("chapter") ?? "");
+    const verse = parseInt(searchParams.get("verse") ?? "");
+    navigateTo(
+      book,
+      Number.isNaN(chapter) ? undefined : chapter,
+      Number.isNaN(verse) ? undefined : verse
+    );
+  }, [searchParams, navigateTo]);
 
   // useEffect(() => {
   //     if (booksList && chaptersList) return;
@@ -59,11 +79,9 @@ export const sortByPriority = (a: IBook, b: IBook) => {
 function SidebarBooksComponent() {
   const { booksList, activeBook } = useReadBookStore();
   const booksListSorted = booksList?.sort(sortByPriority);
+  const openInReader = useOpenInReader();
 
-  const changeBook = (book: IBook) => {
-    window.location.replace(`/?book=${book.slug}`);
-    // window.location.reload()
-  };
+  const changeBook = (book: IBook) => openInReader(book);
   return (
     // <div className="lg:min-w-[130px] lg:max-w-[130px] w-full lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
     <div className="lg:min-w-[130px] w-full lg:flex lg:flex-col lg:h-full lg:min-h-0 lg:border-0 lg:border-r-2 border border-solid text-primary-dark lg:rounded-none rounded-lg">
@@ -125,6 +143,13 @@ function SidebarChaptersComponent() {
     setActiveChapter,
     booksList,
   } = useReadBookStore();
+  const openInReader = useOpenInReader();
+
+  const changeChapter = (chapterId: number) => {
+    const chapter = chaptersList?.find((ch) => ch.id === chapterId);
+    if (activeBook.data && chapter) openInReader(activeBook.data, chapter);
+    else setActiveChapter(chapterId);
+  };
 
   const value = useMemo(
     () => (activeChapter || {}).id?.toString() || "",
@@ -166,7 +191,7 @@ function SidebarChaptersComponent() {
           <SideBarEl
             value={value}
             onChange={(opt) => {
-              if (opt?.value) setActiveChapter(Number(opt.value));
+              if (opt?.value) changeChapter(Number(opt.value));
             }}
             options={options}
           />
@@ -181,7 +206,7 @@ function SidebarChaptersComponent() {
               <button
                 type="button"
                 key={chapter.id}
-                onClick={() => setActiveChapter(chapter.id)}
+                onClick={() => changeChapter(chapter.id)}
                 className={cn(
                   "px-3 py-2 transition-all text-sm hover:scale-110",
                   activeChapter.id === chapter.id

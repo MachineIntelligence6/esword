@@ -78,6 +78,11 @@ type ReadBookStoreType = {
     chapter?: number,
     verse?: number
   ) => Promise<void>;
+  navigateTo: (
+    book?: string,
+    chapter?: number,
+    verse?: number
+  ) => Promise<void>;
 };
 
 const checkAndSaveNote = (state: ReadBookStoreType) => {
@@ -135,6 +140,8 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
         name: "asc",
       },
     });
+    // Another book was clicked while this one loaded.
+    if (get().activeBook.id !== bookId) return;
     set((state) => ({
       ...state,
       chaptersList: chapters,
@@ -152,8 +159,9 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
   setActiveChapter: async (chapterId, verseNum) => {
     if (chapterId === get().activeChapter.id) return;
     checkAndSaveNote(get());
-    const session = await getSession();
-    if (!session) return;
+    // Mark the chapter as active before any request, so the click shows
+    // straight away.
+    const previous = get();
     set((state) => ({
       ...state,
       activeChapter: { id: chapterId, loading: true },
@@ -162,6 +170,17 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
       activeVerseNote: {},
       commentaries: {},
     }));
+    const session = await getSession();
+    if (!session) {
+      set((state) => ({
+        ...state,
+        activeChapter: previous.activeChapter,
+        activeVerse: previous.activeVerse,
+        topicsList: previous.topicsList,
+        activeVerseNote: previous.activeVerseNote,
+      }));
+      return;
+    }
     const chapter = get().chaptersList?.find((ch) => ch.id === chapterId);
     const { data: topics } = await clientApiHandlers.topics.get({
       page: 1,
@@ -197,6 +216,8 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
         },
       },
     });
+    // Another chapter was clicked while this one loaded.
+    if (get().activeChapter.id !== chapterId) return;
     set((state) => ({
       ...state,
       activeChapter: {
@@ -461,5 +482,31 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
       await get().setActiveBook(book.id, chapterNum, verseNum);
     }
     set((state) => ({ ...state, initialLoading: false }));
+  },
+  // Show the book/chapter/verse named in the URL (?book=slug&chapter=N&verse=N).
+  // The first call loads the books list; later calls only load what changed,
+  // so switching book or chapter never reloads the page or the books list.
+  navigateTo: async (bookSlug, chapterNum, verseNum) => {
+    const books = get().booksList;
+    if (!books) return get().loadInitialData(bookSlug, chapterNum, verseNum);
+    const book = bookSlug ? books.find((b) => b.slug === bookSlug) : books[0];
+    if (!book) return;
+    if (book.id !== get().activeBook.id) {
+      return get().setActiveBook(book.id, chapterNum, verseNum);
+    }
+    // No chapter in the URL means the book's first chapter, as when the book
+    // was opened.
+    const chapter = chapterNum
+      ? get().chaptersList?.find((ch) => ch.name === chapterNum)
+      : get().chaptersList?.[0];
+    if (chapter && chapter.id !== get().activeChapter.id) {
+      return get().setActiveChapter(chapter.id, verseNum);
+    }
+    if (verseNum) {
+      const verse = get()
+        .topicsList?.flatMap((topic) => topic.verses ?? [])
+        .find((v) => v.number === verseNum);
+      if (verse) await get().setActiveVerse(verse.id);
+    }
   },
 }));

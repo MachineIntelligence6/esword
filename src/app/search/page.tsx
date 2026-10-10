@@ -4,6 +4,7 @@ import { SearchLoadingPlaceholder } from "@/components/loading-placeholders";
 import { Card, CardContent } from "@/components/ui/card";
 import { PaginatedApiResponse } from "@/shared/types/api.types";
 import { IVerse } from "@/shared/types/models.types";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Highlighter from "react-highlight-words";
@@ -53,30 +54,30 @@ export default function Page() {
                       <div className="flex items-center gap-5 mt-2">
                         <span className="text-xs">
                           Book:{" "}
-                          <a
+                          <Link
                             href={`/?book=${verse.topic?.chapter?.book?.slug}`}
                             className="text-primary"
                           >
                             {verse.topic?.chapter?.book?.name}
-                          </a>
+                          </Link>
                         </span>
                         <span className="text-xs">
                           Chapter:{" "}
-                          <a
+                          <Link
                             href={`/?book=${verse.topic?.chapter?.book?.slug}&chapter=${verse.topic?.chapter?.name}`}
                             className="text-primary"
                           >
                             {verse.topic?.chapter?.name}
-                          </a>
+                          </Link>
                         </span>
                         <span className="text-xs">
                           Verse:{" "}
-                          <a
+                          <Link
                             href={`/?book=${verse.topic?.chapter?.book?.slug}&chapter=${verse.topic?.chapter?.name}&verse=${verse.number}`}
                             className="text-primary"
                           >
                             {verse.number}
-                          </a>
+                          </Link>
                         </span>
                       </div>
                     </div>
