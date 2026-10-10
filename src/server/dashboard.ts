@@ -7,9 +7,13 @@ const live = { archived: false } as const;
 
 // Rows an activity entry stands for. Bulk entries end in "… 12 chapters" and
 // import summaries in "… 2,994 verses into II Psalms (…)" (see activity-log.ts);
-// every other entry is one change.
-const entryCount = Prisma.sql`COALESCE(CAST(REPLACE(SUBSTRING_INDEX(
-    REGEXP_SUBSTR(description, '[0-9][0-9,]* [a-z]+( into .*)?$'), ' ', 1), ',', '') AS UNSIGNED), 1)`;
+// every other entry is one change. The REGEXP test comes first because on a
+// non-match MariaDB's REGEXP_SUBSTR returns '' (cast to 0) where MySQL
+// returns NULL, which made every ordinary entry count as 0 in production.
+const countedPattern = "[0-9][0-9,]* [a-z]+( into .*)?$";
+const entryCount = Prisma.sql`CASE WHEN description REGEXP ${countedPattern}
+    THEN CAST(REPLACE(SUBSTRING_INDEX(REGEXP_SUBSTR(description, ${countedPattern}), ' ', 1), ',', '') AS UNSIGNED)
+    ELSE 1 END`;
 
 const toNumber = (v: bigint | number | null | undefined) => Number(v ?? 0);
 
