@@ -101,7 +101,9 @@ cd "${APP_DIR}"
 # Restore any blog images tracked in git that may be missing on disk
 git checkout HEAD -- public/blogs-images 2>/dev/null || true
 
-npm ci
+# Vulnerability checks run in CI (scripts/audit-gate.mjs), which fails on any
+# high/critical advisory not explicitly accepted; skip the duplicate report here.
+npm ci --no-audit
 npm run migrate
 NODE_ENV=production npm run build
 pm2 restart "${PM2_NAME}" --update-env
