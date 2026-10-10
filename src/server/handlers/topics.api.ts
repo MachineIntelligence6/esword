@@ -37,7 +37,8 @@ export async function getAll({
                     }
             )
         })
-        const topicsCount = await db.topic.count({
+        // Asking for every row (perPage -1) already gives the total.
+        const topicsCount = perPage === -1 ? topics.length : await db.topic.count({
             where: topicWhere,
         })
         return {

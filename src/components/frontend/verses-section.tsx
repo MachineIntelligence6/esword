@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
+import useOpenInReader from "@/components/hooks/use-open-in-reader";
 import { IChapter, IVerse } from "@/shared/types/models.types";
 import { cn } from "@/lib/utils";
 import { escapeRegExp, sanitizeVerseHtml } from "@/lib/sanitize-html";
@@ -112,6 +113,7 @@ function VersesSectionContent() {
   } = useReadBookStore();
   const versesContainerRef = useRef<HTMLDivElement>(null);
   const windowSize = useWindowSize();
+  const openInReader = useOpenInReader();
 
   const activeChIndex =
     chaptersList?.findIndex((ch) => ch.id === activeChapter.id) ?? -1;
@@ -169,13 +171,15 @@ function VersesSectionContent() {
     setScale((prevScale) => Math.max(MIN_SCALE_VALUE, prevScale - 0.2)); // Decrease scale by 0.1 but never below 0.1
   };
 
+  const openChapter = (chapter: IChapter) => {
+    if (activeBook.data) openInReader(activeBook.data, chapter);
+    else setActiveChapter(chapter.id);
+  };
   const goToNextChapter = () => {
-    if (!nextChapter) return;
-    setActiveChapter(nextChapter.id);
+    if (nextChapter) openChapter(nextChapter);
   };
   const goToPrevChapter = () => {
-    if (!previousChapter) return;
-    setActiveChapter(previousChapter.id);
+    if (previousChapter) openChapter(previousChapter);
   };
 
   const showPlaceholder =
@@ -259,6 +263,8 @@ function VersesSectionContent() {
               className="hover:scale-110 transition-transform disabled:hover:!scale-100"
               disabled={!previousChapter}
               onClick={goToPrevChapter}
+              aria-label="Previous chapter"
+              title="Previous chapter"
             >
               <ChevronLeftIcon className="w-5 h-5" />
             </button>
@@ -267,6 +273,8 @@ function VersesSectionContent() {
               className="hover:scale-110 transition-transform disabled:hover:!scale-100"
               disabled={!nextChapter}
               onClick={goToNextChapter}
+              aria-label="Next chapter"
+              title="Next chapter"
             >
               <ChevronRightIcon className="w-5 h-5" />
             </button>
@@ -309,6 +317,8 @@ function VersesSectionContent() {
                             <VerseComponent
                               key={verse.id}
                               verse={verse}
+                              bookAbbreviation={activeBook.data?.abbreviation}
+                              chapterName={activeChapter.data?.name}
                               fontSize={scale * baseFontSize}
                               versesContainerRef={versesContainerRef}
                               active={activeVerse.id === verse.id}
@@ -362,6 +372,8 @@ function generateHighlightedText(verse: IVerse) {
 type VerseComponentProps = {
   onClick?: () => void;
   verse: IVerse;
+  bookAbbreviation?: string;
+  chapterName?: number;
   active?: boolean;
   versesContainerRef: RefObject<HTMLDivElement | null>;
   fontSize: number;
@@ -369,6 +381,8 @@ type VerseComponentProps = {
 
 function VerseComponent({
   verse,
+  bookAbbreviation,
+  chapterName,
   onClick,
   active,
   fontSize,
@@ -409,8 +423,8 @@ function VerseComponent({
     >
       <p className={"text-light-green min-w-max"}>
         <VerseReference
-          abbreviation={verse.topic?.chapter?.book?.abbreviation}
-          chapter={verse.topic?.chapter?.name}
+          abbreviation={bookAbbreviation}
+          chapter={chapterName}
           verse={verse.number}
         />
       </p>

@@ -41,7 +41,8 @@ export async function getAll({
             topics: false,
           },
     });
-    const chaptersCount = await db.chapter.count({
+    // Asking for every row (perPage -1) already gives the total.
+    const chaptersCount = perPage === -1 ? chapters.length : await db.chapter.count({
       where: chapterWhere,
     });
     return {

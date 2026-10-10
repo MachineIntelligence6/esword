@@ -7,34 +7,10 @@ import { SideBarEl } from "@/components/ui/select";
 import { TooltipEl } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useReadBookStore } from "@/lib/zustand/readBookStore";
-import { IBook, IChapter } from "@/shared/types/models.types";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
-
-// The URL (?book=slug&chapter=N) says what is open, so back/forward and a
-// refresh land on the same chapter. On the reader page a click opens the
-// chapter directly (no page reload, no wait for a router re-render) and the
-// History API updates the URL; the URL effect below then finds it already
-// open. From other pages (search, problems, ...) the router navigates to the
-// reader client-side.
-function useOpenInReader() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const navigateTo = useReadBookStore((state) => state.navigateTo);
-  return useCallback(
-    (book: Pick<IBook, "slug">, chapter?: Pick<IChapter, "name">) => {
-      const params = new URLSearchParams({ book: book.slug });
-      if (chapter) params.set("chapter", String(chapter.name));
-      const url = `/?${params.toString()}`;
-      if (pathname !== "/") return router.push(url);
-      navigateTo(book.slug, chapter?.name);
-      if (window.location.search !== `?${params.toString()}`) {
-        window.history.pushState(null, "", url);
-      }
-    },
-    [pathname, router, navigateTo]
-  );
-}
+import useOpenInReader from "@/components/hooks/use-open-in-reader";
+import { IBook } from "@/shared/types/models.types";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 export default function SiteSidebar() {
   const searchParams = useSearchParams();

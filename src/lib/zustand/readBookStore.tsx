@@ -112,6 +112,71 @@ const syncHighlightsWithDB = async (
   await clientApiHandlers.verses.updateHighlights(verseId, highlights);
 };
 
+// One session lookup per page load instead of a round trip before every
+// chapter, verse and highlight. Signing in or out reloads the page, which
+// resets this.
+let sessionPromise: ReturnType<typeof getSession> | null = null;
+const getCachedSession = () => {
+  if (!sessionPromise) {
+    sessionPromise = getSession().then((session) => {
+      if (!session) sessionPromise = null;
+      return session;
+    });
+  }
+  return sessionPromise;
+};
+
+// Verses of a chapter, grouped by topic, with the reader's own highlights.
+// The book and chapter a verse belongs to are already known from the active
+// book/chapter, so they are not repeated on every verse.
+const fetchChapterTopics = async (chapterId: number, userId: number) => {
+  const { data } = await clientApiHandlers.topics.get({
+    page: 1,
+    perPage: -1,
+    chapter: chapterId,
+    orderBy: {
+      number: "asc",
+    },
+    include: {
+      verses: {
+        where: {
+          archived: false,
+        },
+        orderBy: {
+          number: "asc",
+        },
+        include: {
+          highlights: {
+            where: {
+              userId,
+            },
+          },
+        },
+      },
+    },
+  });
+  return data;
+};
+
+// The next chapter is fetched in the background while the current one is read,
+// so moving on shows it at once. An entry is used once and then dropped, so a
+// chapter opened again later (highlights may have changed) is fetched fresh.
+const prefetchedChapters = new Map<number, ReturnType<typeof fetchChapterTopics>>();
+const takeChapterTopics = (chapterId: number, userId: number) => {
+  const prefetched = prefetchedChapters.get(chapterId);
+  prefetchedChapters.delete(chapterId);
+  if (!prefetched) return fetchChapterTopics(chapterId, userId);
+  return prefetched.then((topics) => topics ?? fetchChapterTopics(chapterId, userId));
+};
+const prefetchChapterTopics = (chapterId: number, userId: number) => {
+  if (prefetchedChapters.has(chapterId)) return;
+  const request = fetchChapterTopics(chapterId, userId).catch(() => {
+    prefetchedChapters.delete(chapterId);
+    return null;
+  });
+  prefetchedChapters.set(chapterId, request);
+};
+
 export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
   activeBook: {},
   activeChapter: {},
@@ -170,7 +235,7 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
       activeVerseNote: {},
       commentaries: {},
     }));
-    const session = await getSession();
+    const session = await getCachedSession();
     if (!session) {
       set((state) => ({
         ...state,
@@ -182,40 +247,8 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
       return;
     }
     const chapter = get().chaptersList?.find((ch) => ch.id === chapterId);
-    const { data: topics } = await clientApiHandlers.topics.get({
-      page: 1,
-      perPage: -1,
-      chapter: chapterId,
-      orderBy: {
-        number: "asc",
-      },
-      include: {
-        verses: {
-          where: {
-            archived: false,
-          },
-          orderBy: {
-            number: "asc",
-          },
-          include: {
-            topic: {
-              include: {
-                chapter: {
-                  include: {
-                    book: true,
-                  },
-                },
-              },
-            },
-            highlights: {
-              where: {
-                userId: Number(session.user.id),
-              },
-            },
-          },
-        },
-      },
-    });
+    const userId = Number(session.user.id);
+    const topics = await takeChapterTopics(chapterId, userId);
     // Another chapter was clicked while this one loaded.
     if (get().activeChapter.id !== chapterId) return;
     set((state) => ({
@@ -227,6 +260,9 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
       },
       topicsList: topics,
     }));
+    const chapters = get().chaptersList ?? [];
+    const next = chapters[chapters.findIndex((ch) => ch.id === chapterId) + 1];
+    if (next) prefetchChapterTopics(next.id, userId);
     if (verseNum) {
       const versesList = topics?.flatMap((topic) => topic.verses);
       const verse = versesList?.find((verse) => verse?.number === verseNum);
@@ -242,7 +278,7 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
       activeVerseNote: {},
       commentaries: {},
     }));
-    const session = await getSession();
+    const session = await getCachedSession();
     const { data: verse } = await clientApiHandlers.verses.getById(verseId, {
       topic: {
         include: {
@@ -383,7 +419,7 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
     set((state) => ({ ...state, bookmarksList: bookmarks }));
   },
   saveHighlight: async (verseId, text, index) => {
-    const session = await getSession();
+    const session = await getCachedSession();
     const activeVerse = get().activeVerse.data;
     if (!session || !activeVerse) return;
     const updatedTopicsList = get().topicsList?.map((topic) => {
@@ -425,7 +461,7 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
     set((state) => ({ ...state, topicsList: updatedTopicsList }));
   },
   removeHighlight: async (verseId, text, index) => {
-    const session = await getSession();
+    const session = await getCachedSession();
     const activeVerse = get().activeVerse.data;
     if (!session || !activeVerse) return;
     const updatedTopicsList = get().topicsList?.map((topic) => {
@@ -474,7 +510,8 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
       ],
     });
     set((state) => ({ ...state, booksList: books }));
-    await get().loadBookmarks();
+    // Bookmarks load alongside the first chapter instead of before it.
+    get().loadBookmarks();
     const book = bookSlug
       ? books?.find((b) => b.slug === bookSlug)
       : books?.[0];
