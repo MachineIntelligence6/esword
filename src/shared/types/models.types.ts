@@ -62,6 +62,16 @@ export type IActivity = Activity & {
     user?: IUser;
 }
 
+export type ActivityDetailField = { label: string; value: string }
+
+export type ActivityDetails = {
+    exists: boolean;
+    archived: boolean;
+    breadcrumb: string[];
+    fields: ActivityDetailField[];
+    viewHref: string | null;
+}
+
 
 export type IUserRole = UserRole | "ALL"
 

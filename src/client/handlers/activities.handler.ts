@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
-import { IActivity } from "@/shared/types/models.types";
+import { ActivityDetails, IActivity } from "@/shared/types/models.types";
 import { ActivitesPaginationProps } from "@/shared/types/pagination.types";
 import { Prisma } from "@prisma/client";
 import { buildApiQuery } from "@/client/query-string";
@@ -67,6 +67,21 @@ export async function getById(id: number, include?: Prisma.ActivityInclude): Pro
 //         }
 //     }
 // }
+
+
+
+export async function getDetails(id: number): Promise<ApiResponse<ActivityDetails>> {
+    try {
+        const res = await axios.get<ApiResponse<ActivityDetails>>(`/api/activities/${id}/details`)
+        return res.data
+    } catch (error) {
+        return {
+            succeed: false,
+            code: "UNKNOWN_ERROR",
+            data: null
+        }
+    }
+}
 
 
 

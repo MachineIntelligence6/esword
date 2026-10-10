@@ -66,6 +66,8 @@ interface DataTableProps<TData, TValue> extends ToolbarProps<TData> {
   /** Sit inside a parent card (e.g. Archives tabs) — no second outer border. */
   embedded?: boolean;
   infiniteScroll?: InfiniteScrollProps;
+  /** Clicking anywhere on a row (outside interactive cell content) runs this. */
+  onRowClick?: (row: TData) => void;
 }
 
 export function BaseTable<TData, TValue>({
@@ -75,6 +77,7 @@ export function BaseTable<TData, TValue>({
   hideSearch = false,
   embedded = false,
   infiniteScroll,
+  onRowClick,
   ...toolbarProps
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
@@ -176,7 +179,13 @@ export function BaseTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  onClick={
+                    onRowClick ? () => onRowClick(row.original) : undefined
+                  }
+                  className={onRowClick ? "cursor-pointer" : undefined}
+                >
                   {row.getVisibleCells().map((cell) => {
                     return (
                       <TableCell key={cell.id}>
