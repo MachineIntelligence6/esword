@@ -3,6 +3,7 @@ import serverApiHandlers from "@/server/handlers"
 import { NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import { getSearchParams, parseIdListParam, parseIntegerParam, parseJsonParam } from "@/server/request-query"
+import { sanitizeClientInclude } from "@/server/sanitize-include";
 
 
 export const GET = async (req: Request) => {
@@ -11,7 +12,7 @@ export const GET = async (req: Request) => {
     const perPage = parseIntegerParam(params, "perPage", defaults.PER_PAGE_ITEMS, { min: -1 })
     const author = parseIntegerParam(params, "author", -1, { min: -1 })
     const verse = parseIntegerParam(params, "verse", -1, { min: -1 })
-    const include = parseJsonParam<Prisma.CommentaryInclude>(params, "include")
+    const include = await sanitizeClientInclude(parseJsonParam<Prisma.CommentaryInclude>(params, "include"))
     const where = parseJsonParam<Prisma.CommentaryWhereInput>(params, "where")
     const orderBy = parseJsonParam<Prisma.CommentaryOrderByWithRelationInput>(params, "orderBy")
 

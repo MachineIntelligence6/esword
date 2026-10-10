@@ -3,6 +3,7 @@ import serverApiHandlers from "@/server/handlers"
 import { NextResponse } from "next/server"
 import { BlogType, Prisma } from "@prisma/client"
 import { getSearchParams, parseIntegerParam, parseJsonParam } from "@/server/request-query"
+import { sanitizeClientInclude } from "@/server/sanitize-include";
 
 
 export const GET = async (req: Request) => {
@@ -14,7 +15,7 @@ export const GET = async (req: Request) => {
     const chapter = parseIntegerParam(params, "chapter", -1, { min: -1 })
     const verse = parseIntegerParam(params, "verse", -1, { min: -1 })
     const type = (params.get("type") as BlogType | undefined)
-    const include = parseJsonParam<Prisma.BlogInclude>(params, "include")
+    const include = await sanitizeClientInclude(parseJsonParam<Prisma.BlogInclude>(params, "include"))
     const where = parseJsonParam<Prisma.BlogWhereInput>(params, "where")
     const orderBy = parseJsonParam<Prisma.BlogOrderByWithRelationInput>(params, "orderBy")
 

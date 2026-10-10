@@ -3,13 +3,14 @@ import serverApiHandlers from "@/server/handlers"
 import { NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import { getSearchParams, parseIntegerParam, parseJsonParam } from "@/server/request-query"
+import { sanitizeClientInclude } from "@/server/sanitize-include";
 
 
 export const GET = async (req: Request) => {
     const params = getSearchParams(req)
     const page = parseIntegerParam(params, "page", 1, { min: 1 })
     const perPage = parseIntegerParam(params, "perPage", defaults.PER_PAGE_ITEMS, { min: -1 })
-    const include = parseJsonParam<Prisma.AuthorInclude>(params, "include")
+    const include = await sanitizeClientInclude(parseJsonParam<Prisma.AuthorInclude>(params, "include"))
     const where = parseJsonParam<Prisma.AuthorWhereInput>(params, "where")
     const orderBy = parseJsonParam<Prisma.AuthorOrderByWithRelationInput>(params, "orderBy")
 
