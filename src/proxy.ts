@@ -46,6 +46,7 @@ export default withAuth(
 export const config = {
     matcher: [
         // Keep login + password recovery public. Everything else stays auth-gated.
-        '/((?!login|forgot-password|forgotpassowrd|images|icons|_next/static|_next/image|favicon.ico|api/health|api/auth).*)',
+        // The tab icons are public too, or signed-out visitors get no icon.
+        '/((?!login|forgot-password|forgotpassowrd|images|icons|_next/static|_next/image|favicon.ico|favicon.png|icon-dark.ico|api/health|api/auth).*)',
     ],
 }
