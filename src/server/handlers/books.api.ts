@@ -1,5 +1,5 @@
 import { ApiResponse, PaginatedApiResponse } from "@/shared/types/api.types";
-import db from "@/server/db";
+import db, { logActivity, withoutActivityLog } from "@/server/db";
 import { Prisma } from "@prisma/client";
 import defaults from "@/shared/constants/defaults";
 import { IBook } from "@/shared/types/models.types";
@@ -388,11 +388,22 @@ export async function reorder(req: Request): Promise<ApiResponse> {
     ) {
       return { succeed: false, code: "VALIDATION_ERROR", data: null };
     }
-    await db.$transaction(
-      (ids as number[]).map((id, index) =>
-        db.book.update({ where: { id }, data: { priority: index + 1 } })
+    // Reordering touches every book's priority, which would otherwise log
+    // one "updated book" row per book — a single reorder of ~50 books
+    // flooded the Activities page with ~50 near-identical rows. One summary
+    // row instead.
+    await withoutActivityLog(() =>
+      db.$transaction(
+        (ids as number[]).map((id, index) =>
+          db.book.update({ where: { id }, data: { priority: index + 1 } })
+        )
       )
     );
+    await logActivity({
+      action: "UPDATE",
+      model: "BOOKS",
+      description: (userName) => `${userName} reordered ${ids.length} books`,
+    });
     return { succeed: true, code: "SUCCESS", data: null };
   } catch (error) {
     console.error(error);
