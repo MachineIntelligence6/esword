@@ -141,25 +141,29 @@ const QuillEditorBase = ({
   maxHeight = true,
 }: EditorProps) => {
   const quillRef: MutableRefObject<ReactQuill | null> = useRef(null);
+  // Edits sent to onChange that haven't come back as `value` yet.
+  const pendingEdits = useRef<string[]>([]);
 
-  // Effect to handle image changes
+  // The editor owns its text. Quill's copy escapes quotes (&quot;, &#39;) while
+  // the sanitized HTML we hand out doesn't, so a controlled `value` never
+  // matched it: Quill reloaded the text, changed again and looped forever,
+  // freezing the page whenever the text had a " or '. Now a `value` is loaded
+  // only when it's new (another note opened, a form reset), not our own edit
+  // coming back.
   useEffect(() => {
     const quill = quillRef.current?.getEditor();
     if (!quill) return;
-
-    const handleEditorChange = () => {
-      const content = sanitizeRichHtml(quill.root.innerHTML);
-      if (onChange) {
-        onChange(content);
-      }
-    };
-
-    quill.on("text-change", handleEditorChange);
-
-    return () => {
-      quill.off("text-change", handleEditorChange);
-    };
-  }, [onChange]);
+    const echoed = pendingEdits.current.indexOf(value ?? "");
+    if (echoed !== -1) {
+      pendingEdits.current.splice(0, echoed + 1);
+      return;
+    }
+    pendingEdits.current = [];
+    const next = sanitizeRichHtml(value);
+    if (next !== sanitizeRichHtml(quill.root.innerHTML)) {
+      quill.setContents(quill.clipboard.convert({ html: next }));
+    }
+  }, [value]);
 
   return (
     <div
@@ -172,7 +176,7 @@ const QuillEditorBase = ({
         bounds="#editor-container"
         readOnly={readOnly || disabled}
         formats={formats}
-        value={sanitizeRichHtml(value)}
+        defaultValue={sanitizeRichHtml(value)}
         className={cn(
           "w-full",
           disabled ? "ql-disabled" : "min-300",
@@ -180,9 +184,11 @@ const QuillEditorBase = ({
           className
         )}
         onChange={(content, delta, source, editor) => {
-          if (onChange) {
-            onChange(sanitizeRichHtml(editor.getHTML()));
-          }
+          // Loading a value isn't an edit; only report what the user typed.
+          if (source !== "user") return;
+          const clean = sanitizeRichHtml(editor.getHTML());
+          pendingEdits.current = [...pendingEdits.current.slice(-20), clean];
+          onChange?.(clean);
         }}
         modules={getModules(disabled)}
         placeholder={disabled || readOnly ? "" : "Type..."}

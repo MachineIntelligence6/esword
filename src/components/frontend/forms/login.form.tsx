@@ -13,11 +13,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { ApiResCode } from "@/shared/types/api.types";
 import definedMessages from "@/shared/constants/messages";
 import Spinner from "@/components/spinner";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export const loginFormSchema = z.object({
@@ -31,8 +31,21 @@ export const loginFormSchema = z.object({
 });
 export type LoginFormSchema = z.infer<typeof loginFormSchema>;
 
+// Everyone starts on the reading page, or goes back to the page that asked them
+// to sign in. Admins and editors open the dashboard from the profile menu.
+// Only same-site paths are followed, so a crafted link can't send people elsewhere.
+function afterLoginPath(callbackUrl: string | null) {
+  if (!callbackUrl) return "/";
+  try {
+    const url = new URL(callbackUrl, window.location.origin);
+    if (url.origin !== window.location.origin || url.pathname.startsWith("/login")) return "/";
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/";
+  }
+}
+
 export default function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const form = useForm<LoginFormSchema>({
     resolver: zodResolver(loginFormSchema),
@@ -54,15 +67,10 @@ export default function LoginForm() {
       });
       return;
     }
-    const sesssion = await getSession();
-    const callbackUrl = searchParams.get("callbackUrl");
-    if (sesssion?.user?.role === "ADMIN" || sesssion?.user?.role === "EDITOR") {
-      router.push(callbackUrl ?? "/dashboard");
-      window.location.reload();
-    } else {
-      router.push(callbackUrl ?? "/");
-      window.location.reload();
-    }
+    // A full page load, so the header picks up the new session. (router.push
+    // followed by reload() reloaded /login instead, which sent admins and
+    // editors to the dashboard even when they had opened the reading page.)
+    window.location.assign(afterLoginPath(searchParams.get("callbackUrl")));
   };
 
   return (
