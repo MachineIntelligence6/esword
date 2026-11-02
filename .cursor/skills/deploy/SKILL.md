@@ -32,7 +32,9 @@ Or on the server after code is present:
 bash /var/www/esword/scripts/deploy-production.sh
 ```
 
-The script: backs up MySQL + preserves `.env`/`blogs-images`/`logs` → clones `main` → rsyncs into `/var/www/esword` → `npm ci` → `migrate` → `build` → `pm2 restart esword` → health checks.
+The script: backs up MySQL + preserves `.env`/`blogs-images`/`logs` → clones `main` → checks the clone for malware (stops with "Refusing to deploy" if it looks infected; see `DEPLOY.md`) → rsyncs into `/var/www/esword` → `npm ci` → `migrate` → `build` → `pm2 restart esword` → health checks.
+
+If it refuses, do not override it: report what it listed to the user. `ALLOW_INSTALL_SCRIPTS` is only for a dependency install script the user has reviewed.
 
 Rules:
 - Never print or commit `.env` / DB passwords.

@@ -13,6 +13,27 @@ When an agent is asked to **deploy**:
      (or pipe that script over SSH from the repo)
 3. Verify https://apocryphalwritings.org/api/health returns ok.
 
+## Malware check during deploy
+
+`scripts/deploy-production.sh` checks the fresh clone of `main` before copying or running any of it,
+and stops with "Refusing to deploy" if it finds signs of the worm force-pushed to our GitHub repos on
+2026-11-02 or of a similar implant:
+
+- an `api.js` file, or a `package.json` install/migrate/build/start script that runs `node`, `bun`,
+  `curl`, `wget` or a shell pipe
+- code hidden at the end of a `*.config.*` file (a line over 400 characters or a long run of tabs)
+- known payload markers or attacker addresses anywhere in the code
+- a `.vscode/tasks.json` that runs on folder open, or a font file that contains text
+- a dependency fetched from anywhere but registry.npmjs.org, or one with an install script that is not
+  on the script's allowlist
+
+The running site is left untouched when it refuses. A new dependency with an install script must be
+reviewed and then approved for that run: `ALLOW_INSTALL_SCRIPTS="package-name" bash /var/www/esword/scripts/deploy-production.sh`.
+
+The check runs from the copy of the script already on the server, so a push can't switch it off for
+its own deploy. A change to the check itself only takes effect on the deploy after the one that ships
+it, unless you pipe the script from a trusted checkout (`ssh … 'bash -s' < scripts/deploy-production.sh`).
+
 ## Before first local run
 
 1. Copy `.env.example` to `.env`.
