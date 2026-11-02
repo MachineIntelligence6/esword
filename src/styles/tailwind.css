@@ -62,6 +62,56 @@ body {
   border: none !important;
 }
 
+/* Saved rich text on the About page. Quill's own stylesheet only loads with the
+   editor, so the classes it writes (fonts, indents, list markers) need rules here. */
+.about-content .ql-font-serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
+.about-content .ql-font-monospace {
+  font-family: Monaco, "Courier New", monospace;
+}
+.about-content blockquote {
+  border-left: 4px solid #ccc;
+  margin: 5px 0;
+  padding-left: 16px;
+}
+.about-content .ql-indent-1 { margin-left: 3em; }
+.about-content .ql-indent-2 { margin-left: 6em; }
+.about-content .ql-indent-3 { margin-left: 9em; }
+.about-content .ql-indent-4 { margin-left: 12em; }
+.about-content .ql-indent-5 { margin-left: 15em; }
+.about-content .ql-indent-6 { margin-left: 18em; }
+.about-content .ql-indent-7 { margin-left: 21em; }
+.about-content .ql-indent-8 { margin-left: 24em; }
+.about-content .ql-ui {
+  display: none;
+}
+/* Quill 2 keeps bullet and numbered items together in one <ol>, told apart by
+   data-list, so the markers are drawn here. Items without data-list (saved before
+   it was kept) keep the browser's numbering. */
+.about-content ol {
+  counter-reset: ql-item;
+}
+.about-content li[data-list] {
+  list-style: none;
+  position: relative;
+}
+.about-content li[data-list]::before {
+  position: absolute;
+  left: -1.5em;
+  width: 1.2em;
+  text-align: right;
+}
+.about-content li[data-list="bullet"]::before {
+  content: "\2022";
+}
+.about-content li[data-list="ordered"] {
+  counter-increment: ql-item;
+}
+.about-content li[data-list="ordered"]::before {
+  content: counter(ql-item) ".";
+}
+
 .rti--container {
   @apply !flex !items-center !min-h-[40px] w-full !rounded-md !border !border-slate-200 !bg-white !px-3 !py-2 !text-sm !shadow-sm;
   @apply focus-visible:!outline-none focus-visible:!ring-1 focus-visible:!ring-slate-400 disabled:!cursor-not-allowed disabled:!opacity-50;

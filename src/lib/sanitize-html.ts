@@ -31,6 +31,9 @@ const RICH_TEXT_TAGS = [
 const RICH_TEXT_ATTR = [
   "alt",
   "class",
+  // Quill 2 marks bullet vs numbered items with data-list on every <li>; without
+  // it every list comes back as a numbered one.
+  "data-list",
   "height",
   "href",
   "id",

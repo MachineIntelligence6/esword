@@ -45,16 +45,8 @@ export default function SiteSidebar() {
   );
 }
 
-export const sortByPriority = (a: IBook, b: IBook) => {
-  if (a.priority === 0) return 1;
-  if (b.priority === 0) return -1;
-  return a.priority - b.priority;
-};
-
-
 function SidebarBooksComponent() {
   const { booksList, activeBook } = useReadBookStore();
-  const booksListSorted = booksList?.sort(sortByPriority);
   const openInReader = useOpenInReader();
 
   const changeBook = (book: IBook) => openInReader(book);
@@ -71,7 +63,7 @@ function SidebarBooksComponent() {
             onChange={(opt) => {
               if (opt?.value) changeBook(opt.rawValue as IBook);
             }}
-            options={booksListSorted?.map((book) => ({
+            options={booksList?.map((book) => ({
               label: book.name,
               value: book.id.toString(),
               rawValue: book,
@@ -81,8 +73,8 @@ function SidebarBooksComponent() {
       </div>
       <div className="lg:flex-1 lg:min-h-0 overflow-y-auto overflow-x-hidden lg:flex hidden">
         <div className="w-full h-full">
-          {booksListSorted ? (
-            booksListSorted?.map((book) => (
+          {booksList ? (
+            booksList?.map((book) => (
               <TooltipEl
                 key={book.id}
                 trigger={

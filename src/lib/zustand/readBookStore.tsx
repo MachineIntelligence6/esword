@@ -85,6 +85,15 @@ type ReadBookStoreType = {
   ) => Promise<void>;
 };
 
+// Reader order: priority 1, 2, 3 ..., with books that have no priority (0) last.
+// Equal priorities keep the order they came in (name A-Z from the API).
+export const sortByPriority = (a: IBook, b: IBook) => {
+  if (a.priority === b.priority) return 0;
+  if (a.priority === 0) return 1;
+  if (b.priority === 0) return -1;
+  return a.priority - b.priority;
+};
+
 const checkAndSaveNote = (state: ReadBookStoreType) => {
   const note = state.activeVerseNote;
   const activeVerse = state.activeVerse;
@@ -497,7 +506,7 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
   },
   loadInitialData: async (bookSlug, chapterNum, verseNum) => {
     set({ initialLoading: true });
-    const { data: books } = await clientApiHandlers.books.get({
+    const { data } = await clientApiHandlers.books.get({
       page: 1,
       perPage: -1,
       orderBy: [
@@ -509,6 +518,9 @@ export const useReadBookStore = create<ReadBookStoreType>()((set, get) => ({
         },
       ],
     });
+    // Sorted here, not in the sidebar, so the book opened by default is the
+    // first one the sidebar lists, not the one with the highest priority number.
+    const books = data ? [...data].sort(sortByPriority) : data;
     set((state) => ({ ...state, booksList: books }));
     // Bookmarks load alongside the first chapter instead of before it.
     get().loadBookmarks();
