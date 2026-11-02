@@ -5,6 +5,7 @@ import defaults from "@/shared/constants/defaults";
 import { DonationSettings } from "@prisma/client";
 import { isAuthError, requireAdmin, requireContentManager } from "./authz";
 import { sanitizeRichHtml } from "@/lib/sanitize-html";
+import { DONATION_CURRENCIES, parsePresetAmounts } from "@/lib/money";
 
 
 
@@ -108,7 +109,11 @@ export async function saveDonationSettings(req: Request): Promise<ApiResponse<Do
         if (isAuthError(session)) return session
         const b = await req.json() as Record<string, unknown>
         const paypalUrl = str(b.paypalUrl, 2000)
-        if (paypalUrl && !/^https:\/\//i.test(paypalUrl)) {
+        const manageUrl = str(b.manageUrl, 500)
+        const currency = str(b.currency, 3)?.toUpperCase()
+        const badUrl = (u?: string) => !!u && !/^https:\/\//i.test(u)
+        // A wrong currency code would make every card donation fail at Stripe.
+        if (badUrl(paypalUrl) || badUrl(manageUrl) || (currency !== undefined && !DONATION_CURRENCIES.includes(currency))) {
             return { succeed: false, code: "VALIDATION_ERROR", data: null }
         }
         const data = {
@@ -116,10 +121,15 @@ export async function saveDonationSettings(req: Request): Promise<ApiResponse<Do
             heading: str(b.heading, 100),
             orgName: str(b.orgName, 100),
             message: str(b.message, 2000),
-            currency: str(b.currency, 3)?.toUpperCase(),
+            currency,
             suggestedAmount: num(b.suggestedAmount, 0, 100000),
+            presetAmounts: typeof b.presetAmounts === "string"
+                ? parsePresetAmounts(b.presetAmounts).filter((n) => n <= 100000).slice(0, 6).join(",")
+                : undefined,
+            cardButtonLabel: str(b.cardButtonLabel, 60),
             buttonLabel: str(b.buttonLabel, 60),
             paypalUrl,
+            manageUrl,
             monthlyOption: typeof b.monthlyOption === "boolean" ? b.monthlyOption : undefined,
             popupEnabled: typeof b.popupEnabled === "boolean" ? b.popupEnabled : undefined,
             popupTitle: str(b.popupTitle, 100),

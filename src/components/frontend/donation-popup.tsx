@@ -71,7 +71,7 @@ export default function DonationPopup() {
         </DialogHeader>
         <p className="text-4xl font-bold text-primary-dark">{amount}</p>
         <Button variant="primary" className="h-11 w-full" asChild>
-          <Link href="/donate" onClick={() => setOpen(false)}>
+          <Link href={`/donate?amount=${settings.popupAmount}`} onClick={() => setOpen(false)}>
             {settings.popupButtonLabel}
           </Link>
         </Button>

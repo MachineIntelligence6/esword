@@ -5,6 +5,8 @@ import {
     getRecentActivityGroups, getTopEditors, getTotals, type ActivityGroup,
 } from "@/server/dashboard";
 import { cn } from "@/lib/utils";
+import { formatMoney, fromMinorUnits } from "@/lib/money";
+import { getDonationSummary } from "@/server/handlers/donations.api";
 import { BookProgressTable } from "./book-progress-table";
 import { ChangesChart } from "./changes-chart";
 import { ShortDate, TimeRange } from "./local-time";
@@ -18,13 +20,25 @@ function plural(n: number, one: string, many: string) {
     return `${fmt(n)} ${n === 1 ? one : many}`;
 }
 
+function donationMeta(d: NonNullable<Awaited<ReturnType<typeof getDonationSummary>>["data"]>) {
+    if (d.mode === null) return "Stripe not connected";
+    const count = d.totals.reduce((n, t) => n + t.count, 0);
+    const parts = [plural(count, "gift", "gifts"), plural(d.activeMonthly, "monthly donor", "monthly donors")];
+    if (d.totals.length > 1) parts.push("more currencies");
+    return `${d.mode === "test" ? "Test · " : ""}${parts.join(" · ")}`;
+}
+
 export async function TotalsSection({ role, userId }: Viewer) {
-    const t = await getTotals(role, userId);
     const isAdmin = role === "ADMIN";
+    const [t, donations] = await Promise.all([
+        getTotals(role, userId),
+        isAdmin ? getDonationSummary().then((r) => r.data ?? null) : null,
+    ]);
     const blogTotal = t.blogs.published + t.blogs.drafts;
     const userTotal = t.users.ADMIN + t.users.EDITOR + t.users.VIEWER;
+    const topTotal = donations?.totals[0];
     return (
-        <section aria-label="Totals" className={cn("grid grid-cols-2 gap-3 md:grid-cols-3", isAdmin ? "xl:grid-cols-4" : "xl:grid-cols-3")}>
+        <section aria-label="Totals" className="grid grid-cols-2 gap-3 md:grid-cols-3">
             <StatTile label="Books" value={t.books} href="/dashboard/books"
                 meta={t.booksNoChapters ? `${plural(t.booksNoChapters, "book", "books")} without chapters` : "All have chapters"}
                 tone={t.booksNoChapters ? "warn" : undefined} />
@@ -47,6 +61,12 @@ export async function TotalsSection({ role, userId }: Viewer) {
             {isAdmin && (
                 <StatTile label="Users" value={userTotal} href="/dashboard/users"
                     meta={`${plural(t.users.ADMIN, "admin", "admins")} · ${plural(t.users.EDITOR, "editor", "editors")} · ${plural(t.users.VIEWER, "viewer", "viewers")}`} />
+            )}
+            {donations && (
+                <StatTile label="Donations" href="/dashboard/donation"
+                    value={topTotal ? formatMoney(fromMinorUnits(topTotal.amount, topTotal.currency), topTotal.currency) : 0}
+                    meta={donationMeta(donations)}
+                    tone={donations.mode === null ? "warn" : undefined} />
             )}
         </section>
     );

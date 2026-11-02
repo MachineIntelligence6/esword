@@ -214,8 +214,11 @@ model DonationSettings {
   message            String  @db.Text
   currency           String  @default("USD")
   suggestedAmount    Float   @default(50) @map("suggested_amount")
+  presetAmounts      String  @default("10,25,50,100") @map("preset_amounts")
+  cardButtonLabel    String  @default("Donate with card") @map("card_button_label")
   buttonLabel        String  @default("Donation with Paypal") @map("button_label")
   paypalUrl          String  @map("paypal_url") @db.Text
+  manageUrl          String  @default("") @map("manage_url") @db.VarChar(500)
   monthlyOption      Boolean @default(true) @map("monthly_option")
   popupEnabled       Boolean @default(false) @map("popup_enabled")
   popupTitle         String  @default("Support Hidden Sword") @map("popup_title")
@@ -226,6 +229,37 @@ model DonationSettings {
   popupFrequencyDays Int     @default(7) @map("popup_frequency_days")
 
   @@map("donation_settings")
+}
+
+// One row per successful Stripe payment: a Checkout session (one-time gift or
+// the first month of a monthly gift) or a monthly renewal invoice.
+model Donation {
+  id              Int              @id @default(autoincrement())
+  stripeId        String           @unique @map("stripe_id")
+  interval        DonationInterval
+  amount          Int // in the currency's smallest unit (cents for USD)
+  currency        String
+  email           String?
+  name            String?
+  subscriptionId  String?          @map("subscription_id")
+  // How a refund finds its row: one-time gifts by payment intent, monthly ones by invoice.
+  paymentIntentId String?          @map("payment_intent_id")
+  invoiceId       String?          @map("invoice_id")
+  refundedAmount  Int              @default(0) @map("refunded_amount")
+  cancelledAt     DateTime?        @map("cancelled_at") // monthly gift stopped
+  livemode        Boolean
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([paymentIntentId])
+  @@index([invoiceId])
+  @@index([subscriptionId])
+  @@map("donations")
+}
+
+enum DonationInterval {
+  ONE_TIME
+  MONTHLY
 }
 
 model Blog {

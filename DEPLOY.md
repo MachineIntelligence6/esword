@@ -35,6 +35,30 @@ When an agent is asked to **deploy**:
 - `NEXTAUTH_SECRET` (at least 32 characters)
 - `NEXTAUTH_URL` (public HTTPS origin)
 
+## Stripe donations (optional)
+
+Without `STRIPE_SECRET_KEY` the Donate page shows only the PayPal button.
+
+1. **API key** (`STRIPE_SECRET_KEY`): Stripe Dashboard → Developers → API keys → Create restricted key,
+   with only these permissions:
+   - Checkout Sessions: **Write** (start a donation, read it back on the thank-you page)
+   - Invoices: **Read** (match refunds of monthly payments to their donation)
+   - Events: **Read** (the webhook re-reads each event in the API version the code expects)
+2. **Webhook** (`STRIPE_WEBHOOK_SECRET`): Developers → Webhooks → Add destination
+   - URL: `https://apocryphalwritings.org/api/donate/webhook`
+   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`,
+     `charge.refunded`, `customer.subscription.deleted`
+   - Copy the destination's signing secret (`whsec_…`).
+   - Without it, monthly renewals, refunds and cancellations are never recorded (the dashboard warns).
+3. After editing `.env` on the server: `pm2 restart esword --update-env`.
+4. **Donor self-service**: Settings → Billing → Customer portal → allow cancelling subscriptions and
+   updating payment methods → Activate link. Paste the link into Dashboard → Donations → Page & popup →
+   "Manage monthly donation link".
+5. **Receipts**: Settings → Customer emails → turn on "Successful payments".
+
+Donations show under Dashboard → Donations. Test and live payments are listed separately,
+matching whichever key is set.
+
 ## Production blockers that still need human action
 
 1. Rotate credentials exposed in Git history (`DATABASE_URL`, `NEXTAUTH_SECRET`).

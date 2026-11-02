@@ -59,7 +59,7 @@ export function Panel({ title, sub, action, className, children }: {
 
 export function StatTile({ label, value, meta, tone, href }: {
     label: string;
-    value: number;
+    value: number | string;
     meta: string;
     tone?: Tone;
     href: string;
@@ -70,7 +70,7 @@ export function StatTile({ label, value, meta, tone, href }: {
             className="flex min-w-0 flex-col gap-0.5 rounded-sm border border-slate-200 bg-white px-4 py-3.5 transition-colors hover:border-primary"
         >
             <span className="text-xs font-medium uppercase tracking-wider text-slate-500">{label}</span>
-            <span className="text-2xl font-bold tabular-nums text-slate-900">{fmt(value)}</span>
+            <span className="text-2xl font-bold tabular-nums text-slate-900">{typeof value === "number" ? fmt(value) : value}</span>
             <span className={cn("truncate text-sm", tone ? toneText[tone] : "text-slate-500")}>{meta}</span>
         </Link>
     );

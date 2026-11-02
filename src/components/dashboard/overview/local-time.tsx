@@ -25,3 +25,12 @@ export function ShortDate({ value }: { value: string }) {
         </span>
     );
 }
+
+export function DateTime({ value }: { value: string }) {
+    const d = new Date(value);
+    return (
+        <time dateTime={value} suppressHydrationWarning>
+            {d.toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}
+        </time>
+    );
+}

@@ -13,6 +13,7 @@ import * as archivesApiHandlers from '@/server/handlers/archives.api'
 import * as searchApiHandlers from '@/server/handlers/search.api'
 import * as blogsApiHandlers from '@/server/handlers/blogs.api'
 import * as settingsApiHandlers from '@/server/handlers/settings.api'
+import * as donationsApiHandlers from '@/server/handlers/donations.api'
 
 
 const serverApiHandlers = {
@@ -30,7 +31,8 @@ const serverApiHandlers = {
     archives: archivesApiHandlers,
     search: searchApiHandlers,
     blogs: blogsApiHandlers,
-    settings: settingsApiHandlers
+    settings: settingsApiHandlers,
+    donations: donationsApiHandlers
 }
 
 export default serverApiHandlers;

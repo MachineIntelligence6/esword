@@ -1,17 +1,25 @@
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import DonateForm from "@/components/frontend/donate-form";
 import { StaticContentPage } from "@/components/frontend/static-content-page";
 import serverApiHandlers from "@/server/handlers";
+import { getStripe } from "@/server/stripe";
+import { parsePresetAmounts } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const { data: s } = await serverApiHandlers.settings.getDonationSettings();
   if (!s) return <StaticContentPage title="Donate">Unavailable.</StaticContentPage>;
 
-  const amount = new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: Number.isInteger(s.suggestedAmount) ? 0 : 2,
-  }).format(s.suggestedAmount);
+  // The popup links here with ?amount= so its amount is preselected.
+  const linked = Number((await searchParams).amount);
+  const initialAmount = Number.isFinite(linked) && linked > 0 ? linked : s.suggestedAmount;
+  const presets = Array.from(
+    new Set([...parsePresetAmounts(s.presetAmounts), ...(initialAmount > 0 ? [initialAmount] : [])])
+  ).sort((a, b) => a - b);
 
   return (
     <StaticContentPage title={s.pageTitle} className="flex items-start justify-center md:pt-12">
@@ -22,30 +30,24 @@ export default async function Page() {
         <p className="whitespace-pre-line px-2 py-3 text-sm font-normal text-primary-dark">
           {s.message}
         </p>
-        <p className="pt-6 text-6xl font-bold text-primary-dark">
-          <span className="align-top text-2xl">$</span>
-          {amount}
-        </p>
-        <p className="py-2 text-base font-bold text-primary-dark">{s.currency}</p>
-        {s.monthlyOption && (
-          <label className="flex items-center gap-x-1 py-7">
-            <Checkbox />
-            <span>Make this a monthly donation</span>
-          </label>
+        <DonateForm
+          currency={s.currency || "USD"}
+          presets={presets}
+          initialAmount={initialAmount}
+          monthlyOption={s.monthlyOption}
+          cardEnabled={getStripe() !== null}
+          cardButtonLabel={s.cardButtonLabel}
+          paypalUrl={s.paypalUrl}
+          paypalButtonLabel={s.buttonLabel}
+        />
+        {s.manageUrl && s.monthlyOption && (
+          <p className="pt-6 text-sm text-primary-dark">
+            Already giving monthly?{" "}
+            <a href={s.manageUrl} target="_blank" rel="noopener noreferrer" className="underline">
+              Manage your donation
+            </a>
+          </p>
         )}
-        <div className="w-full pt-2">
-          {s.paypalUrl ? (
-            <Button variant="primary" className="h-12 w-full" asChild>
-              <a href={s.paypalUrl} target="_blank" rel="noopener noreferrer">
-                {s.buttonLabel}
-              </a>
-            </Button>
-          ) : (
-            <Button variant="primary" className="h-12 w-full" disabled>
-              {s.buttonLabel}
-            </Button>
-          )}
-        </div>
       </div>
     </StaticContentPage>
   );

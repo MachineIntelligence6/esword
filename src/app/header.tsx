@@ -175,7 +175,11 @@ function Dropdown() {
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger>
         <div className="flex items-center gap-1">
-          {menuList.find((m) => m.path === pathname)?.label}
+          {
+            menuList.find(
+              (m) => m.path === pathname || (m.path !== "/" && pathname.startsWith(`${m.path}/`))
+            )?.label
+          }
           <ChevronDownIcon />
         </div>
       </DropdownMenuTrigger>
