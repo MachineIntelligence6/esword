@@ -13,8 +13,8 @@ description: >-
 | Item | Value |
 |------|-------|
 | SSH | `ssh -i ~/.ssh/id_ed25519 mi6support@2.29.28.247` |
-| App dir | `/var/www/esword` |
-| Process | PM2 app name `esword` (`next start -H 127.0.0.1 -p 3000`) |
+| App dir | `/var/www/esword` (owned by the app account `esword`: no login, no sudo) |
+| Process | PM2 app `esword` under the account `esword` (`sudo -u esword -H pm2 status`) |
 | Public URL | https://apocryphalwritings.org |
 | Health | https://apocryphalwritings.org/api/health |
 | DB backup dir | `~/backups/esword/` |
@@ -26,13 +26,15 @@ ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes mi6support@2.29.28.247 \
   'bash -s' < scripts/deploy-production.sh
 ```
 
-Or on the server after code is present:
+Or on the server, as `mi6support`:
 
 ```bash
-bash /var/www/esword/scripts/deploy-production.sh
+esword-deploy
 ```
 
-The script: backs up MySQL + preserves `.env`/`blogs-images`/`logs` → clones `main` → checks the clone for malware (stops with "Refusing to deploy" if it looks infected; see `DEPLOY.md`) → rsyncs into `/var/www/esword` → `npm ci` → `migrate` → `build` → `pm2 restart esword` → health checks.
+That is a root-owned copy in `/usr/local/sbin`. Never run the copy in `/var/www/esword` (the script refuses): the website's account can edit it.
+
+The script: backs up MySQL into `mi6support`'s `~/backups/esword` → then as `esword`: clones `main` → checks the clone for malware (stops with "Refusing to deploy" if it looks infected; see `DEPLOY.md`) → rsyncs into `/var/www/esword` → `npm ci` → `migrate` → `build` → `pm2 restart esword` → health checks.
 
 If it refuses, do not override it: report what it listed to the user. `ALLOW_INSTALL_SCRIPTS` is only for a dependency install script the user has reviewed.
 
@@ -60,6 +62,6 @@ If the user only wants code on GitHub:
 ## Done criteria
 
 - [ ] Production health OK on https://apocryphalwritings.org/api/health
-- [ ] PM2 `esword` online
+- [ ] `sudo -u esword -H pm2 status` shows `esword` online
 - [ ] Deployed SHA matches intended `main` commit
 - [ ] Optional: GitHub CI green for that SHA

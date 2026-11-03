@@ -9,9 +9,36 @@ When an agent is asked to **deploy**:
 1. Read and follow `.cursor/skills/deploy/SKILL.md`.
 2. **Production server (default when host is known):**
    - SSH: `ssh -i ~/.ssh/id_ed25519 mi6support@2.29.28.247`
-   - Run: `bash /var/www/esword/scripts/deploy-production.sh`
-     (or pipe that script over SSH from the repo)
+   - Run: `esword-deploy`
+     (or pipe `scripts/deploy-production.sh` over SSH from the repo; never run the copy in `/var/www/esword`)
 3. Verify https://apocryphalwritings.org/api/health returns ok.
+
+## Accounts on the production server
+
+The website runs as `esword`, an account with no password, no login and no admin rights, so a
+break-in through the site or a bad npm package stays inside that account. You log in as
+`mi6support`, which has admin rights and keeps the database backups in `~/backups/esword`, out of
+the site's reach.
+
+- `/var/www/esword` belongs to `esword`, except `.env`, which belongs to root and is locked with
+  `chattr +i` so the site can read it but not change or replace it. To edit it:
+  `sudo chattr -i /var/www/esword/.env && sudo nano /var/www/esword/.env && sudo chattr +i /var/www/esword/.env`,
+  then `sudo -u esword -H pm2 restart esword --update-env`.
+- PM2 runs under `esword` and starts on boot through the systemd unit `pm2-esword`:
+  `sudo -u esword -H pm2 status`, `sudo -u esword -H pm2 logs esword`.
+- `mi6support` must never run a file that `esword` can edit, which is everything in `/var/www/esword`,
+  or a break-in through the site could gain admin rights at the next deploy. The deploy script refuses
+  to run from there. Run `esword-deploy`, a root-owned copy in `/usr/local/sbin`, or pipe the script
+  from a checkout. After changing the script, update that copy from a reviewed checkout:
+  `ssh -i ~/.ssh/id_ed25519 mi6support@2.29.28.247 'sudo install -o root -g root -m 755 /dev/stdin /usr/local/sbin/esword-deploy' < scripts/deploy-production.sh`
+- If PM2's saved process list is ever lost, start the site again with:
+  ```bash
+  sudo -u esword -H bash -c 'cd /var/www/esword && set -a && . ./.env && set +a &&
+    pm2 start node_modules/next/dist/bin/next --name esword -i 1 --merge-logs --time \
+      --log-date-format "YYYY-MM-DDTHH:mm:ss" --max-memory-restart 512M \
+      --output /var/www/esword/logs/out-0.log --error /var/www/esword/logs/error-0.log \
+      -- start -H 127.0.0.1 -p 3000 && pm2 save'
+  ```
 
 ## Malware check during deploy
 
@@ -28,11 +55,11 @@ and stops with "Refusing to deploy" if it finds signs of the worm force-pushed t
   on the script's allowlist
 
 The running site is left untouched when it refuses. A new dependency with an install script must be
-reviewed and then approved for that run: `ALLOW_INSTALL_SCRIPTS="package-name" bash /var/www/esword/scripts/deploy-production.sh`.
+reviewed and then approved for that run: `ALLOW_INSTALL_SCRIPTS="package-name" esword-deploy`.
 
-The check runs from the copy of the script already on the server, so a push can't switch it off for
-its own deploy. A change to the check itself only takes effect on the deploy after the one that ships
-it, unless you pipe the script from a trusted checkout (`ssh … 'bash -s' < scripts/deploy-production.sh`).
+`esword-deploy` is a copy installed on the server, so a push can't switch the check off. A change to
+the check takes effect once that copy is updated (see "Accounts on the production server"), or right
+away when you pipe the script from a trusted checkout (`ssh … 'bash -s' < scripts/deploy-production.sh`).
 
 ## Before first local run
 
@@ -71,7 +98,8 @@ Without `STRIPE_SECRET_KEY` the Donate page shows only the PayPal button.
      `charge.refunded`, `customer.subscription.deleted`
    - Copy the destination's signing secret (`whsec_…`).
    - Without it, monthly renewals, refunds and cancellations are never recorded (the dashboard warns).
-3. After editing `.env` on the server: `pm2 restart esword --update-env`.
+3. After editing `.env` on the server (it is locked; see "Accounts on the production server"):
+   `sudo -u esword -H pm2 restart esword --update-env`.
 4. **Donor self-service**: Settings → Billing → Customer portal → allow cancelling subscriptions and
    updating payment methods → Activate link. Paste the link into Dashboard → Donations → Page & popup →
    "Manage monthly donation link".

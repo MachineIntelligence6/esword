@@ -1,20 +1,25 @@
 #!/usr/bin/env bash
-# Run ON the production host as mi6support from anywhere:
-#   bash /var/www/esword/scripts/deploy-production.sh
-# Or after SSH:
+# Deploys main to production. The website runs as the unprivileged account esword, which owns
+# APP_DIR. This script runs as the operator account (mi6support) and hands every step that runs
+# code from the repository to esword. Run it from a copy esword cannot edit:
 #   ssh -i ~/.ssh/id_ed25519 mi6support@2.29.28.247 'bash -s' < scripts/deploy-production.sh
+#   esword-deploy    (on the server: the root-owned copy in /usr/local/sbin, see DEPLOY.md)
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-/var/www/esword}"
+APP_USER="${APP_USER:-esword}"
 REPO_URL="${REPO_URL:-https://github.com/MachineIntelligence6/esword.git}"
 BRANCH="${BRANCH:-main}"
 PM2_NAME="${PM2_NAME:-esword}"
+BACKUP_DIR="${BACKUP_DIR:-${HOME}/backups/esword}"
+ALLOW_INSTALL_SCRIPTS="${ALLOW_INSTALL_SCRIPTS:-}"
 TS="$(date +%Y%m%d-%H%M%S)"
+SELF="${BASH_SOURCE[0]:-}"
 
 # Refuses a checkout carrying the worm force-pushed to our GitHub repos on 2026-11-02
 # (an api.js loader, "node api.js" in package.json scripts, code hidden after a run of
-# tabs in *.config.js) or other common supply-chain implants. It runs from the copy already
-# on this server, before anything from the new checkout is copied into APP_DIR or executed.
+# tabs in *.config.js) or other common supply-chain implants. It runs before anything from
+# the new checkout is copied into APP_DIR or executed.
 # After reviewing a dependency's install script, approve it with ALLOW_INSTALL_SCRIPTS="name".
 check_source_tree() {
   local src="$1" problems="" f len run node_out
@@ -83,42 +88,22 @@ NODE
   echo "Malware check passed"
 }
 
-echo "==> Deploying ${BRANCH} into ${APP_DIR} (${TS})"
-
-mkdir -p "${HOME}/backups/esword" /tmp/esword-preserve-"${TS}"
-ln -sfn /tmp/esword-preserve-"${TS}" /tmp/esword-preserve-latest
-
-cp -a "${APP_DIR}/.env" /tmp/esword-preserve-latest/.env
-mkdir -p /tmp/esword-preserve-latest/blogs-images /tmp/esword-preserve-latest/logs
-if [ -d "${APP_DIR}/public/blogs-images" ]; then
-  rsync -a "${APP_DIR}/public/blogs-images/" /tmp/esword-preserve-latest/blogs-images/
-fi
-if [ -d "${APP_DIR}/logs" ]; then
-  rsync -a "${APP_DIR}/logs/" /tmp/esword-preserve-latest/logs/ || true
-fi
-
-set -a
-# shellcheck disable=SC1091
-. "${APP_DIR}/.env"
-set +a
-export TS
-node <<'NODE'
+# Writes a gzipped dump of the app's database to stdout. Runs as APP_USER.
+dump_database() {
+  set -a
+  # shellcheck disable=SC1091
+  . "${APP_DIR}/.env"
+  set +a
+  node <<'NODE'
 const { spawn } = require("child_process");
-const fs = require("fs");
 const zlib = require("zlib");
-const path = require("path");
 const url = new URL(process.env.DATABASE_URL);
 const user = decodeURIComponent(url.username);
 const password = decodeURIComponent(url.password);
 const host = url.hostname || "127.0.0.1";
 const port = url.port || "3306";
 const db = url.pathname.replace(/^\//, "");
-const out = path.join(
-  process.env.HOME,
-  "backups/esword",
-  `esword-pre-deploy-${process.env.TS}.sql.gz`
-);
-console.log(`Backing up ${db}@${host}:${port}`);
+console.error(`Backing up ${db}@${host}:${port}`);
 const dump = spawn(
   "mysqldump",
   [
@@ -133,9 +118,7 @@ const dump = spawn(
   ],
   { stdio: ["ignore", "pipe", "pipe"] }
 );
-const gzip = zlib.createGzip();
-const file = fs.createWriteStream(out);
-dump.stdout.pipe(gzip).pipe(file);
+dump.stdout.pipe(zlib.createGzip()).pipe(process.stdout);
 let err = "";
 dump.stderr.on("data", (d) => {
   err += d.toString();
@@ -145,48 +128,102 @@ dump.on("close", (code) => {
     console.error(err.replaceAll(password, "***"));
     process.exit(code || 1);
   }
-  console.log("DB backup OK:", out);
 });
 NODE
+}
 
-rm -rf /tmp/esword-src
-git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}" /tmp/esword-src
-echo "==> Checking $(git -C /tmp/esword-src log -1 --format='%h "%s" by %an') for malware"
-check_source_tree /tmp/esword-src
+# Fetches, checks, installs, builds and restarts the app. Runs as APP_USER, so code from the
+# repository and its dependencies get that account's rights and nothing more.
+deploy_as_app() {
+  local src="${HOME}/deploy/src" keep="${HOME}/deploy/preserve"
+  set -a
+  # shellcheck disable=SC1091
+  . "${APP_DIR}/.env"
+  set +a
 
-rsync -a --delete \
-  --exclude '.env' \
-  --exclude 'node_modules/' \
-  --exclude 'build/' \
-  --exclude '.next/' \
-  --exclude 'logs/' \
-  --exclude 'public/blogs-images/' \
-  --exclude '.git/' \
-  /tmp/esword-src/ "${APP_DIR}/"
+  rm -rf "$keep"
+  mkdir -p "$keep/blogs-images" "$keep/logs"
+  if [ -d "${APP_DIR}/public/blogs-images" ]; then
+    rsync -a "${APP_DIR}/public/blogs-images/" "$keep/blogs-images/"
+  fi
+  if [ -d "${APP_DIR}/logs" ]; then
+    rsync -a "${APP_DIR}/logs/" "$keep/logs/" || true
+  fi
 
-cp -a /tmp/esword-preserve-latest/.env "${APP_DIR}/.env"
-mkdir -p "${APP_DIR}/public/blogs-images" "${APP_DIR}/logs"
-rsync -a /tmp/esword-preserve-latest/blogs-images/ "${APP_DIR}/public/blogs-images/"
-rsync -a /tmp/esword-preserve-latest/logs/ "${APP_DIR}/logs/" || true
-rm -rf "${APP_DIR}/.git"
-cp -a /tmp/esword-src/.git "${APP_DIR}/.git"
+  rm -rf "$src"
+  git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}" "$src"
+  echo "==> Checking $(git -C "$src" log -1 --format='%h "%s" by %an') for malware"
+  check_source_tree "$src"
 
-cd "${APP_DIR}"
-# Restore any blog images tracked in git that may be missing on disk
-git checkout HEAD -- public/blogs-images 2>/dev/null || true
+  rsync -a --delete \
+    --exclude '.env' \
+    --exclude 'node_modules/' \
+    --exclude 'build/' \
+    --exclude '.next/' \
+    --exclude 'logs/' \
+    --exclude 'public/blogs-images/' \
+    --exclude '.git/' \
+    "$src/" "${APP_DIR}/"
 
-# Vulnerability checks run in CI (scripts/audit-gate.mjs), which fails on any
-# high/critical advisory not explicitly accepted; skip the duplicate report here.
-npm ci --no-audit
-npm run migrate
-NODE_ENV=production npm run build
-pm2 restart "${PM2_NAME}" --update-env
-pm2 save
-sleep 2
+  mkdir -p "${APP_DIR}/public/blogs-images" "${APP_DIR}/logs"
+  rsync -a "$keep/blogs-images/" "${APP_DIR}/public/blogs-images/"
+  rsync -a "$keep/logs/" "${APP_DIR}/logs/" || true
+  rm -rf "${APP_DIR}/.git"
+  cp -a "$src/.git" "${APP_DIR}/.git"
 
-curl -fsS http://127.0.0.1:3000/api/health
-echo
-curl -fsS https://apocryphalwritings.org/api/health
-echo
-echo "Deployed $(git rev-parse --short HEAD) $(git log -1 --oneline)"
-echo "DONE"
+  cd "${APP_DIR}"
+  # Restore any blog images tracked in git that may be missing on disk
+  git checkout HEAD -- public/blogs-images 2>/dev/null || true
+
+  # Vulnerability checks run in CI (scripts/audit-gate.mjs), which fails on any
+  # high/critical advisory not explicitly accepted; skip the duplicate report here.
+  npm ci --no-audit
+  npm run migrate
+  NODE_ENV=production npm run build
+  pm2 restart "${PM2_NAME}" --update-env
+  pm2 save
+  sleep 2
+
+  curl -fsS http://127.0.0.1:3000/api/health
+  echo
+  curl -fsS https://apocryphalwritings.org/api/health
+  echo
+  echo "Deployed $(git rev-parse --short HEAD) $(git log -1 --oneline)"
+}
+
+# Runs one of the functions above as APP_USER, using this file's copy of them.
+as_app() {
+  (cd / && sudo -n -u "${APP_USER}" -H bash -c "set -euo pipefail
+$(declare -p APP_DIR REPO_URL BRANCH PM2_NAME ALLOW_INSTALL_SCRIPTS)
+$(declare -f check_source_tree dump_database deploy_as_app)
+$1" </dev/null)
+}
+
+main() {
+  refuse() { printf '!! %s\n' "$*" >&2; exit 1; }
+  # Anything this account runs must be out of the website's reach, or a break-in through the
+  # site could edit it and gain this account's admin rights on the next deploy.
+  [ "$(id -un)" != "${APP_USER}" ] || refuse "Run this as the operator account, not as ${APP_USER}."
+  if [ -n "$SELF" ] && [ -f "$SELF" ]; then
+    case "$(readlink -f "$SELF")" in
+      "$(readlink -f "${APP_DIR}")"/*)
+        refuse "Not running the copy in ${APP_DIR}, which ${APP_USER} can edit. Run esword-deploy, or pipe the script from a checkout (see DEPLOY.md)." ;;
+    esac
+    [ "$(stat -c %U "$SELF")" != "${APP_USER}" ] || refuse "${SELF} is owned by ${APP_USER}; run esword-deploy instead."
+  fi
+  id "${APP_USER}" >/dev/null 2>&1 || refuse "The account ${APP_USER} does not exist (see DEPLOY.md)."
+
+  echo "==> Deploying ${BRANCH} into ${APP_DIR} as ${APP_USER} (${TS})"
+  # The backup is written by this account, where the website can neither read nor delete it.
+  local backup="${BACKUP_DIR}/esword-pre-deploy-${TS}.sql.gz"
+  if ! (umask 077 && mkdir -p "${BACKUP_DIR}" && as_app dump_database > "$backup") || ! gzip -t "$backup"; then
+    rm -f "$backup"
+    refuse "Database backup failed; nothing was changed."
+  fi
+  echo "DB backup OK: $backup"
+
+  as_app deploy_as_app
+  echo "DONE"
+}
+
+main "$@"
