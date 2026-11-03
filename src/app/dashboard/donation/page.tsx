@@ -1,5 +1,5 @@
 import DonationSettingsForm from "@/components/dashboard/forms/donation-settings.form";
-import DonationsReceived from "@/components/dashboard/donations-received";
+import DonationsReceived, { StripeStatus } from "@/components/dashboard/donations-received";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import serverApiHandlers from "@/server/handlers";
@@ -14,8 +14,9 @@ export default async function Page() {
 
   return (
     <Card className="min-h-[600px]">
-      <CardHeader className="border-b-8 border-silver-light py-4">
+      <CardHeader className="flex-row flex-wrap items-center justify-between gap-x-6 gap-y-2 space-y-0 border-b-8 border-silver-light py-4">
         <CardTitle className="font-bold text-2xl">Donations</CardTitle>
+        {overview && <StripeStatus mode={overview.mode} />}
       </CardHeader>
       <CardContent className="px-3 py-5 md:p-5">
         <Tabs defaultValue="received">
