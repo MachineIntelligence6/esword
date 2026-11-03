@@ -11,6 +11,14 @@ const ACCEPTED = {
       "Only reachable through build-time tools (tailwindcss, eslint-config-next) matching our own " +
       "file patterns, never user input. Revisit when migrating to Tailwind 4.",
   },
+  "GHSA-mrhx-c7xc-m3w5": {
+    package: "zod",
+    reason:
+      "Memory exhaustion validating oversized constrained collections. Fixed only in zod 4.6.7; we are " +
+      "on 3.x, and moving means @hookform/resolvers 5 plus rewriting every required_error/invalid_type_error. " +
+      "zod only validates form input in the browser (no server or API code uses it), so the worst case is a " +
+      "user freezing their own tab. Remove after migrating the forms to zod 4.",
+  },
 };
 
 const res = spawnSync("npm", ["audit", "--json"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
